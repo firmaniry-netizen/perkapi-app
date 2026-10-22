@@ -1,0 +1,62 @@
+# Build otomatis PERKAPI di Codemagic (mesin Mac di cloud — tidak perlu Mac/Xcode sendiri).
+# Panduan lengkap: docs/RILIS-IOS.md
+workflows:
+  ios-testflight:
+    name: iOS → TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: PERKAPI App Store Connect   # nama kunci API di Codemagic: Team settings → Integrations
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: id.or.perkapi.app
+      groups:
+        - firebase   # berisi FIREBASE_OPTIONS_DART & GOOGLE_SERVICES_JSON (lihat docs/RILIS-IOS.md)
+      vars:
+        APP_STORE_APPLE_ID: 0000000000   # GANTI: App Store Connect → aplikasi PERKAPI → App Information → Apple ID
+    scripts:
+      - name: Pasang konfigurasi Firebase dari variabel rahasia (tidak disimpan di Git)
+        script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+      - name: Ambil paket Flutter
+        script: flutter pub get
+      - name: Pasang profil penandatanganan
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          LAST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          flutter build ipa --release \
+            --build-number=$((LAST + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-apk:
+    name: Android → APK
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      groups:
+        - firebase
+    scripts:
+      - name: Pasang konfigurasi Firebase dari variabel rahasia (tidak disimpan di Git)
+        script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+      - name: Ambil paket Flutter
+        script: flutter pub get
+      - name: Build APK
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk

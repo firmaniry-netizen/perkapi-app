@@ -1,0 +1,54 @@
+# ---------- Rahasia & konfigurasi lokal (JANGAN di-commit) ----------
+env.json
+.env
+.env.*
+!env.example.json
+# Konfigurasi Firebase (kunci klien) — disimpan di komputer & di Codemagic (variabel rahasia), tidak di Git
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+# Penandatanganan aplikasi
+*.keystore
+*.jks
+key.properties
+android/key.properties
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+# Supabase CLI (berisi ref proyek & alamat database lokal)
+supabase/.temp/
+supabase/.branches/
+# Cadangan & arsip
+*.zip
+
+# ---------- Hasil build & cache ----------
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+coverage/
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/.symlinks/
+ios/Runner/GeneratedPluginRegistrant.*
+**/DerivedData/
+
+# ---------- Editor & sistem ----------
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/

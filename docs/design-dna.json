@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "name": "PERKAPI — Tegas & Tenang 2.0",
+    "source": "Deskripsi pengguna (modern, dongker utama, aksen merah dan putih, beranimasi) + audit kode Flutter",
+    "profile": "ringkas: field inti tiga dimensi; nilai diambil dari kode (app_colors.dart, theme.dart, motion.dart)",
+    "revision": "Redesain: permukaan lembut, skala tipografi tunggal, token jarak/radius"
+  },
+  "design_system": {
+    "color": {
+      "primary": {
+        "name": "dongker",
+        "hex": "#0F2B5B"
+      },
+      "secondary": {
+        "name": "dongker terang",
+        "hex": "#16397A"
+      },
+      "accent": {
+        "name": "merah segel (aksi utama)",
+        "hex": "#C8202F",
+        "on_dark": "#FF6B73"
+      },
+      "surface": {
+        "background": "#F4F6FB",
+        "card": "#FFFFFF",
+        "dark_background": "#08142E",
+        "dark_card": "#0F1E3F"
+      },
+      "neutral": {
+        "scale": [
+          "#FFFFFF",
+          "#DDE3F0",
+          "#5B6785",
+          "#0B1530"
+        ],
+        "usage": "teks utama #0B1530 di latar terang; putih di latar dongker"
+      },
+      "rule": "merah hanya untuk SATU aksi utama per layar dan status mendesak; bukan dekorasi",
+      "semantic_status": {
+        "sukses": "#1B7F4B",
+        "menunggu": "#B26A00",
+        "gagal": "#B3261E",
+        "info": "#3B5BA5"
+      },
+      "module_accents": {
+        "sky": "#2E7BD6",
+        "teal": "#0F8F86",
+        "emerald": "#1E8A57",
+        "amber": "#D98A00",
+        "orange": "#E0661A",
+        "violet": "#6D5BD0",
+        "rose": "#D2406F",
+        "usage": "hanya pembeda modul; tampil sebagai latar 12% (gelap 20%) + ikon berwarna, bukan blok pekat"
+      }
+    },
+    "typography": {
+      "family": "Plus Jakarta Sans",
+      "scale": {
+        "display": 28,
+        "title": 18,
+        "body": 14,
+        "caption": 12,
+        "micro": 11
+      },
+      "heading_weight": 800,
+      "body_weight": 500,
+      "heading_tracking": "-0.2 s.d. -0.6 (makin besar makin rapat)",
+      "wordmark_tracking": 1.2,
+      "numbers": "angka besar memakai tabular figures"
+    },
+    "shape": {
+      "card_radius": 20,
+      "hero_radius": 28,
+      "button_radius": 16,
+      "control_radius": 14,
+      "sheet_radius": 28,
+      "chip_radius": 999
+    },
+    "elevation": {
+      "light": "dua lapis bertinta dongker (6% blur 24 + 4% blur 4)",
+      "dark": "tanpa bayangan, garis tipis #22365F"
+    },
+    "motion": {
+      "easing": "easeOutCubic",
+      "duration_scale": {
+        "micro_ms": 180,
+        "normal_ms": 480,
+        "macro_ms": 1100
+      },
+      "stagger_ms": 55,
+      "reduced_motion": "semua animasi mati bila Reduce Motion aktif"
+    },
+    "components": {
+      "button_style": "utama: merah segel gradasi vertikal tipis + garis putih 16%, tinggi 52, radius 16; sekunder: outline",
+      "card_style": "putih, garis tipis, bayangan lembut; aksen status 4px di kiri pada daftar modul",
+      "navigation_pattern": "navigasi bawah mengambang; pil aktif lembut (tinta dongker 9%), FAB merah bercincin / sidebar dongker (layar lebar)",
+      "icon_tile": "SolidTile/IconBadge: gradasi tiga nada satu warna + kilau lembut separuh atas + garis kaca tipis + bayangan berwarna; ikon putih bergaris bayangan halus",
+      "stat_card": "gradasi tipis warna aksen (12%) ke permukaan, ikon besar samar sebagai tanda air, angka besar tabular, ubin ikon bergradasi",
+      "icon_button": "kotak membulat 48x48 (radius 16), bukan lingkaran",
+      "hero": "ScreenHero: gradasi dongker yang bergeser ke warna modul + cahaya radial berwarna + foto opsional + aksen merah pendek",
+      "list_card": "AppCard dengan wash warna modul (10%), ubin ikon bergradasi, chip panah berwarna, aksen status 4px di kiri",
+      "section_header": "pil gradasi merah-ke-biru 4x18 di kiri judul"
+    },
+    "spacing": {
+      "unit": "kelipatan 4/8",
+      "page_padding": 20,
+      "section_gap": 24,
+      "card_padding": 16
+    }
+  },
+  "design_style": {
+    "aesthetic": {
+      "mood": "tegas, tenang, dipercaya",
+      "archetype": "aplikasi profesional lembaga hukum, modern"
+    },
+    "visual_language": "blok dongker untuk struktur, kartu putih bergaris tipis, ubin ikon lembut, angka penting besar, ikon garis",
+    "composition": "satu titik fokus per layar (hero/kartu anggota), elemen lain tenang, ruang napas lega, daftar ritmis",
+    "interaction_feel": "responsif dan lembut: tekan mengecil sedikit, elemen muncul bertahap, tidak pernah mengganggu",
+    "brand_voice_in_ui": "Bahasa Indonesia formal-ramah, singkat"
+  },
+  "visual_effects": {
+    "overview": {
+      "effect_intensity": "low-medium",
+      "performance_tier": "ringan (tanpa shader/3D)"
+    },
+    "intro_sequence": "splash: logo membal masuk -> nama -> subjudul; cincin denyut di belakang logo",
+    "sheen": "kilau cahaya menyapu sekali di kartu anggota setelah muncul",
+    "entrance": "login: header turun, sheet naik; daftar mengalir bertahap (Reveal)",
+    "glassmorphism_neumorphism": {
+      "enabled": false
+    },
+    "particle_systems": {
+      "enabled": false
+    },
+    "3d_elements": {
+      "enabled": false
+    },
+    "composite_notes": "efek sengaja hemat agar tetap cepat di HP menengah dan tetap profesional",
+    "photo_backdrop": "foto opsional di login, kartu anggota, kepala layar; bayangan dongker 74-80%; fade + zoom-out 1,07->1 (900 ms, sekali); tak terlihat bila file tidak ada",
+    "scroll_header": "header dashboard: transparan di puncak -> kaca buram (blur 14) + garis tipis setelah digulir 24 px",
+    "haptics": "selectionClick pada tombol utama, navigasi bawah, FAB, ubin akses cepat, tombol ikon (saat aksi dipilih, bukan saat jari menyentuh)",
+    "page_glow": "halaman modul: cahaya radial warna modul (14%/22%) di belakang kepala layar"
+  }
+}
