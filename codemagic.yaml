@@ -113,10 +113,17 @@ workflows:
         script: flutter pub get
       - name: Build IPA tanpa tanda tangan
         script: |
+          set -ex
           flutter build ios --release --no-codesign
-          mkdir -p build/ipa/Payload
-          cp -R build/ios/iphoneos/Runner.app build/ipa/Payload/
-          cd build/ipa && zip -qr PERKAPI-unsigned.ipa Payload
+          ls -la build/ios/iphoneos/
+          # Runner.app bisa berupa symlink: ikuti ke folder aslinya, salin utuh dengan ditto.
+          APP_DIR="$(cd build/ios/iphoneos/Runner.app && pwd -P)"
+          rm -rf build/ipa && mkdir -p build/ipa/Payload
+          ditto "$APP_DIR" build/ipa/Payload/Runner.app
+          test -f build/ipa/Payload/Runner.app/Runner || { echo "Runner.app kosong, IPA dibatalkan"; exit 1; }
+          du -sh build/ipa/Payload/Runner.app
+          cd build/ipa && zip -qry PERKAPI-unsigned.ipa Payload
+          ls -la PERKAPI-unsigned.ipa
     artifacts:
       - build/ipa/PERKAPI-unsigned.ipa
       - /tmp/xcodebuild_logs/*.log
