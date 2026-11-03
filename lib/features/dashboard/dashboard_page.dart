@@ -529,7 +529,7 @@ class _PhotoTile extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: r,
-            boxShadow: [BoxShadow(color: tint.withValues(alpha: 0.30), blurRadius: 18, offset: const Offset(0, 8))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.18), blurRadius: 16, offset: const Offset(0, 6))],
           ),
           child: ClipRRect(
             borderRadius: r,
@@ -547,8 +547,8 @@ class _PhotoTile extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [tint.withValues(alpha: 0.0), Color.lerp(tint, Colors.black, 0.35)!.withValues(alpha: 0.92)],
-                    stops: const [0.2, 1],
+                    colors: [Colors.black.withValues(alpha: 0.0), Colors.black.withValues(alpha: 0.62)],
+                    stops: const [0.35, 1],
                   ),
                 ),
               ),
@@ -557,8 +557,8 @@ class _PhotoTile extends StatelessWidget {
                 right: 12,
                 bottom: 10,
                 child: Row(children: [
-                  SolidTile(icon: icon, color: tint, size: 26, radius: 8),
-                  const SizedBox(width: 8),
+                  Icon(icon, size: 18, color: Colors.white),
+                  const SizedBox(width: 7),
                   Expanded(
                     child: Text(label,
                         maxLines: 1,

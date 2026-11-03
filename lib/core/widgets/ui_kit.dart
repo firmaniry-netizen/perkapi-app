@@ -282,7 +282,7 @@ SliverGridDelegate quickTileGrid(BuildContext context, {int columns = 4, double 
       mainAxisSpacing: spacing,
       crossAxisSpacing: spacing,
       // padding 12 + ikon 48 + jarak 8 + cadangan 8, ditambah 2 baris teks.
-      mainAxisExtent: 76 + MediaQuery.textScalerOf(context).scale(12) * 2.3,
+      mainAxisExtent: 70 + MediaQuery.textScalerOf(context).scale(12) * 2.3,
     );
 
 /// Wordmark PERKAPI (Fraunces) dengan titik merah segel.

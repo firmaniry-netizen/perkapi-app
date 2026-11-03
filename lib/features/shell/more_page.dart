@@ -64,9 +64,10 @@ class _MorePageState extends State<MorePage> {
   }
 
   Widget _grid(BuildContext context, List<NavItem> list, {bool hero = true}) => AppCard(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.fromLTRB(6, 10, 6, 6),
         child: GridView(
-          gridDelegate: quickTileGrid(context),
+          padding: EdgeInsets.zero,
+          gridDelegate: quickTileGrid(context, spacing: 2),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [

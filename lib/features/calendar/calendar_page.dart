@@ -152,6 +152,7 @@ Padding(
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: GridView.builder(
+                  padding: EdgeInsets.zero,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: lead + daysInMonth,

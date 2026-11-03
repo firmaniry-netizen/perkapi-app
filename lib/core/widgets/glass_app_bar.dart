@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
@@ -6,7 +8,13 @@ import 'liquid_glass.dart';
 
 /// Padding daftar untuk halaman dengan `extendBodyBehindAppBar: true`: tambahkan tinggi status bar + bar kaca
 /// ke padding atas, supaya isi mulai di bawah bar tetapi tetap bisa digulir lewat DI BELAKANG bar (buram).
-EdgeInsets barPad(BuildContext context, EdgeInsets p) => p.copyWith(top: p.top + MediaQuery.paddingOf(context).top);
+EdgeInsets barPad(BuildContext context, EdgeInsets p) {
+  // Konteks bisa berada di atas Scaffold (padding = status bar saja) atau di dalam body (padding sudah
+  // termasuk tinggi bar). Ambil yang terbesar: status bar asli + tinggi bar, atau padding yang sudah ada.
+  final status = MediaQueryData.fromView(View.of(context)).padding.top;
+  final top = math.max(MediaQuery.paddingOf(context).top, status + kToolbarHeight);
+  return p.copyWith(top: p.top + top);
+}
 
 /// App bar ala iOS 26 (Liquid Glass): judul tetap di atas latar halaman, tombol kembali menjadi
 /// lingkaran kaca, dan semua aksi di kanan dikumpulkan dalam satu kapsul kaca.
