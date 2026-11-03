@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/art_3d.dart';
 
 /// Ilustrasi digambar lewat kode (tanpa aset/paket tambahan) dalam palet dongker, merah, putih.
 
@@ -172,9 +171,6 @@ class EmptyArt extends StatelessWidget {
       child: Stack(alignment: Alignment.center, children: [
         card(-math.pi / 11, const Offset(-30, 4), AppColors.red),
         card(math.pi / 12, const Offset(30, 2), AppColors.sky),
-        if (Art3D.forIcon(icon) case final art?)
-          Image.asset(art, width: 118, height: 118, fit: BoxFit.contain, cacheWidth: 354)
-        else
         Container(
           width: 84,
           height: 84,
@@ -183,7 +179,7 @@ class EmptyArt extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF2456B8), AppColors.navy],
+              colors: [AppColors.navyAction, AppColors.navy],
             ),
             boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.35), blurRadius: 22, offset: const Offset(0, 10))],
           ),

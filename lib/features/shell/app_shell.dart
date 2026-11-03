@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
+
+import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
@@ -15,6 +18,8 @@ import '../../core/services/live_notifier.dart';
 import '../../core/services/push_service.dart';
 import '../alerts/alert_service.dart';
 import '../tracking/location_service.dart';
+import '../chat/call_service.dart';
+import '../../core/services/online_service.dart';
 import '../auth/auth_repository.dart';
 import '../auth/pending_approval_view.dart';
 import '../settings/pin_widgets.dart';
@@ -23,7 +28,6 @@ import 'more_page.dart';
 import 'nav_items.dart';
 import '../../core/constants/app_tokens.dart';
 import '../../core/widgets/aurora_background.dart';
-import '../../core/widgets/smooth_overlays.dart';
 
 /// Kerangka utama: bottom nav + FAB (layar sempit) atau sidebar (layar lebar/web).
 class AppShell extends StatefulWidget {
@@ -56,12 +60,20 @@ class _AppShellState extends State<AppShell> {
     LiveNotifier.instance.start();
     LocationService.instance.start();
     PushService.instance.register();
+    // status online + panggilan masuk (telepon/video call) — dipasang setelah frame agar tidak mengubah state saat build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      OnlineService.instance.start(Access.instance.memberId);
+      CallService.instance.start(Access.instance.memberId, context);
+    });
   }
 
   @override
   void dispose() {
     LiveNotifier.instance.stop();
     LocationService.instance.stop();
+    OnlineService.instance.stop();
+    CallService.instance.stop();
     Access.instance.removeListener(_onAccess);
     super.dispose();
   }
@@ -115,15 +127,15 @@ class _AppShellState extends State<AppShell> {
   Future<void> _quickActions() async {
     final a = Access.instance;
     final actions = <BurstAction>[
-      const BurstAction('Kartu & QR', Icons.qr_code_2_rounded, '/member-card', color: AppColors.navy),
-      const BurstAction('SOS & Keamanan', Icons.shield_rounded, '/safety', color: AppColors.red),
-      const BurstAction('Tulis berita', Icons.edit_note_rounded, '/gallery?add=1', color: AppColors.goldDeep),
-      const BurstAction('Catatan baru', Icons.note_add_rounded, '/module/notes/new', color: AppColors.teal),
-      const BurstAction('Tanya AI', Icons.auto_awesome_rounded, '/ai', color: AppColors.violet),
-      const BurstAction('Data AHU', Icons.verified_rounded, '/ahu', color: AppColors.navyAction),
-      if (a.can('manage_event')) const BurstAction('Buat agenda', Icons.event_available_rounded, '/module/events/new', color: AppColors.goldDeep),
-      if (a.can('manage_alert')) const BurstAction('Kirim peringatan', Icons.campaign_rounded, '/alerts/new', color: AppColors.red),
-      if (a.can('manage_member')) const BurstAction('Verifikasi QR', Icons.verified_user_rounded, '/verify-member', color: AppColors.teal),
+      const BurstAction('Kartu & QR', CupertinoIcons.qrcode, '/member-card', color: AppColors.navy),
+      const BurstAction('SOS & Keamanan', CupertinoIcons.shield_fill, '/safety', color: AppColors.red),
+      const BurstAction('Tulis berita', CupertinoIcons.square_pencil, '/gallery?add=1', color: AppColors.goldDeep),
+      const BurstAction('Catatan baru', CupertinoIcons.doc_append, '/module/notes/new', color: AppColors.teal),
+      const BurstAction('Tanya AI', CupertinoIcons.sparkles, '/ai', color: AppColors.violet),
+      const BurstAction('Data AHU', CupertinoIcons.checkmark_seal_fill, '/ahu', color: AppColors.navyAction),
+      if (a.can('manage_event')) const BurstAction('Buat agenda', CupertinoIcons.calendar_badge_plus, '/module/events/new', color: AppColors.goldDeep),
+      if (a.can('manage_alert')) const BurstAction('Kirim peringatan', CupertinoIcons.speaker_2_fill, '/alerts/new', color: AppColors.red),
+      if (a.can('manage_member')) const BurstAction('Verifikasi QR', CupertinoIcons.checkmark_shield_fill, '/verify-member', color: AppColors.teal),
     ];
     final box = _fabKey.currentContext?.findRenderObject() as RenderBox?;
     final size = MediaQuery.sizeOf(context);
@@ -185,6 +197,12 @@ class _AppShellState extends State<AppShell> {
         body: Row(children: [
           Material(
             color: AppColors.navy,
+            child: DecoratedBox(
+            // panel samping: gradasi dongker dalam + garis kaca tipis di tepi kanan
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF13336B), AppColors.navy, AppColors.navyDeep]),
+              border: Border(right: BorderSide(color: Colors.white.withValues(alpha: 0.10))),
+            ),
             child: SizedBox(
             width: 240,
             child: Column(children: [
@@ -221,7 +239,7 @@ class _AppShellState extends State<AppShell> {
                 onTap: () => context.go('/profile'),
               ),
             ]),
-            ),
+            )),
           ),
           Expanded(child: body),
         ]),
@@ -231,6 +249,11 @@ class _AppShellState extends State<AppShell> {
     final visible = bottomItems.where((i) => a.can(i.perm)).toList();
     final current = bottomIndexFor(widget.location);
     final selected = current < 0 ? -1 : visible.indexWhere((i) => i.route == bottomItems[current].route);
+    // Navigasi bawah + tombol aksi cepat hanya di halaman utama; di halaman fitur disembunyikan
+    // supaya tidak menutupi isi dan tombol halaman itu (halaman fitur punya tombol kembali sendiri).
+    if (!isTopLevelRoute(widget.location)) {
+      return Scaffold(body: body);
+    }
     return Scaffold(
       extendBody: true,
       body: body,
@@ -280,17 +303,25 @@ class _FloatNav extends StatelessWidget {
             duration: Duration(milliseconds: still ? 0 : 220),
             curve: Curves.easeOutCubic,
             height: 48,
-            padding: EdgeInsets.symmetric(horizontal: on ? (compact ? 10 : 14) : (compact ? 8 : 10)),
-            // Pil aktif lembut: tinta dongker + ikon/label berwarna aksen (kontras tinggi, tanpa kilau).
+            // Lensa kaca aktif (iOS 26): kaca lebih terang di atas kaca bar, dengan kilau tepi & bayangan tipis.
             decoration: BoxDecoration(
-              color: on ? (dark ? Colors.white.withValues(alpha: 0.12) : AppColors.navy.withValues(alpha: 0.09)) : Colors.transparent,
+              color: on ? (dark ? Colors.white.withValues(alpha: 0.14) : Colors.white.withValues(alpha: 0.72)) : Colors.transparent,
               borderRadius: BorderRadius.circular(24),
+              boxShadow: on
+                  ? [BoxShadow(color: Colors.black.withValues(alpha: dark ? 0.25 : 0.08), blurRadius: 10, offset: const Offset(0, 3))]
+                  : const [],
             ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
+            child: CustomPaint(
+              foregroundPainter: on ? GlassSheen(dark: dark, radius: 24, strength: 0.9) : null,
+              child: AnimatedPadding(
+              duration: Duration(milliseconds: still ? 0 : 220),
+              curve: Curves.easeOutCubic,
+              padding: EdgeInsets.symmetric(horizontal: on ? (compact ? 10 : 14) : (compact ? 8 : 10)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
               AnimatedScale(
                 scale: on ? 1.12 : 1,
-                duration: Duration(milliseconds: still ? 0 : 320),
-                curve: Curves.easeOutBack,
+                duration: Duration(milliseconds: still ? 0 : 240),
+                curve: const Cubic(0.23, 1, 0.32, 1),
                 child: Icon(items[i].icon, size: 24, color: on ? accent : muted),
               ),
               AnimatedSize(
@@ -305,6 +336,8 @@ class _FloatNav extends StatelessWidget {
                     : const SizedBox.shrink(),
               ),
             ]),
+              ),
+            ),
           ),
         ),
       );
@@ -316,25 +349,16 @@ class _FloatNav extends StatelessWidget {
           Semantics(
             button: true,
             label: 'Aksi cepat',
-            child: Pressable(
+            // Tombol aksi: kaca merah (tint merah tembus pandang + pendar merah), menggembung saat ditekan.
+            child: KeyedSubtree(
               key: fabKey,
-              onTap: onAction,
-              scale: 0.9,
-              child: Material(
-                color: AppColors.red,
-                shape: CircleBorder(side: BorderSide(color: Colors.white.withValues(alpha: dark ? 0.18 : 0.9), width: 2)),
-                elevation: 2,
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () {
-                    tapHaptic();
-                    onAction();
-                  },
-                  child: SizedBox(
-                      width: compact ? 48 : 52,
-                      height: compact ? 48 : 52,
-                      child: const Icon(Icons.add_rounded, color: Colors.white, size: 28)),
-                ),
+              child: LiquidGlassButton(
+                circle: true,
+                size: compact ? 48 : 52,
+                tint: AppColors.red.withValues(alpha: 0.86),
+                glow: AppColors.red,
+                onTap: onAction,
+                child: const Icon(CupertinoIcons.add, color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -347,31 +371,12 @@ class _FloatNav extends StatelessWidget {
       top: false,
       child: Padding(
         padding: EdgeInsets.fromLTRB(compact ? 12 : 16, 0, compact ? 12 : 16, 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(color: AppColors.navy.withValues(alpha: dark ? 0.50 : 0.14), blurRadius: 28, offset: const Offset(0, 12)),
-            ],
-          ),
-          // Tanpa BackdropFilter: blur terus-menerus di bawah daftar yang digulir berat untuk HP kelas menengah.
-          // Permukaan hampir buram + garis tipis memberi kesan yang sama dengan biaya jauh lebih kecil.
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
-            child: KeyedSubtree(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: (dark ? AppColors.navySurface : Colors.white).withValues(alpha: dark ? 0.97 : 0.97),
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: (dark ? Colors.white : AppColors.navy).withValues(alpha: dark ? 0.12 : 0.08)),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: 8),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
-                ),
-              ),
-            ),
-          ),
+        // Liquid Glass: isi halaman terlihat samar di balik bar (blur + saturasi), dengan kilau tepi.
+        child: LiquidGlass(
+          radius: 32,
+          blur: 18,
+          padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: 8),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
         ),
       ),
     ));
@@ -400,12 +405,20 @@ class _SideItem extends StatelessWidget {
             curve: Curves.easeOutCubic,
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
+            // Pil kaca untuk menu aktif (tepi putih tipis + kilau), titik emas sebagai penanda.
             decoration: BoxDecoration(
-              color: selected ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: Border(left: BorderSide(color: selected ? AppColors.gold : Colors.transparent, width: 3)),
+              color: selected ? Colors.white.withValues(alpha: 0.14) : Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withValues(alpha: selected ? 0.22 : 0)),
             ),
             child: Row(children: [
+              AnimatedContainer(
+                duration: Duration(milliseconds: still ? 0 : 220),
+                width: selected ? 6 : 0,
+                height: 6,
+                margin: EdgeInsets.only(right: selected ? 8 : 0),
+                decoration: const BoxDecoration(color: AppColors.gold, shape: BoxShape.circle),
+              ),
               Icon(item.icon, size: 20, color: selected ? Colors.white : Colors.white70),
               const SizedBox(width: 12),
               Expanded(
@@ -414,7 +427,7 @@ class _SideItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: AppType.small,
                         fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
               ),
             ]),
@@ -455,7 +468,7 @@ class _LockView extends StatelessWidget {
                     Text(
                       pinOn ? 'Masukkan PIN untuk membuka aplikasi' : 'Gunakan sidik jari atau wajah untuk membuka',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: 13),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.72), fontSize: AppType.small),
                     ),
                     const SizedBox(height: 24),
                     if (pinOn) PinPad(onUnlocked: onUnlocked, onTooMany: onTooMany),
@@ -468,7 +481,7 @@ class _LockView extends StatelessWidget {
                           minimumSize: const Size(220, 52),
                         ),
                         onPressed: onBiometric,
-                        icon: const Icon(Icons.fingerprint_rounded),
+                        icon: const Icon(CupertinoIcons.lock_shield),
                         label: const Text('Buka dengan biometrik'),
                       ),
                     ],

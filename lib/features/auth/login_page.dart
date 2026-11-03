@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
@@ -6,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/aurora_background.dart';
+import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/partner_logos.dart';
@@ -16,6 +18,7 @@ import '../legal/privacy_policy_page.dart';
 import 'otp_dialog.dart';
 import '../../core/widgets/smooth_overlays.dart';
 import '../../core/widgets/illustrations.dart';
+import '../../core/constants/app_tokens.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -112,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         AppConstants.appSubtitle,
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: 13),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: AppType.small),
                       ),
                     ],
                   ]),
@@ -123,10 +126,17 @@ class _LoginPageState extends State<LoginPage> {
                 child: Reveal(
                   index: 2,
                   dy: 56,
+                  child: ClipRRect(
+                  // Lembar login berbahan kaca cair: foto latar tampak samar di baliknya.
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                  child: BackdropFilter(
+                  filter: LiquidGlass.backdrop(28),
+                  child: CustomPaint(
+                  foregroundPainter: GlassSheen(dark: dark, radius: 32, solid: MediaQuery.highContrastOf(context)),
                   child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: dark ? AppColors.navySurface : AppColors.white,
+                    color: (dark ? AppColors.navySurface : AppColors.white).withValues(alpha: MediaQuery.highContrastOf(context) ? 1 : (dark ? 0.80 : 0.88)),
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   ),
                   child: SingleChildScrollView(
@@ -137,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                         Text('Selamat datang kembali', style: Theme.of(context).textTheme.headlineSmall),
                         const SizedBox(height: 6),
                         Text('Masuk dengan email atau nomor anggota Anda.',
-                            style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 14, height: 1.4)),
+                            style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.body, height: 1.4)),
                         const SizedBox(height: 24),
                         TextFormField(
                           controller: _idCtrl,
@@ -147,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                           autofillHints: const [AutofillHints.username],
                           decoration: const InputDecoration(
                             labelText: 'Email atau nomor anggota',
-                            prefixIcon: Icon(Icons.person_outline),
+                            prefixIcon: Icon(CupertinoIcons.person),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty) ? 'Isi email atau nomor anggota' : null,
                         ),
@@ -161,10 +171,10 @@ class _LoginPageState extends State<LoginPage> {
                           onFieldSubmitted: (_) => _submit(),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(CupertinoIcons.lock),
                             suffixIcon: IconButton(
                               tooltip: _obscure ? 'Tampilkan password' : 'Sembunyikan password',
-                              icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                              icon: Icon(_obscure ? CupertinoIcons.eye : CupertinoIcons.eye_slash),
                               onPressed: () => setState(() => _obscure = !_obscure),
                             ),
                           ),
@@ -185,9 +195,9 @@ class _LoginPageState extends State<LoginPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(children: [
-                                      Icon(Icons.error_outline, color: scheme.error, size: 18),
+                                      Icon(CupertinoIcons.exclamationmark_circle, color: scheme.error, size: 18),
                                       const SizedBox(width: 8),
-                                      Expanded(child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13, height: 1.35))),
+                                      Expanded(child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: AppType.small, height: 1.35))),
                                     ]),
                                   ),
                                 ),
@@ -210,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                     builder: (_) => OtpDialog(
                                         initialEmail: _idCtrl.text.contains('@') ? _idCtrl.text.trim() : ''),
                                   ),
-                          icon: const Icon(Icons.mark_email_read_outlined),
+                          icon: const Icon(CupertinoIcons.envelope_open),
                           label: const Text('Masuk dengan kode email'),
                         ),
                         TextButton(
@@ -227,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                       ]),
                     ),
                   ),
-                ),
+                )))),
                 ),
               ),
             ]),

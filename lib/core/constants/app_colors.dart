@@ -59,23 +59,38 @@ class AppColors {
         stops: const [0, 0.55, 1],
       );
 
-  /// Warna pembeda per modul/rute (cocok untuk id modul maupun path rute).
+  // Warna sistem iOS (mode terang): dipakai untuk ubin ikon berwarna ala aplikasi Pengaturan iPhone.
+  static const iosBlue = Color(0xFF007AFF);
+  static const iosGreen = Color(0xFF34C759);
+  static const iosIndigo = Color(0xFF5856D6);
+  static const iosOrange = Color(0xFFFF9500);
+  static const iosPink = Color(0xFFFF2D55);
+  static const iosPurple = Color(0xFFAF52DE);
+  static const iosRed = Color(0xFFFF3B30);
+  static const iosTeal = Color(0xFF30B0C7);
+  static const iosYellow = Color(0xFFFFB800);
+  static const iosMint = Color(0xFF00C7BE);
+
+  /// Warna ubin per modul/rute (cocok untuk id modul maupun path rute), memakai palet sistem iOS:
+  /// Kalender merah, Pesan hijau, Catatan kuning, Berita oranye, dan seterusnya, seperti di iPhone.
   static Color forKey(String key) {
     final k = key.toLowerCase();
     bool has(List<String> w) => w.any(k.contains);
-    if (has(['case', 'perkara', 'debtor', 'creditor'])) return navyAction;
-    if (has(['gallery', 'galeri', 'dokumentasi', 'news', 'berita'])) return goldDeep;
-    if (has(['document', 'dokumen'])) return sky;
-    if (has(['task', 'tugas'])) return emerald;
-    if (has(['complaint', 'pengaduan', 'safety', 'sos', 'alert'])) return red;
-    if (has(['event', 'calendar', 'kalender', 'agenda'])) return goldDeep;
-    if (has(['forum', 'chat', 'broadcast'])) return violet;
-    if (has(['ai'])) return violet;
-    if (has(['member', 'anggota', 'branch', 'cabang'])) return teal;
-    if (has(['pocket', 'note', 'announcement', 'info'])) return goldDeep;
-    if (has(['regulation', 'peraturan', 'profession', 'profesi', 'ahu'])) return navyAction;
-    if (has(['tracking', 'geofence', 'attendance', 'absensi'])) return teal;
-    return navyAction;
+    if (has(['complaint', 'pengaduan', 'safety', 'sos', 'alert'])) return iosRed;
+    if (has(['case', 'perkara', 'debtor', 'creditor'])) return iosIndigo;
+    if (has(['donation', 'donasi'])) return iosPink;
+    if (has(['gallery', 'galeri', 'dokumentasi', 'news', 'berita'])) return iosOrange;
+    if (has(['document', 'dokumen'])) return iosBlue;
+    if (has(['task', 'tugas'])) return iosGreen;
+    if (has(['event', 'calendar', 'kalender', 'agenda'])) return iosRed;
+    if (has(['forum', 'chat', 'broadcast'])) return iosGreen;
+    if (has(['ai'])) return iosPurple;
+    if (has(['member', 'anggota', 'branch', 'cabang'])) return iosTeal;
+    if (has(['pocket', 'note', 'announcement', 'info'])) return iosYellow;
+    if (has(['regulation', 'peraturan', 'profession', 'profesi', 'ahu'])) return iosIndigo;
+    if (has(['tracking', 'geofence', 'attendance', 'absensi'])) return iosMint;
+    if (has(['setting', 'pengaturan', 'audit', 'report', 'laporan'])) return const Color(0xFF8E8E93);
+    return iosBlue;
   }
 
   // Nama lama (dipertahankan agar layar lain tidak rusak)

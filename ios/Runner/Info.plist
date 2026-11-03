@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>PERKAPI memakai mikrofon untuk pesan suara, telepon, dan video call di chat.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>PERKAPI memakai kamera untuk memindai kode QR anggota dan mengambil foto profil.</string>
+	<string>PERKAPI memakai kamera untuk memindai kode QR anggota, mengambil foto, dan video call di chat.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>PERKAPI memerlukan akses foto untuk memilih foto profil dan melampirkan dokumen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

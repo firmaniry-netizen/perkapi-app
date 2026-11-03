@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 
 import 'auth_repository.dart';
+import '../../core/constants/app_tokens.dart';
+import '../../core/constants/app_colors.dart';
 
 /// Login dengan kode OTP yang dikirim ke email (tanpa password).
 /// Setelah verifikasi berhasil, router otomatis membuka dashboard.
@@ -81,7 +84,7 @@ class _OtpDialogState extends State<OtpDialog> {
             controller: _email,
             enabled: !_sent && !_busy,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email akun', prefixIcon: Icon(Icons.email_outlined)),
+            decoration: const InputDecoration(labelText: 'Email akun', prefixIcon: Icon(CupertinoIcons.mail)),
           ),
           if (_sent) ...[
             const SizedBox(height: 12),
@@ -96,11 +99,11 @@ class _OtpDialogState extends State<OtpDialog> {
               decoration: const InputDecoration(labelText: 'Kode dari email', counterText: ''),
             ),
           ],
-          if (_info != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_info!, style: const TextStyle(fontSize: 12))),
+          if (_info != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_info!, style: const TextStyle(fontSize: AppType.caption))),
           if (_error != null)
             Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(_error!, style: const TextStyle(color: Color(0xFFC62828)))),
+                child: Text(_error!, style: const TextStyle(color: AppColors.red))),
         ]),
       ),
       actions: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
@@ -102,7 +103,7 @@ class _PendingApprovalViewState extends State<PendingApprovalView> {
                       onPressed: _checking ? null : _check,
                       icon: _checking
                           ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2))
-                          : const Icon(Icons.refresh_rounded),
+                          : const Icon(CupertinoIcons.arrow_clockwise),
                       label: Text(_checking ? 'Memeriksa...' : 'Periksa status'),
                     ),
                   const SizedBox(height: 8),
@@ -142,7 +143,7 @@ class _Step extends StatelessWidget {
         border: Border.all(color: done || now ? Colors.transparent : Colors.white.withValues(alpha: 0.35), width: 1.5),
       ),
       child: done
-          ? const Icon(Icons.check_rounded, size: 16, color: AppColors.navyDeep)
+          ? const Icon(CupertinoIcons.checkmark, size: 16, color: AppColors.navyDeep)
           : now
               ? const Padding(
                   padding: EdgeInsets.all(6),

@@ -13,6 +13,7 @@ import '../../core/widgets/perkapi_logo.dart';
 import '../../core/widgets/aurora_background.dart';
 import '../../core/widgets/illustrations.dart';
 import '../welcome/welcome_page.dart';
+import '../../core/constants/app_tokens.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -124,7 +125,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     final sub = Text(
       AppConstants.appSubtitle,
       textAlign: TextAlign.center,
-      style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: 14),
+      style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: AppType.body),
     );
     final bar = SizedBox(
       width: 120,
@@ -136,7 +137,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       ),
     );
 
-    final logoA = _iv(0.0, 0.55, Curves.easeOutBack);
+    final logoA = _iv(0.0, 0.55, const Cubic(0.23, 1, 0.32, 1));
     final nameA = _iv(0.35, 0.80);
     final subA = _iv(0.55, 1.0);
 
@@ -183,7 +184,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               child: AnimatedBuilder(
                 animation: _exit,
                 builder: (_, c) => Opacity(
-                  opacity: 1 - Curves.easeIn.transform(_exit.value),
+                  opacity: 1 - Curves.easeOut.transform(_exit.value),
                   child: Transform.scale(scale: 1 + 0.10 * _exit.value, child: c),
                 ),
                 child: content,

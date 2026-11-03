@@ -44,6 +44,7 @@ class LiveNotifier {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'member_id', value: id),
           callback: (payload) {
             final r = payload.newRecord;
+            if (r['type'] == 'call') return; // layar panggilan sudah tampil sendiri
             final nid = '${r['id']}';
             if (!_shown.add('n$nid')) return;
             show(LiveNotice(

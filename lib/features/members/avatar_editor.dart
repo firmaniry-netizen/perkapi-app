@@ -1,8 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/widgets/member_avatar.dart';
 import '../../core/widgets/smooth_overlays.dart';
@@ -188,7 +188,7 @@ class _AvatarEditorState extends State<AvatarEditor> {
                         ? const Padding(
                             padding: EdgeInsets.all(9),
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Icon(Icons.camera_alt_outlined, size: 18, color: scheme.onPrimary),
+                        : Icon(CupertinoIcons.camera, size: 18, color: scheme.onPrimary),
                   ),
                 ),
               ),

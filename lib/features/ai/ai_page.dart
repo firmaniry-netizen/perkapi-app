@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Chat AI. Semua panggilan lewat Edge Function `ai-perkapi`; API key AI hanya ada di server.
 class AiPage extends StatefulWidget {
@@ -79,21 +82,21 @@ class _AiPageState extends State<AiPage> {
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('AI PERKAPI')),
+      appBar: GlassAppBar(title: const Text('AI PERKAPI')),
       body: PageGlow(accent: AppColors.violet, child: Column(children: [
         Container(
           margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
           decoration: BoxDecoration(
             color: dark ? const Color(0xFF3A2E12) : const Color(0xFFFFF4E5),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.button),
           ),
           padding: const EdgeInsets.all(12),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(Icons.info_outline, size: 18, color: dark ? const Color(0xFFFFB74D) : const Color(0xFFB26A00)),
+            Icon(CupertinoIcons.info_circle, size: 18, color: dark ? const Color(0xFFFFB74D) : AppColors.goldDeep),
             const SizedBox(width: 8),
             Expanded(
               child: Text(AppConstants.aiDisclaimer,
-                  style: TextStyle(fontSize: 12, height: 1.4, color: dark ? Colors.white : AppColors.darkText)),
+                  style: TextStyle(fontSize: AppType.caption, height: 1.4, color: dark ? Colors.white : AppColors.darkText)),
             ),
           ]),
         ),
@@ -106,7 +109,7 @@ class _AiPageState extends State<AiPage> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(color: scheme.primary.withValues(alpha: 0.10), shape: BoxShape.circle),
-                      child: Icon(Icons.auto_awesome, size: 34, color: scheme.primary),
+                      child: Icon(CupertinoIcons.sparkles, size: 34, color: scheme.primary),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -161,8 +164,8 @@ class _AiPageState extends State<AiPage> {
                   onSubmitted: (_) => _send(),
                   decoration: InputDecoration(
                     hintText: 'Tulis pertanyaan...',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.hero), borderSide: BorderSide.none),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.hero), borderSide: BorderSide.none),
                   ),
                 ),
               ),
@@ -171,7 +174,7 @@ class _AiPageState extends State<AiPage> {
                 tooltip: 'Kirim',
                 style: IconButton.styleFrom(backgroundColor: AppColors.red, foregroundColor: Colors.white, minimumSize: const Size(52, 52)),
                 onPressed: _busy ? null : _send,
-                icon: const Icon(Icons.arrow_upward_rounded),
+                icon: const Icon(CupertinoIcons.arrow_up),
               ),
             ]),
           ),

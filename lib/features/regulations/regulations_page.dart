@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/services/supabase_service.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../profession/guide_widgets.dart';
 import 'regulation_data.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Peraturan & hukum: daftar aturan yang relevan bagi kurator/pengurus, dengan tombol unduh PDF.
 /// Unduhan dibuka lewat peramban/penampil PDF perangkat dari sumber resmi (tidak disimpan di server PERKAPI).
@@ -20,6 +24,21 @@ class RegulationsPage extends StatefulWidget {
 class _RegulationsPageState extends State<RegulationsPage> {
   String _q = '';
   RegulationKind? _kind;
+  List<Regulation> _items = regulations;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  /// Daftar terbaru dari database (sama dengan situs). Gagal/kosong = tetap memakai daftar bawaan.
+  Future<void> _load() async {
+    try {
+      final rows = List<Map<String, dynamic>>.from(await SupabaseService.client.rpc('public_regulations') as List);
+      if (rows.isNotEmpty && mounted) setState(() => _items = rows.map(regulationFromRow).toList());
+    } catch (_) {}
+  }
 
   Future<void> _open(String url) async {
     final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication).catchError((_) => false);
@@ -40,15 +59,16 @@ class _RegulationsPageState extends State<RegulationsPage> {
     final sc = Theme.of(context).colorScheme;
     final q = _q.trim().toLowerCase();
     final list = [
-      for (final r in regulations)
+      for (final r in _items)
         if ((_kind == null || r.kind == _kind) && (q.isEmpty || r.searchText.contains(q))) r,
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Peraturan & Hukum')),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Peraturan & Hukum')),
       body: PageGlow(
         accent: AppColors.navyAction,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom),
+          padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom)),
           children: [
             Reveal(
               index: 0,
@@ -56,7 +76,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
               child: ScreenHero(
                 title: 'Peraturan & Hukum',
                 subtitle: 'Dasar hukum kurator, pengurus, kepailitan, dan PKPU. Unduh langsung dari sumber resmi.',
-                icon: Icons.gavel_rounded,
+                icon: CupertinoIcons.hammer_fill,
                 accent: AppColors.navyAction,
               ),
             ),
@@ -65,7 +85,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
               onChanged: (v) => setState(() => _q = v),
               textInputAction: TextInputAction.search,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: Icon(CupertinoIcons.search),
                 hintText: 'Cari peraturan (mis. imbalan jasa, pendaftaran)',
               ),
             ),
@@ -104,16 +124,16 @@ class _RegulationsPageState extends State<RegulationsPage> {
                 child: AppCard(
                   onTap: () => _open(p.$3),
                   child: Row(children: [
-                    const SolidTile(icon: Icons.public_rounded, color: AppColors.sky, size: 40, radius: 12),
+                    const SolidTile(icon: CupertinoIcons.globe, color: AppColors.sky, size: 40, radius: 12),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(p.$1, style: const TextStyle(fontWeight: FontWeight.w800)),
                         const SizedBox(height: 2),
-                        Text(p.$2, style: TextStyle(fontSize: 13, height: 1.35, color: sc.onSurfaceVariant)),
+                        Text(p.$2, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                       ]),
                     ),
-                    Icon(Icons.open_in_new_rounded, size: 18, color: sc.onSurfaceVariant),
+                    Icon(CupertinoIcons.arrow_up_right_square, size: 18, color: sc.onSurfaceVariant),
                   ]),
                 ),
               ),
@@ -122,7 +142,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
               child: Text(
                 'Daftar ini dikumpulkan dari portal resmi pemerintah dan Mahkamah Konstitusi. Ini bukan nasihat hukum. '
                 'Peraturan dapat berubah atau dicabut, jadi pastikan status berlakunya sebelum dikutip dalam laporan atau permohonan.',
-                style: TextStyle(fontSize: 12, height: 1.45, color: sc.onSurfaceVariant),
+                style: TextStyle(fontSize: AppType.caption, height: 1.45, color: sc.onSurfaceVariant),
               ),
             ),
           ],
@@ -144,35 +164,37 @@ class _RegulationsPageState extends State<RegulationsPage> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SolidTile(icon: switch (r.kind) {
-            RegulationKind.putusan => Icons.balance_rounded,
-            RegulationKind.rancangan => Icons.edit_note_rounded,
-            _ => Icons.description_outlined,
+            RegulationKind.putusan => CupertinoIcons.hammer,
+            RegulationKind.rancangan => CupertinoIcons.square_pencil,
+            _ => CupertinoIcons.doc_text,
           }, color: color, size: 44, radius: 14),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(r.kind.label.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: color)),
+              Text(r.kind.label.toUpperCase(), style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: color)),
               const SizedBox(height: 2),
-              Text(r.number, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, height: 1.3)),
-              const SizedBox(height: 2),
-              Text('tentang ${r.title}', style: TextStyle(fontSize: 13, height: 1.35, color: sc.onSurfaceVariant)),
+              Text(r.number, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.3)),
+              if (r.title.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text('tentang ${r.title}', style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
+              ],
             ]),
           ),
         ]),
         const SizedBox(height: 10),
-        Text(r.summary, style: const TextStyle(height: 1.4, fontSize: 14)),
+        Text(r.summary, style: const TextStyle(height: 1.4, fontSize: AppType.body)),
         if (r.note != null) ...[
           const SizedBox(height: 10),
-          GuideCallout(text: r.note!, icon: Icons.info_outline_rounded, color: AppColors.amber),
+          GuideCallout(text: r.note!, icon: CupertinoIcons.info_circle, color: AppColors.amber),
         ],
         const SizedBox(height: 12),
         Wrap(spacing: 8, runSpacing: 8, children: [
           if (r.pdfUrl != null)
-            FilledButton.icon(onPressed: () => _open(r.pdfUrl!), icon: const Icon(Icons.download_rounded, size: 18), label: const Text('Unduh PDF')),
+            FilledButton.icon(onPressed: () => _open(r.pdfUrl!), icon: const Icon(CupertinoIcons.arrow_down_to_line, size: 18), label: const Text('Unduh PDF')),
           if (r.pageUrl != null)
-            OutlinedButton.icon(onPressed: () => _open(r.pageUrl!), icon: const Icon(Icons.open_in_new_rounded, size: 18), label: Text(r.pageLabel)),
+            OutlinedButton.icon(onPressed: () => _open(r.pageUrl!), icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 18), label: Text(r.pageLabel)),
           if (main != null)
-            TextButton.icon(onPressed: () => _copy(main), icon: const Icon(Icons.link_rounded, size: 18), label: const Text('Salin tautan')),
+            TextButton.icon(onPressed: () => _copy(main), icon: const Icon(CupertinoIcons.link, size: 18), label: const Text('Salin tautan')),
         ]),
       ]),
     );

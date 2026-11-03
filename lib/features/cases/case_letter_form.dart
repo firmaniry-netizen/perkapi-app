@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -6,6 +7,8 @@ import '../../core/widgets/ui_kit.dart';
 import '../reports/export_service.dart';
 import 'case_letters.dart';
 import 'case_models.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 enum _To { all, one, general }
 
@@ -144,13 +147,13 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
   }
 
   Widget _dateField(String label, DateTime? v, ValueChanged<DateTime> onPick, {DateTime? initial}) => InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         onTap: () async {
           final d = await _pickDate(v ?? initial ?? today());
           if (d != null) onPick(d);
         },
         child: InputDecorator(
-          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(Icons.calendar_today_outlined)),
+          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(CupertinoIcons.calendar_today)),
           child: Text(v == null ? 'Pilih tanggal' : hariTgl(v)),
         ),
       );
@@ -162,8 +165,9 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
     final role = c.type.toUpperCase().contains('PKPU') ? 'Pengurus' : 'Kurator';
     Widget gap() => const SizedBox(height: 12);
     return Scaffold(
-      appBar: AppBar(title: Text(kind.title, style: const TextStyle(fontSize: 16))),
-      body: ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 40 + MediaQuery.paddingOf(context).bottom), children: [
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(kind.title, style: const TextStyle(fontSize: AppType.lead))),
+      body: ListView(padding: barPad(context, EdgeInsets.fromLTRB(20, 8, 20, 40 + MediaQuery.paddingOf(context).bottom)), children: [
         AppCard(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -172,7 +176,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
             Text(
               'Perkara ${c.number}\n${c.title}\nDebitur: ${c.debtorName}\n$role: ${_officer.text}'
               '${c.officerAhu.isEmpty ? '' : '\nNo. SBP AHU: ${c.officerAhu}'}\nKreditur terdata: ${c.creditors.length}',
-              style: TextStyle(fontSize: 13, height: 1.45, color: sc.onSurfaceVariant),
+              style: TextStyle(fontSize: AppType.small, height: 1.45, color: sc.onSurfaceVariant),
             ),
           ]),
         ),
@@ -180,15 +184,15 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
         AppCard(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            TextField(controller: _number, decoration: const InputDecoration(labelText: 'Nomor surat', prefixIcon: Icon(Icons.tag))),
+            TextField(controller: _number, decoration: const InputDecoration(labelText: 'Nomor surat', prefixIcon: Icon(CupertinoIcons.tag))),
             gap(),
-            TextField(controller: _city, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Kota penandatanganan', hintText: 'mis. Jakarta', prefixIcon: Icon(Icons.location_city_outlined))),
+            TextField(controller: _city, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Kota penandatanganan', hintText: 'mis. Jakarta', prefixIcon: Icon(CupertinoIcons.building_2_fill))),
             gap(),
             _dateField('Tanggal surat', _letterDate, (d) => setState(() => _letterDate = d)),
             gap(),
-            TextField(controller: _officer, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() {}), decoration: InputDecoration(labelText: 'Nama $role', prefixIcon: const Icon(Icons.person_outline))),
+            TextField(controller: _officer, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() {}), decoration: InputDecoration(labelText: 'Nama $role', prefixIcon: const Icon(CupertinoIcons.person))),
             gap(),
-            TextField(controller: _address, maxLines: 2, decoration: const InputDecoration(labelText: 'Alamat kantor (kop surat)', prefixIcon: Icon(Icons.home_work_outlined))),
+            TextField(controller: _address, maxLines: 2, decoration: const InputDecoration(labelText: 'Alamat kantor (kop surat)', prefixIcon: Icon(CupertinoIcons.house))),
           ]),
         ),
         const SizedBox(height: 14),
@@ -199,13 +203,13 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
               _dateField('Tanggal rapat', _meetDate, (d) => setState(() => _meetDate = d)),
               gap(),
               InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
                   final t = await showTimePicker(context: context, initialTime: _meetTime ?? const TimeOfDay(hour: 10, minute: 0));
                   if (t != null) setState(() => _meetTime = t);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Jam rapat', prefixIcon: Icon(Icons.schedule)),
+                  decoration: const InputDecoration(labelText: 'Jam rapat', prefixIcon: Icon(CupertinoIcons.clock)),
                   child: Text(_meetTime == null ? '10.00 (bawaan)' : '${_meetTime!.hour.toString().padLeft(2, '0')}.${_meetTime!.minute.toString().padLeft(2, '0')} WIB'),
                 ),
               ),
@@ -220,18 +224,18 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: kind == LetterKind.pemberitahuan ? 'Tempat/alamat pengajuan tagihan' : 'Tempat rapat',
-                prefixIcon: const Icon(Icons.place_outlined),
+                prefixIcon: const Icon(CupertinoIcons.placemark),
               ),
             ),
             if (kind != LetterKind.pemberitahuan) ...[
               gap(),
-              TextField(controller: _agenda, maxLines: 3, decoration: const InputDecoration(labelText: 'Acara rapat', prefixIcon: Icon(Icons.list_alt_outlined))),
+              TextField(controller: _agenda, maxLines: 3, decoration: const InputDecoration(labelText: 'Acara rapat', prefixIcon: Icon(CupertinoIcons.list_bullet))),
             ],
             if (kind == LetterKind.beritaAcara) ...[
               gap(),
-              TextField(controller: _judge, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Nama Hakim Pengawas (opsional)', prefixIcon: Icon(Icons.balance_outlined))),
+              TextField(controller: _judge, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Nama Hakim Pengawas (opsional)', prefixIcon: Icon(CupertinoIcons.hammer))),
               gap(),
-              TextField(controller: _attendees, maxLines: 2, decoration: const InputDecoration(labelText: 'Yang hadir (opsional)', hintText: 'mis. 12 kreditur dan debitur', prefixIcon: Icon(Icons.groups_outlined))),
+              TextField(controller: _attendees, maxLines: 2, decoration: const InputDecoration(labelText: 'Yang hadir (opsional)', hintText: 'mis. 12 kreditur dan debitur', prefixIcon: Icon(CupertinoIcons.person_3))),
               gap(),
               TextField(controller: _outcome, maxLines: 6, decoration: const InputDecoration(labelText: 'Jalannya rapat dan hasil/keputusan', alignLabelWithHint: true)),
             ],
@@ -268,9 +272,9 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
           Text(_error!, style: const TextStyle(color: AppColors.red, fontWeight: FontWeight.w600)),
         ],
         const SizedBox(height: 18),
-        PrimaryButton(label: _busy ? 'Membuat PDF...' : 'Buat PDF', icon: Icons.picture_as_pdf_rounded, loading: _busy, onPressed: _busy ? null : _make),
+        PrimaryButton(label: _busy ? 'Membuat PDF...' : 'Buat PDF', icon: CupertinoIcons.doc_richtext, loading: _busy, onPressed: _busy ? null : _make),
         const SizedBox(height: 10),
-        Text('Isi surat adalah draf umum. Periksa dan sesuaikan sebelum dikirim.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: sc.onSurfaceVariant)),
+        Text('Isi surat adalah draf umum. Periksa dan sesuaikan sebelum dikirim.', textAlign: TextAlign.center, style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
       ]),
     );
   }

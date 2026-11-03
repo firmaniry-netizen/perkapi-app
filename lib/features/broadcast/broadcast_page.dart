@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -8,6 +9,7 @@ import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 /// Admin utama: satu pesan ke semua anggota atau satu cabang. Terkirim sebagai notifikasi (dan push bila Firebase aktif).
 class BroadcastPage extends StatefulWidget {
@@ -40,7 +42,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
 
   Future<void> _loadBranches() async {
     try {
-      final r = await SupabaseService.client.from('branches').select('id,name').order('name');
+      final r = await SupabaseService.client.from('branches').select('id,name').order('name', ascending: true);
       if (mounted) setState(() => _branches = List<Map<String, dynamic>>.from(r as List));
     } catch (_) {}
   }
@@ -86,9 +88,10 @@ class _BroadcastPageState extends State<BroadcastPage> {
   Widget build(BuildContext context) {
     if (!_allowed) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengumuman Massal')),
-      body: PageGlow(accent: AppColors.violet, child: ListView(padding: const EdgeInsets.all(20), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Pengumuman Massal', subtitle: 'Kirim pesan ke seluruh anggota atau satu cabang', icon: Icons.campaign_rounded, accent: AppColors.violet)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Pengumuman Massal')),
+      body: PageGlow(accent: AppColors.violet, child: ListView(padding: barPad(context, const EdgeInsets.all(20)), children: [
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Pengumuman Massal', subtitle: 'Kirim pesan ke seluruh anggota atau satu cabang', icon: CupertinoIcons.speaker_2_fill, accent: AppColors.violet)),
         const SizedBox(height: 16),
         DropdownButtonFormField<String?>(
           initialValue: _branch,
@@ -106,7 +109,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: _sending ? null : _send,
-          icon: _sending ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.campaign_outlined),
+          icon: _sending ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(CupertinoIcons.speaker_2),
           label: const Text('Kirim'),
         ),
       ])),

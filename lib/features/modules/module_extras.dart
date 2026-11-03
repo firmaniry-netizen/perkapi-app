@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/icon_badge.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +9,8 @@ import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../shared/repositories/data_repository.dart';
 import '../../core/utils/upload_helper.dart';
+import '../../core/widgets/motion.dart';
+import '../../core/constants/app_tokens.dart';
 
 SupabaseClient get _db => SupabaseService.client;
 
@@ -110,7 +113,7 @@ class _ForumSectionState extends State<ForumSection> {
           .from('forum_comments')
           .select('id,body,created_at,author_id,members(full_name)')
           .eq('post_id', widget.postId)
-          .order('created_at');
+          .order('created_at', ascending: true);
       _likes = (likes as List).length;
       _liked = likes.any((e) => e['member_id'] == me);
       _comments = List<Map<String, dynamic>>.from(comments);
@@ -168,15 +171,15 @@ class _ForumSectionState extends State<ForumSection> {
     final mod = Access.instance.can('moderate_forum');
     return _Box(
       title: 'Diskusi',
-      icon: Icons.forum_outlined,
+      icon: CupertinoIcons.chat_bubble_2,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         TextButton.icon(
           onPressed: _loading ? null : _toggleLike,
-          icon: Icon(_liked ? Icons.thumb_up : Icons.thumb_up_outlined),
+          icon: Icon(_liked ? CupertinoIcons.hand_thumbsup_fill : CupertinoIcons.hand_thumbsup),
           label: Text('$_likes suka'),
         ),
         if (_loading)
-          const Center(child: CircularProgressIndicator())
+          const SkeletonList()
         else if (_comments.isEmpty)
           const Padding(padding: EdgeInsets.all(8), child: Text('Belum ada komentar.'))
         else
@@ -189,7 +192,7 @@ class _ForumSectionState extends State<ForumSection> {
               trailing: (c['author_id'] == me || mod)
                   ? IconButton(
                       tooltip: 'Hapus',
-                      icon: const Icon(Icons.delete_outline, size: 20),
+                      icon: const Icon(CupertinoIcons.trash, size: 20),
                       onPressed: () => _delete(c))
                   : null,
             ),
@@ -204,7 +207,7 @@ class _ForumSectionState extends State<ForumSection> {
             ),
           ),
           IconButton.filled(
-              onPressed: _sending ? null : _send, icon: const Icon(Icons.send), tooltip: 'Kirim'),
+              onPressed: _sending ? null : _send, icon: const Icon(CupertinoIcons.paperplane_fill), tooltip: 'Kirim'),
         ]),
       ]),
     );
@@ -272,9 +275,9 @@ class _EventRsvpSectionState extends State<EventRsvpSection> {
   Widget build(BuildContext context) {
     return _Box(
       title: 'Konfirmasi Kehadiran (RSVP)',
-      icon: Icons.how_to_reg_outlined,
+      icon: CupertinoIcons.person_badge_plus,
       child: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonList()
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SegmentedButton<String>(
                 emptySelectionAllowed: true,
@@ -365,20 +368,20 @@ class _NoteShareSectionState extends State<NoteShareSection> {
     final options = _members.where((m) => m['id'] != me && !sharedIds.contains(m['id'])).toList();
     return _Box(
       title: 'Bagikan catatan',
-      icon: Icons.share_outlined,
+      icon: CupertinoIcons.share,
       child: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonList()
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (_shares.isEmpty) const Text('Belum dibagikan kepada siapa pun.'),
               for (final s in _shares)
                 ListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.person_outline),
+                  leading: const Icon(CupertinoIcons.person),
                   title: Text('${(s['members'] as Map?)?['full_name'] ?? 'Anggota'}'),
                   trailing: IconButton(
                       tooltip: 'Cabut akses',
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: const Icon(CupertinoIcons.xmark, size: 20),
                       onPressed: () => _unshare(s)),
                 ),
               const SizedBox(height: 8),
@@ -442,7 +445,7 @@ class _AttachmentsState extends State<Attachments> {
           .select()
           .eq('entity_type', widget.entityType)
           .eq('entity_id', widget.entityId)
-          .order('created_at');
+          .order('created_at', ascending: true);
       _rows = List<Map<String, dynamic>>.from(rows);
     } catch (_) {
       if (mounted) _snack(context, 'Gagal memuat lampiran. Pastikan skrip perkapi_features.sql sudah dijalankan.');
@@ -518,10 +521,10 @@ class _AttachmentsState extends State<Attachments> {
     final me = Access.instance.memberId;
     return _Box(
       title: 'Lampiran',
-      icon: Icons.attach_file,
+      icon: CupertinoIcons.paperclip,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (_loading)
-          const Center(child: CircularProgressIndicator())
+          const SkeletonList()
         else if (_rows.isEmpty)
           const Text('Belum ada lampiran.')
         else
@@ -529,14 +532,14 @@ class _AttachmentsState extends State<Attachments> {
             ListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.description_outlined),
+              leading: const Icon(CupertinoIcons.doc_text),
               title: Text('${a['file_name'] ?? a['file_path']}', overflow: TextOverflow.ellipsis),
               subtitle: Text(_when(a['created_at'])),
               onTap: () => _open(a),
               trailing: a['uploaded_by'] == me
                   ? IconButton(
                       tooltip: 'Hapus',
-                      icon: const Icon(Icons.delete_outline, size: 20),
+                      icon: const Icon(CupertinoIcons.trash, size: 20),
                       onPressed: () => _delete(a))
                   : null,
             ),
@@ -546,12 +549,12 @@ class _AttachmentsState extends State<Attachments> {
             onPressed: _busy ? null : _upload,
             icon: _busy
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.upload_file),
+                : const Icon(CupertinoIcons.doc_on_clipboard),
             label: const Text('Tambah lampiran'),
           ),
           const Padding(
             padding: EdgeInsets.only(top: 4),
-            child: Text('PDF, Word, Excel, JPG, PNG • maks 10 MB', style: TextStyle(fontSize: 11)),
+            child: Text('PDF, Word, Excel, JPG, PNG • maks 10 MB', style: TextStyle(fontSize: AppType.micro)),
           ),
         ],
       ]),

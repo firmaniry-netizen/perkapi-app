@@ -49,8 +49,8 @@ class _Tilt3DState extends State<Tilt3D> {
       onPointerCancel: _reset,
       child: TweenAnimationBuilder<Offset>(
         tween: Tween<Offset>(end: _t),
-        duration: _drag ? Duration.zero : const Duration(milliseconds: 380),
-        curve: Curves.easeOutBack,
+        duration: _drag ? Duration.zero : const Duration(milliseconds: 320),
+        curve: const Cubic(0.23, 1, 0.32, 1),
         builder: (context, v, child) {
           final m = Matrix4.identity()
             ..setEntry(3, 2, 0.0013)

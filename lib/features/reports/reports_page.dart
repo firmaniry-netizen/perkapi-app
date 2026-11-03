@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 
 import '../../core/services/access_service.dart';
@@ -7,6 +8,8 @@ import '../../shared/widgets/state_widgets.dart';
 import 'export_service.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Pengurus: ekspor data anggota dan agenda ke CSV/PDF.
 class ReportsPage extends StatelessWidget {
@@ -29,22 +32,23 @@ class ReportsPage extends StatelessWidget {
     if (!_allowed) return const AccessDenied();
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Laporan & Ekspor')),
-      body: PageGlow(accent: AppColors.red, child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 40), children: [
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Laporan & Ekspor')),
+      body: PageGlow(accent: AppColors.red, child: ListView(padding: barPad(context, const EdgeInsets.fromLTRB(20, 4, 20, 40)), children: [
         const ScreenHero(
           title: 'Laporan & Ekspor',
           subtitle: 'Rekap data organisasi, siap diunduh',
-          icon: Icons.insights_rounded,
+          icon: CupertinoIcons.chart_bar_alt_fill,
           accent: AppColors.red,
         ),
         const SizedBox(height: 22),
         Text('Ekspor data', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 4),
-        Text('File CSV bisa dibuka di Excel. Hanya data yang boleh Anda lihat yang ikut terekspor.', style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13)),
+        Text('File CSV bisa dibuka di Excel. Hanya data yang boleh Anda lihat yang ikut terekspor.', style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.small)),
         const SizedBox(height: 10),
         for (final e in <(String, IconData, String)>[
-          ('Daftar anggota', Icons.badge_outlined, 'members'),
-          ('Agenda & event', Icons.event_outlined, 'events'),
+          ('Daftar anggota', CupertinoIcons.person_crop_rectangle, 'members'),
+          ('Agenda & event', CupertinoIcons.calendar, 'events'),
         ])
           Card(
             child: ListTile(

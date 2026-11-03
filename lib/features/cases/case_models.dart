@@ -59,7 +59,7 @@ class CaseContext {
     var creditors = <Map<String, dynamic>>[];
     try {
       creditors = List<Map<String, dynamic>>.from(
-          await db.from('creditors').select('id,name,address,creditor_type').eq('case_id', caseId).order('name'));
+          await db.from('creditors').select('id,name,address,creditor_type').eq('case_id', caseId).order('name', ascending: true));
     } catch (_) {}
 
     return CaseContext(

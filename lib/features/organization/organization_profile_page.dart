@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,6 +12,8 @@ import '../../core/widgets/page_glow.dart';
 import '../../core/widgets/scale_3d.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../profession/guide_widgets.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Profil Organisasi: identitas, visi-misi, kegiatan, legalitas, dan kontak sekretariat.
 /// Isinya diatur di lib/core/constants/org_profile.dart.
@@ -33,12 +36,12 @@ class OrganizationProfilePage extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
+            Text(label, style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
             const SizedBox(height: 2),
             Text(value, style: const TextStyle(height: 1.35)),
           ]),
         ),
-        if (uri != null) Icon(Icons.open_in_new_rounded, size: 18, color: sc.onSurfaceVariant),
+        if (uri != null) Icon(CupertinoIcons.arrow_up_right_square, size: 18, color: sc.onSurfaceVariant),
       ]),
     );
     if (uri == null) return row;
@@ -57,11 +60,12 @@ class OrganizationProfilePage extends StatelessWidget {
         !hasContact;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil Organisasi')),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Profil Organisasi')),
       body: PageGlow(
         accent: AppColors.navyAction,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom),
+          padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom)),
           children: [
             Reveal(
               index: 0,
@@ -70,18 +74,18 @@ class OrganizationProfilePage extends StatelessWidget {
                 child: Row(children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.line)),
-                    child: Image.asset(AppAssets.logoPerkapi, height: 48, width: 48, errorBuilder: (_, __, ___) => const Icon(Icons.apartment_rounded, size: 40, color: AppColors.navy)),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.button), border: Border.all(color: AppColors.line)),
+                    child: Image.asset(AppAssets.logoPerkapi, height: 48, width: 48, errorBuilder: (_, __, ___) => const Icon(CupertinoIcons.building_2_fill, size: 40, color: AppColors.navy)),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(AppConstants.appName, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: 0.4)),
+                      Text(AppConstants.appName, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: AppType.heading, letterSpacing: 0.4)),
                       const SizedBox(height: 2),
                       Text(OrgProfile.fullName.isNotEmpty ? OrgProfile.fullName : AppConstants.appSubtitle, style: TextStyle(height: 1.35, color: sc.onSurfaceVariant)),
                       if (OrgProfile.founded.isNotEmpty) ...[
                         const SizedBox(height: 4),
-                        Text('Berdiri ${OrgProfile.founded}', style: TextStyle(fontSize: 13, color: sc.onSurfaceVariant)),
+                        Text('Berdiri ${OrgProfile.founded}', style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
                       ],
                     ]),
                   ),
@@ -94,16 +98,16 @@ class OrganizationProfilePage extends StatelessWidget {
             AppCard(
               onTap: () => context.push('/organization-structure'),
               child: Row(children: [
-                const SolidTile(icon: Icons.account_tree_rounded, color: AppColors.navy, size: 44, radius: 14),
+                const SolidTile(icon: CupertinoIcons.list_bullet_indent, color: AppColors.navy, size: 44, radius: 14),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Struktur Organisasi', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                    Text('Struktur Organisasi', style: TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
                     SizedBox(height: 2),
-                    Text('Susunan pengurus lengkap dengan foto', style: TextStyle(fontSize: 13)),
+                    Text('Susunan pengurus lengkap dengan foto', style: TextStyle(fontSize: AppType.small)),
                   ]),
                 ),
-                Icon(Icons.chevron_right_rounded, color: sc.onSurfaceVariant),
+                Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
               ]),
             ),
             if (nothingFilled) ...[
@@ -119,11 +123,11 @@ class OrganizationProfilePage extends StatelessWidget {
               GuideCard(
                 title: 'Kontak sekretariat',
                 child: Column(children: [
-                  if (OrgProfile.address.isNotEmpty) _contactRow(context, Icons.location_on_outlined, 'Alamat', OrgProfile.address, null),
+                  if (OrgProfile.address.isNotEmpty) _contactRow(context, CupertinoIcons.location, 'Alamat', OrgProfile.address, null),
                   if (OrgProfile.phone.isNotEmpty)
-                    _contactRow(context, Icons.phone_outlined, 'Telepon', OrgProfile.phone, Uri(scheme: 'tel', path: OrgProfile.phone.replaceAll(' ', ''))),
-                  if (OrgProfile.email.isNotEmpty) _contactRow(context, Icons.mail_outline_rounded, 'Email', OrgProfile.email, Uri(scheme: 'mailto', path: OrgProfile.email)),
-                  if (OrgProfile.website.isNotEmpty) _contactRow(context, Icons.language_rounded, 'Situs web', OrgProfile.website, Uri.tryParse(OrgProfile.website)),
+                    _contactRow(context, CupertinoIcons.phone, 'Telepon', OrgProfile.phone, Uri(scheme: 'tel', path: OrgProfile.phone.replaceAll(' ', ''))),
+                  if (OrgProfile.email.isNotEmpty) _contactRow(context, CupertinoIcons.mail, 'Email', OrgProfile.email, Uri(scheme: 'mailto', path: OrgProfile.email)),
+                  if (OrgProfile.website.isNotEmpty) _contactRow(context, CupertinoIcons.globe, 'Situs web', OrgProfile.website, Uri.tryParse(OrgProfile.website)),
                 ]),
               ),
           ],

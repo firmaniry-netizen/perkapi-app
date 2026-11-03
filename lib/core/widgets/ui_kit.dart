@@ -3,9 +3,9 @@ import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/art_3d.dart';
+import '../constants/app_photos.dart';
 import '../constants/app_tokens.dart';
-import 'illustrations.dart';
+import 'liquid_glass.dart';
 import 'motion.dart';
 
 bool _dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
@@ -135,7 +135,7 @@ class PrimaryButton extends StatelessWidget {
                           )
                         : Row(key: const ValueKey('label'), mainAxisSize: MainAxisSize.min, children: [
                             Text(label,
-                                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 0.1)),
+                                style: const TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w800, letterSpacing: 0.1)),
                             if (icon != null) ...[
                               const SizedBox(width: 8),
                               Icon(icon, color: Colors.white, size: 20),
@@ -177,29 +177,15 @@ class AppIconButton extends StatelessWidget {
       );
       if (pulse) i = PulseTwice(value: badge, child: i);
     }
+    // Kaca cair (iOS 26): tombol kaca kotak membulat, menggembung & berkilau saat ditekan.
     return Tooltip(
       message: tooltip ?? '',
-      child: Semantics(
-        button: true,
-        label: tooltip,
-        child: Pressable(
-          onTap: onTap,
-          child: Material(
-            color: dark ? AppColors.navySurface : AppColors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.button),
-              side: BorderSide(color: dark ? AppColors.navyLine : AppColors.line),
-            ),
-            child: InkWell(
-              customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-              onTap: () {
-                tapHaptic();
-                onTap();
-              },
-              child: SizedBox(width: 48, height: 48, child: Center(child: i)),
-            ),
-          ),
-        ),
+      child: LiquidGlassButton(
+        semanticLabel: tooltip,
+        radius: AppRadius.button,
+        tint: (dark ? AppColors.navySurface : Colors.white).withValues(alpha: dark ? 0.55 : 0.62),
+        onTap: onTap,
+        child: IconTheme.merge(data: IconThemeData(color: dark ? Colors.white : AppColors.navy), child: i),
       ),
     );
   }
@@ -235,7 +221,7 @@ class SectionHeader extends StatelessWidget {
           TextButton(
             onPressed: onAction,
             style: TextButton.styleFrom(foregroundColor: link, minimumSize: const Size(48, 48)),
-            child: Text(actionLabel!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            child: Text(actionLabel!, style: const TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w700)),
           ),
       ]),
     );
@@ -254,8 +240,7 @@ class QuickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = color;
-    Widget ic = SolidTile(icon: icon, color: base ?? AppColors.navy, size: 52, radius: 18);
+    Widget ic = SolidTile(icon: icon, color: color ?? AppColors.iosBlue, size: 52, radius: 15);
     if (heroTag != null) ic = Hero(tag: heroTag!, child: ic);
     if (badge > 0) {
       ic = Badge(label: Text('$badge'), backgroundColor: AppColors.red, textColor: Colors.white, child: ic);
@@ -266,7 +251,7 @@ class QuickTile extends StatelessWidget {
       child: Pressable(
         onTap: onTap,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.card),
           onTap: () {
             tapHaptic();
             onTap();
@@ -280,7 +265,7 @@ class QuickTile extends StatelessWidget {
                   maxLines: 2,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.15)),
+                  style: const TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w600, height: 1.15)),
             ]),
           ),
         ),
@@ -326,8 +311,8 @@ class Wordmark extends StatelessWidget {
 }
 
 
-/// Ubin ikon bergradasi: tiga nada satu warna, kilau lembut di separuh atas, garis kaca tipis,
-/// dan bayangan berwarna. Ikon putih dengan bayangan halus agar tetap terbaca di warna terang.
+/// Ubin ikon ala aplikasi Pengaturan iPhone: kotak membulat berwarna sistem iOS (gradasi tipis terang ke
+/// pekat), ikon putih, kilau halus di separuh atas, dan bayangan berwarna yang lembut.
 class SolidTile extends StatelessWidget {
   const SolidTile({super.key, required this.icon, required this.color, this.size = 48, this.radius = 16});
   final IconData icon;
@@ -337,59 +322,29 @@ class SolidTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = _dark(context);
     final r = BorderRadius.circular(radius);
-    final art = Art3D.forIcon(icon);
-    if (art != null) return _art(context, art, dark, r);
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         borderRadius: r,
-        gradient: AppColors.tileGradient(color),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
-        boxShadow: [BoxShadow(color: color.withValues(alpha: dark ? 0.30 : 0.38), blurRadius: size * 0.38, offset: Offset(0, size * 0.14))],
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color.lerp(color, Colors.white, 0.18)!, color, Color.lerp(color, Colors.black, 0.10)!],
+          stops: const [0, 0.6, 1],
+        ),
+        boxShadow: [BoxShadow(color: color.withValues(alpha: dark ? 0.28 : 0.30), blurRadius: size * 0.32, offset: Offset(0, size * 0.12))],
       ),
-      child: Stack(alignment: Alignment.center, children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: r,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.center,
-                colors: [Colors.white.withValues(alpha: 0.30), Colors.white.withValues(alpha: 0)],
-              ),
-            ),
-          ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: r,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 0.8),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.center,
+          colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0)],
         ),
-        Icon(icon, size: size * 0.5, color: Colors.white, shadows: [Shadow(color: Colors.black.withValues(alpha: 0.22), blurRadius: 4, offset: const Offset(0, 1))]),
-      ]),
-    );
-  }
-  /// Versi bergambar: ubin bernada lembut warna [color] + gambar 3D yang sedikit "keluar" dari ubin.
-  Widget _art(BuildContext context, String art, bool dark, BorderRadius r) {
-    final bg = dark ? Color.alphaBlend(color.withValues(alpha: 0.24), const Color(0xFF16213F)) : Color.alphaBlend(color.withValues(alpha: 0.10), Colors.white);
-    final px = (size * MediaQuery.devicePixelRatioOf(context)).clamp(48, 384).round();
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: r,
-              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color.lerp(bg, Colors.white, dark ? 0.04 : 0.6)!, bg]),
-              border: Border.all(color: color.withValues(alpha: dark ? 0.32 : 0.16)),
-              boxShadow: [BoxShadow(color: color.withValues(alpha: dark ? 0.18 : 0.14), blurRadius: size * 0.3, offset: Offset(0, size * 0.1))],
-            ),
-          ),
-        ),
-        // gambar mengisi ubin & naik 3%: kesan benda 3D "berdiri" di atas ubin
-        Transform.translate(
-          offset: Offset(0, -size * 0.03),
-          child: Image.asset(art, width: size * 0.98, height: size * 0.98, fit: BoxFit.contain, cacheWidth: px, filterQuality: FilterQuality.medium,
-              errorBuilder: (_, __, ___) => Icon(icon, size: size * 0.5, color: color)),
-        ),
-      ]),
+      ),
+      child: Icon(icon, size: size * 0.52, color: Colors.white),
     );
   }
 }
@@ -468,8 +423,11 @@ class StatCard extends StatelessWidget {
 /// Kepala layar dongker bergradasi (layar dalam): titik halus, timbangan keadilan, strip merah,
 /// judul + subjudul + chip. Teks putih di atas dongker (kontras tinggi).
 class ScreenHero extends StatelessWidget {
-  const ScreenHero({super.key, required this.title, this.subtitle, this.icon, this.chips = const [], this.accent, this.heroTag});
+  const ScreenHero({super.key, required this.title, this.subtitle, this.icon, this.chips = const [], this.accent, this.heroTag, this.photo});
   final String? heroTag;
+
+  /// Foto latar (images/foto/). Default: dipilih dari [icon] lewat [AppPhotos.forIcon].
+  final String? photo;
   final String title;
   final String? subtitle;
   final IconData? icon;
@@ -489,7 +447,7 @@ class ScreenHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint = accent ?? AppColors.sky;
+    final tint = accent ?? AppColors.iosBlue;
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -504,21 +462,33 @@ class ScreenHero extends StatelessWidget {
         boxShadow: [BoxShadow(color: Color.lerp(AppColors.navy, tint, 0.35)!.withValues(alpha: 0.34), blurRadius: 30, offset: const Offset(0, 14))],
       ),
       child: Stack(children: [
-        // Sengaja tanpa foto & pola titik: kepala layar dalam cukup gradasi + satu cahaya warna modul,
-        // supaya foto hanya menjadi momen di layar utama (login, kartu anggota) dan tidak terasa diulang-ulang.
-        Positioned(
-          right: -60,
-          top: -70,
-          child: Container(
-            width: 220,
-            height: 220,
+        // Foto kegiatan/tema modul + selimut dongker (kiri pekat agar judul terbaca, kanan foto lebih terlihat).
+        Positioned.fill(
+          child: Image.asset(
+            photo ?? AppPhotos.forIcon(icon),
+            fit: BoxFit.cover,
+            cacheWidth: 900,
+            filterQuality: FilterQuality.medium,
+            excludeFromSemantics: true,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+        Positioned.fill(
+          child: DecoratedBox(
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [tint.withValues(alpha: 0.50), tint.withValues(alpha: 0)]),
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  AppColors.navyDeep.withValues(alpha: 0.92),
+                  Color.lerp(AppColors.navy, tint, 0.35)!.withValues(alpha: 0.72),
+                  tint.withValues(alpha: 0.45),
+                ],
+                stops: const [0, 0.55, 1],
+              ),
             ),
           ),
         ),
-        const Positioned(right: 10, bottom: -8, child: ScalesArt(size: 112, opacity: 0.30)),
         Positioned(
           left: 20,
           bottom: 0,
@@ -565,7 +535,7 @@ class ScreenHero extends StatelessWidget {
                   if (subtitle != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 96),
-                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withValues(alpha: 0.80), fontSize: 13, height: 1.3)),
+                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withValues(alpha: 0.80), fontSize: AppType.small, height: 1.3)),
                     ),
                 ]),
               ),
@@ -578,13 +548,13 @@ class ScreenHero extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.13),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppRadius.chip),
                       border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Icon(c.$1, size: 14, color: Colors.white),
                       const SizedBox(width: 6),
-                      Text(c.$2, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text(c.$2, style: const TextStyle(color: Colors.white, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                     ]),
                   ),
               ]),
@@ -637,6 +607,28 @@ class GradientIconButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Daftar "inset grouped" ala iOS: satu kartu membulat berisi beberapa baris, dipisah garis tipis
+/// yang menjorok (mulai sejajar teks, bukan dari tepi). Dipakai untuk daftar chat, pengaturan, dll.
+class InsetGroup extends StatelessWidget {
+  const InsetGroup({super.key, required this.children, this.indent = 72});
+  final List<Widget> children;
+  final double indent;
+
+  @override
+  Widget build(BuildContext context) {
+    final line = Theme.of(context).dividerTheme.color ?? Theme.of(context).colorScheme.outline;
+    return AppCard(
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.xs),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) Divider(height: 1, thickness: 1, indent: indent, color: line.withValues(alpha: 0.6)),
+          children[i],
+        ],
+      ]),
     );
   }
 }

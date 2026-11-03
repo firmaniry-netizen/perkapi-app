@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Pemindai QR dengan kamera. Mengembalikan isi QR (String) lewat Navigator.pop.
 /// Di web, kamera hanya jalan lewat HTTPS atau localhost.
@@ -37,7 +39,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pindai QR Kartu Anggota')),
+      appBar: GlassAppBar(title: const Text('Pindai QR Kartu Anggota')),
       body: Stack(children: [
         MobileScanner(controller: _controller, onDetect: _onDetect),
         Center(
@@ -46,7 +48,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
             height: 240,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.white, width: 3),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppRadius.button),
             ),
           ),
         ),

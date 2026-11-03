@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../shared/repositories/data_repository.dart';
 import '../../shared/widgets/state_widgets.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Form pengiriman peringatan oleh pengelola (permission: manage_alert).
 class AlertComposePage extends StatefulWidget {
@@ -102,7 +105,7 @@ class _AlertComposePageState extends State<AlertComposePage> {
   Widget build(BuildContext context) {
     if (!Access.instance.can('manage_alert')) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Kirim Peringatan')),
+      appBar: GlassAppBar(title: const Text('Kirim Peringatan')),
       body: Form(
         key: _key,
         child: ListView(padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom), children: [
@@ -124,10 +127,10 @@ class _AlertComposePageState extends State<AlertComposePage> {
           const SizedBox(height: 8),
           SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'info', label: Text('Info'), icon: Icon(Icons.info_outline)),
+              ButtonSegment(value: 'info', label: Text('Info'), icon: Icon(CupertinoIcons.info_circle)),
               ButtonSegment(
-                  value: 'warning', label: Text('Peringatan'), icon: Icon(Icons.warning_amber_rounded)),
-              ButtonSegment(value: 'urgent', label: Text('Penting'), icon: Icon(Icons.error_outline)),
+                  value: 'warning', label: Text('Peringatan'), icon: Icon(CupertinoIcons.exclamationmark_triangle)),
+              ButtonSegment(value: 'urgent', label: Text('Penting'), icon: Icon(CupertinoIcons.exclamationmark_circle)),
             ],
             selected: {_severity},
             onSelectionChanged: (s) => setState(() => _severity = s.first),
@@ -169,9 +172,9 @@ class _AlertComposePageState extends State<AlertComposePage> {
               decoration: InputDecoration(
                 labelText: 'Berlaku sampai (opsional)',
                 suffixIcon: _expires == null
-                    ? const Icon(Icons.calendar_today_outlined)
+                    ? const Icon(CupertinoIcons.calendar_today)
                     : IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(CupertinoIcons.xmark),
                         onPressed: () => setState(() => _expires = null)),
               ),
               child: Text(_expires == null ? 'Tanpa batas waktu' : _expires!.toIso8601String().substring(0, 10)),
@@ -182,13 +185,13 @@ class _AlertComposePageState extends State<AlertComposePage> {
             onPressed: _saving ? null : _send,
             icon: _saving
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.send),
+                : const Icon(CupertinoIcons.paperplane_fill),
             label: const Text('Kirim'),
           ),
           const SizedBox(height: 8),
           const Text(
             'Peringatan tampil di aplikasi anggota yang dituju dan juga masuk ke menu Notifikasi.',
-            style: TextStyle(fontSize: 12),
+            style: TextStyle(fontSize: AppType.caption),
           ),
         ]),
       ),

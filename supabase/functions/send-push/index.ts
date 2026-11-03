@@ -1,6 +1,3 @@
-// Edge Function: kirim push FCM saat ada baris baru di tabel `notifications`.
-// Dipicu oleh Database Webhook (INSERT pada notifications). Deploy: supabase functions deploy send-push --no-verify-jwt
-// Secret: FCM_SERVICE_ACCOUNT (isi JSON service account Firebase), PUSH_WEBHOOK_SECRET (string acak panjang).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const b64u = (b: ArrayBuffer | string) => {
@@ -37,6 +34,10 @@ async function accessToken(sa: { client_email: string; private_key: string }): P
   return j.access_token as string;
 }
 
+// FCM: semua nilai di "data" wajib berupa teks
+const asData = (o: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(o).filter(([, v]) => v !== null && v !== undefined).map(([k, v]) => [k, String(v).slice(0, 200)]));
+
 Deno.serve(async (req) => {
   try {
     if (req.headers.get("x-webhook-secret") !== (Deno.env.get("PUSH_WEBHOOK_SECRET") ?? "\u0000")) {
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
     if (payload?.type !== "INSERT" || !rec?.member_id) return new Response("skip");
 
     const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: toks } = await db.from("device_tokens").select("token").eq("member_id", rec.member_id);
+    const { data: toks } = await db.from("device_tokens").select("token, platform").eq("member_id", rec.member_id);
     if (!toks?.length) return new Response("no tokens");
 
     const sa = JSON.parse(Deno.env.get("FCM_SERVICE_ACCOUNT") ?? "{}");
@@ -56,23 +57,46 @@ Deno.serve(async (req) => {
     const title = String(rec.title ?? "PERKAPI").slice(0, 80);
     const body = String(rec.body ?? "").slice(0, 180);
     const link = typeof rec.link === "string" && rec.link.startsWith("/") ? rec.link : "/notifications";
+    const type = String(rec.type ?? "info");
+    const extra = rec.data && typeof rec.data === "object" ? rec.data as Record<string, unknown> : {};
+    const data = asData({ ...extra, link, type });
+    const isCall = type === "call";
+    const expires = String(Math.floor(Date.now() / 1000) + 45);
 
     for (const t of toks) {
+      let message: Record<string, unknown>;
+      if (isCall && t.platform !== "ios") {
+        // Android: pesan DATA saja → aplikasi menampilkan layar dering sendiri (lihat incoming_call_ui.dart)
+        message = { token: t.token, data, android: { priority: "HIGH", ttl: "45s" } };
+      } else if (isCall) {
+        // iPhone: notifikasi berbunyi yang menembus mode fokus; kedaluwarsa setelah 45 detik
+        message = {
+          token: t.token,
+          notification: { title, body },
+          data,
+          apns: {
+            headers: { "apns-priority": "10", "apns-push-type": "alert", "apns-expiration": expires },
+            payload: { aps: { sound: "default", "interruption-level": "time-sensitive" } },
+          },
+        };
+      } else {
+        message = {
+          token: t.token,
+          notification: { title, body },
+          data,
+          android: { priority: "HIGH" },
+          apns: { headers: { "apns-priority": "10" }, payload: { aps: { sound: "default" } } },
+        };
+      }
       const r = await fetch(url, {
         method: "POST",
         headers: { Authorization: `Bearer ${bearer}`, "content-type": "application/json" },
-        body: JSON.stringify({
-          message: {
-            token: t.token,
-            notification: { title, body },
-            data: { link, type: String(rec.type ?? "info") },
-            android: { priority: "HIGH" },
-          },
-        }),
+        body: JSON.stringify({ message }),
       });
       if (r.status === 404 || r.status === 400) {
         const e = await r.text();
-        if (e.includes("UNREGISTERED") || e.includes("INVALID_ARGUMENT")) {
+        // hanya token yang benar-benar sudah tidak berlaku yang dihapus
+        if (e.includes("UNREGISTERED") || (r.status === 400 && e.includes("registration token"))) {
           await db.from("device_tokens").delete().eq("token", t.token);
         }
       }

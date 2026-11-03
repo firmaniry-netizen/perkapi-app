@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/widgets/ui_kit.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Kerangka halaman panduan: AppBar + cahaya aksen + hero di atas + isi berupa kartu.
 class GuideScaffold extends StatelessWidget {
@@ -17,11 +20,12 @@ class GuideScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(title)),
       body: PageGlow(
         accent: accent,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom),
+          padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom)),
           children: [
             Reveal(index: 0, dy: -12, child: hero),
             const SizedBox(height: 8),
@@ -81,7 +85,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: Text('$count dari ${widget.items.length} siap', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
+        child: Text('$count dari ${widget.items.length} siap', style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
       ),
       for (var i = 0; i < widget.items.length; i++)
         InkWell(
@@ -90,7 +94,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(_done[i] ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              Icon(_done[i] ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
                   size: 22, color: _done[i] ? AppColors.emerald : sc.onSurfaceVariant),
               const SizedBox(width: 10),
               Expanded(
@@ -108,7 +112,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
 
 /// Kotak penekanan (batas waktu, catatan penting).
 class GuideCallout extends StatelessWidget {
-  const GuideCallout({super.key, required this.text, this.icon = Icons.info_outline_rounded, this.color = AppColors.sky});
+  const GuideCallout({super.key, required this.text, this.icon = CupertinoIcons.info_circle, this.color = AppColors.sky});
   final String text;
   final IconData icon;
   final Color color;
@@ -121,13 +125,13 @@ class GuideCallout extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.soft(color, dark: dark),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, size: 20, color: fg),
         const SizedBox(width: 10),
-        Expanded(child: Text(text, style: const TextStyle(height: 1.4, fontSize: 14))),
+        Expanded(child: Text(text, style: const TextStyle(height: 1.4, fontSize: AppType.body))),
       ]),
     );
   }
@@ -149,7 +153,7 @@ class GuideCard extends StatelessWidget {
       AppCard(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (subtitle != null) ...[
-            Text(subtitle!, style: TextStyle(fontSize: 13, height: 1.4, color: sc.onSurfaceVariant)),
+            Text(subtitle!, style: TextStyle(fontSize: AppType.small, height: 1.4, color: sc.onSurfaceVariant)),
             const SizedBox(height: 12),
           ],
           child,
@@ -174,7 +178,7 @@ class CopyButton extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format disalin. Tempel di dokumen Anda.')));
         }
       },
-      icon: const Icon(Icons.copy_rounded),
+      icon: const Icon(CupertinoIcons.doc_on_doc),
       label: Text(label),
       style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
     );
@@ -193,7 +197,7 @@ class GuideSource extends StatelessWidget {
       child: Text(
         'Ringkasan dari Peraturan Menteri Hukum dan HAM No. 37 Tahun 2018 tentang Syarat dan Tata Cara Pendaftaran serta Penyampaian Laporan Kurator dan Pengurus. '
         'Ini bukan nasihat hukum. Aturan dan formulir di laman resmi AHU dapat berubah, jadi pastikan lagi di ahu.go.id sebelum mengajukan.',
-        style: TextStyle(fontSize: 12, height: 1.45, color: sc.onSurfaceVariant),
+        style: TextStyle(fontSize: AppType.caption, height: 1.45, color: sc.onSurfaceVariant),
       ),
     );
   }

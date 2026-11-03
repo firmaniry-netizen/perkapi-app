@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -13,6 +14,8 @@ import '../../core/widgets/motion.dart';
 import '../../core/widgets/motion_physics.dart';
 import '../../core/widgets/perkapi_logo.dart';
 import '../ahu/ahu_page.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Kartu anggota digital 3D. Miring mengikuti kemiringan ponsel (akselerometer) atau geseran jari,
 /// dengan kilau cahaya yang bergerak. Ketuk untuk membalik: sisi belakang berisi QR.
@@ -100,7 +103,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
     final m = a.member ?? {};
     final calm = reduceMotion(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Kartu Anggota')),
+      appBar: GlassAppBar(title: const Text('Kartu Anggota')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -158,13 +161,13 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
               Text(
                 kIsWeb ? 'Geser kartu ke samping atau ketuk untuk membalik.' : 'Miringkan HP untuk melihat kilau 3D. Geser ke samping atau ketuk untuk membalik.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 6),
               const Text(
                 'Kartu ini bukan dokumen resmi pemerintah. Lencana AHU hanya menandai data yang dicocokkan pengelola PERKAPI.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11),
+                style: TextStyle(fontSize: AppType.micro),
               ),
             ]),
           ),
@@ -174,7 +177,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
   }
 
   BoxDecoration _shell(Offset t, {required Gradient gradient}) => BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppRadius.hero),
         gradient: gradient,
         boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.38), blurRadius: 30, offset: Offset(-t.dx * 16, 16 - t.dy * 10))],
       );
@@ -183,7 +186,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
         child: IgnorePointer(
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(AppRadius.hero),
               gradient: LinearGradient(
                 begin: Alignment(-1.4 + t.dx * 1.6, -1.4 + t.dy * 1.6),
                 end: Alignment(0.6 + t.dx * 1.6, 0.6 + t.dy * 1.6),
@@ -201,7 +204,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
     return Container(
       decoration: _shell(t, gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0B1A3F), AppColors.navy, Color(0xFF1B3F9A)])),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppRadius.hero),
         child: Stack(children: [
           Positioned(right: -70, bottom: -50, child: Icon(Icons.hexagon_outlined, size: 300, color: Colors.white.withOpacity(0.07))),
           Positioned(left: 0, right: 0, top: 0, child: Container(height: 5, color: AppColors.red)),
@@ -213,21 +216,21 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
                 SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('PERKAPI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 2)),
-                    Text('Kartu Anggota Digital', style: TextStyle(color: Color(0xFFBCC7EA), fontSize: 12)),
+                    Text('PERKAPI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: AppType.title, letterSpacing: 2)),
+                    Text('Kartu Anggota Digital', style: TextStyle(color: Color(0xFFBCC7EA), fontSize: AppType.caption)),
                   ]),
                 ),
               ]),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.gold, Color(0xFFB8860B)])),
+                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.gold, AppColors.goldDeep])),
                 child: MemberAvatar(name: a.name, path: a.avatarPath, radius: 54),
               ),
               const SizedBox(height: 16),
-              Text(a.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, height: 1.15)),
+              Text(a.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.h2, fontWeight: FontWeight.w900, height: 1.15)),
               const SizedBox(height: 6),
-              Text('No. ${m['member_number'] ?? '-'}', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.2, fontSize: 15)),
+              Text('No. ${m['member_number'] ?? '-'}', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.2, fontSize: AppType.lead)),
               const SizedBox(height: 10),
               Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 6, children: [
                 _chip(a.roleLabel),
@@ -236,12 +239,12 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
               const Spacer(),
               if (ahuNo.isNotEmpty)
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(verified ? Icons.verified_rounded : Icons.badge_outlined, size: 16, color: AppColors.gold),
+                  Icon(verified ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.person_crop_rectangle, size: 16, color: AppColors.gold),
                   const SizedBox(width: 6),
-                  Flexible(child: Text(verified ? 'Terverifikasi AHU' : 'AHU $ahuNo', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700, fontSize: 13))),
+                  Flexible(child: Text(verified ? 'Terverifikasi AHU' : 'AHU $ahuNo', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700, fontSize: AppType.small))),
                 ]),
               const SizedBox(height: 8),
-              Text('Berlaku s/d ${m['valid_until'] ?? '-'}', style: const TextStyle(color: Color(0xFFBCC7EA), fontSize: 12)),
+              Text('Berlaku s/d ${m['valid_until'] ?? '-'}', style: const TextStyle(color: Color(0xFFBCC7EA), fontSize: AppType.caption)),
             ]),
           ),
           _glare(t),
@@ -252,8 +255,8 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
 
   Widget _chip(String s) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(999), border: Border.all(color: Colors.white24)),
-        child: Text(s, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+        decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(AppRadius.chip), border: Border.all(color: Colors.white24)),
+        child: Text(s, style: const TextStyle(color: Colors.white, fontSize: AppType.caption, fontWeight: FontWeight.w700)),
       );
 
   Widget _backFace(BuildContext context, Map m, Offset t) {
@@ -262,26 +265,26 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
     return Container(
       decoration: _shell(t, gradient: const LinearGradient(colors: [Colors.white, Color(0xFFEDEFF4)], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppRadius.hero),
         child: Stack(children: [
           Positioned(left: 0, right: 0, top: 0, child: Container(height: 5, color: AppColors.red)),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 30, 22, 20),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text('Pindai untuk verifikasi', style: TextStyle(color: AppColors.navy, fontSize: 18, fontWeight: FontWeight.w900)),
+              const Text('Pindai untuk verifikasi', style: TextStyle(color: AppColors.navy, fontSize: AppType.title, fontWeight: FontWeight.w900)),
               const SizedBox(height: 16),
               if (token == null)
                 const Text('QR belum tersedia', style: TextStyle(color: AppColors.navy))
               else
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFC9CFDF))),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.button), border: Border.all(color: const Color(0xFFC9CFDF))),
                   child: QrImageView(data: 'perkapi:member:$token', size: 200),
                 ),
               if (ahuNo.isNotEmpty) ...[
                 const SizedBox(height: 14),
-                Text(ahuNo, style: const TextStyle(color: AppColors.navy, fontSize: 12, fontWeight: FontWeight.w600)),
-                TextButton.icon(onPressed: () => openAhuOnline(context), icon: const Icon(Icons.open_in_new_rounded, size: 16), label: const Text('Buka AHU Online')),
+                Text(ahuNo, style: const TextStyle(color: AppColors.navy, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
+                TextButton.icon(onPressed: () => openAhuOnline(context), icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 16), label: const Text('Buka AHU Online')),
               ],
             ]),
           ),

@@ -11,7 +11,7 @@ extension RegulationKindLabel on RegulationKind {
         RegulationKind.uu => 'Undang-Undang',
         RegulationKind.permen => 'Peraturan Menteri',
         RegulationKind.putusan => 'Putusan MK',
-        RegulationKind.rancangan => 'Dalam pembahasan',
+        RegulationKind.rancangan => 'Peraturan lainnya',
       };
 }
 
@@ -51,58 +51,95 @@ class Regulation {
   String get searchText => '$number $title $summary ${kind.label}'.toLowerCase();
 }
 
+/// Daftar bawaan (sama dengan situs, per Oktober 2026). Bila database berisi daftar peraturan
+/// (tabel site_regulations, dikelola dari panel admin situs), aplikasi memakai daftar dari database.
 const regulations = <Regulation>[
   Regulation(
     kind: RegulationKind.uu,
-    number: 'Undang-Undang Nomor 37 Tahun 2004',
-    title: 'Kepailitan dan Penundaan Kewajiban Pembayaran Utang',
-    summary: 'Dasar hukum utama kepailitan dan PKPU: syarat pailit, tugas dan kewenangan kurator serta pengurus, rapat kreditor, hingga pemberesan harta pailit.',
+    number: 'UU No. 37 Tahun 2004',
+    title: '',
+    summary: 'Kepailitan dan Penundaan Kewajiban Pembayaran Utang. Pasal 223 dicabut oleh UU No. 4 Tahun 2023 (P2SK). Beberapa pasal telah ditafsirkan Mahkamah Konstitusi, lihat putusan di bawah.',
     pdfUrl: 'https://peraturan.go.id/files/uu37-2004.pdf',
     pageUrl: 'https://peraturan.bpk.go.id/Details/40784/uu-no-37-tahun-2004',
-    pageLabel: 'Status di JDIH BPK',
-    note: 'Sudah ada perubahan oleh putusan MK dan undang-undang lain. Misalnya Pasal 223 (PKPU untuk bank, perusahaan efek, asuransi, dan sejenisnya) dicabut oleh UU Nomor 4 Tahun 2023. '
-        'PDF di atas adalah naskah asli, jadi cek halaman status sebelum dikutip.',
+    pageLabel: 'Status',
   ),
   Regulation(
     kind: RegulationKind.permen,
-    number: 'Peraturan Menteri Hukum dan HAM Nomor 37 Tahun 2018',
-    title: 'Syarat dan Tata Cara Pendaftaran serta Penyampaian Laporan Kurator dan Pengurus',
-    summary: 'Syarat dokumen pendaftaran, perpanjangan surat bukti pendaftaran, laporan ke Ditjen AHU, dan penghapusan dari daftar. Menjadi dasar menu Profesi di aplikasi ini.',
+    number: 'Permenkum No. 20 Tahun 2025',
+    title: '',
+    summary: 'Pedoman imbalan jasa bagi kurator dan pengurus. Berlaku sejak 27 Mei 2025, menggantikan Permenkumham No. 18 Tahun 2021.',
+    pageUrl: 'https://pasal.id/peraturan/permen/permenkum-no-20-tahun-2025',
+    pageLabel: 'Lihat',
+  ),
+  Regulation(
+    kind: RegulationKind.permen,
+    number: 'Permenkumham No. 37 Tahun 2018',
+    title: '',
+    summary: 'Syarat dan tata cara pendaftaran serta penyampaian laporan kurator dan pengurus. Masih berlaku.',
     pdfUrl: 'https://peraturan.go.id/files/bn1686-2018.pdf',
     pageUrl: 'https://pasal.id/peraturan/permen/permenkumham-no-37-tahun-2018',
-    pageLabel: 'Ringkasan bab (pasal.id)',
-    note: 'Menggantikan Permenkumham Nomor 18 Tahun 2013. Pasal.id adalah situs pihak ketiga, jadi rujuk PDF resmi untuk kutipan.',
-  ),
-  Regulation(
-    kind: RegulationKind.permen,
-    number: 'Peraturan Menteri Hukum dan HAM Nomor 18 Tahun 2021',
-    title: 'Pedoman Imbalan Jasa bagi Kurator dan Pengurus',
-    summary: 'Pedoman besaran dan cara penetapan imbalan jasa kurator, kurator sementara, dan pengurus.',
-    pageUrl: 'https://pasal.id/peraturan/permen/permenkumham-no-18-tahun-2021',
-    pageLabel: 'Buka peraturan (pasal.id)',
-    note: 'Menggantikan Permenkumham 11/2016 jo. 2/2017. Perkara yang sudah berjalan sebelum berlakunya tetap memakai aturan lama. '
-        'Tautan PDF resmi belum saya temukan, silakan cari di portal resmi di bagian bawah halaman.',
+    pageLabel: 'Status',
   ),
   Regulation(
     kind: RegulationKind.putusan,
-    number: 'Putusan MK Nomor 74/PUU-XXIV/2026',
-    title: 'Pengujian Pasal 74 ayat (1) UU 37/2004 (laporan kurator kepada hakim pengawas)',
-    summary: 'Menyatakan Pasal 74 ayat (1) bersyarat: kurator melapor ke hakim pengawas tiap 3 bulan, dengan tembusan ke kreditor dan debitor pailit lewat surat tercatat, surel, atau aplikasi.',
+    number: 'Putusan MK No. 243/PUU-XXIV/2026',
+    title: '',
+    summary: '29 September 2026. Pasal 127 ayat (1) dan penjelasannya: bila hakim pengawas tidak dapat mendamaikan, perselisihan diselesaikan di pengadilan (pengadilan negeri, pengadilan tinggi, atau MA) untuk perkara yang diajukan sebelum putusan pailit.',
+    pageUrl: 'https://pasal.id/peraturan/putusan-mk/puu-mk-243-2026',
+    pageLabel: 'Lihat',
+  ),
+  Regulation(
+    kind: RegulationKind.putusan,
+    number: 'Putusan MK No. 181/PUU-XXIII/2025',
+    title: '',
+    summary: '25 Mei 2026. Penjelasan Pasal 292: harta pailit berada dalam keadaan insolvensi sejak dinyatakan hakim pengawas dalam rapat kreditor dan dicatat dalam berita acara.',
+    pageUrl: 'https://pasal.id/peraturan/putusan-mk/puu-mk-181-2025',
+    pageLabel: 'Lihat',
+  ),
+  Regulation(
+    kind: RegulationKind.putusan,
+    number: 'Putusan MK No. 14/PUU-XXIV/2026',
+    title: '',
+    summary: '25 Mei 2026. Permohonan atas Pasal 292 ditolak: rujukan ke Pasal 286 dan larangan menawarkan perdamaian kembali tetap berlaku.',
+    pageUrl: 'https://pasal.id/peraturan/putusan-mk/puu-mk-14-2026',
+    pageLabel: 'Lihat',
+  ),
+  Regulation(
+    kind: RegulationKind.putusan,
+    number: 'Putusan MK No. 74/PUU-XXIV/2026',
+    title: '',
+    summary: '29 April 2026. Pasal 74 ayat (1): kurator melapor ke hakim pengawas tiap 3 bulan, dengan tembusan kepada kreditor dan debitor pailit.',
     pdfUrl: 'https://s.mkri.id/public/content/persidangan/putusan/putusan_mkri_14183_1777450375.pdf',
-    pageUrl: 'https://literasihukum.com/putusan-mk/4391/74puu-xxiv2026',
-    pageLabel: 'Ringkasan putusan',
-    note: 'Putusan terbaru, jadi periksa dulu apakah praktik pelaporan di pengadilan niaga Anda sudah menyesuaikan.',
   ),
   Regulation(
     kind: RegulationKind.rancangan,
     number: 'RUU Profesi Kurator',
-    title: 'Rancangan undang-undang khusus profesi kurator (masuk Prolegnas)',
-    summary: 'Diusulkan untuk mengatur standar profesi, pengawasan, tugas, tanggung jawab, dan perlindungan kurator, terpisah dari UU 37/2004. PERKAPI menyampaikan masukan dalam rapat dengar pendapat umum dengan Komisi XIII DPR pada 15 September 2026.',
-    pageUrl: 'https://www.rctiplus.com/news/detail/inews/5473832/perkapi-rapat-bareng-komisi-xiii-dpr--dorong-ruu-profesi-kurator-jadi-prioritas',
+    title: '',
+    summary: 'Usul inisiatif DPR sejak April 2026. PERKAPI mendorongnya masuk Prolegnas Prioritas. Masih rancangan dan belum berlaku.',
+    pageUrl: 'https://www.hukumonline.com/berita/a/pemerintah-dpr-sepakat-6-ruu-ini-jadi-usul-inisiatif-dpr-lt69e0455bc1771/',
     pageLabel: 'Baca beritanya',
-    note: 'Ini masih rancangan dan belum berlaku, jadi belum bisa dijadikan dasar hukum. Pantau perkembangannya di portal DPR atau JDIH.',
   ),
 ];
+
+/// Satu baris dari RPC `public_regulations` (situs & aplikasi memakai daftar yang sama).
+Regulation regulationFromRow(Map<String, dynamic> r) {
+  final kind = switch ('${r['kind']}') {
+    'Undang-Undang' => RegulationKind.uu,
+    'Peraturan Menteri' => RegulationKind.permen,
+    'Putusan MK' => RegulationKind.putusan,
+    _ => RegulationKind.rancangan,
+  };
+  String? s(Object? v) => (v == null || '$v'.trim().isEmpty) ? null : '$v'.trim();
+  return Regulation(
+    kind: kind,
+    number: '${r['number'] ?? ''}',
+    title: '',
+    summary: '${r['summary'] ?? ''}',
+    pdfUrl: s(r['pdf_url']),
+    pageUrl: s(r['page_url']),
+    pageLabel: s(r['page_label']) ?? 'Lihat',
+  );
+}
 
 /// Portal resmi untuk mencari peraturan lain (perubahan, PP, SEMA/PERMA, dll.).
 const regulationPortals = <(String, String, String)>[

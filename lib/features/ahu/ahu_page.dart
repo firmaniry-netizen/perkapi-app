@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -7,7 +8,10 @@ import '../../core/constants/app_colors.dart';
 import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/widgets/ui_kit.dart';
-import '../../shared/widgets/state_widgets.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
+import '../../core/constants/app_tokens.dart';
 
 const ahuOnlineUrl = 'https://ahu.go.id';
 
@@ -39,15 +43,15 @@ class AhuBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final filled = number != null && number!.trim().isNotEmpty;
     final (label, color, icon) = !filled
-        ? ('Belum diisi', AppColors.muted, Icons.help_outline_rounded)
+        ? ('Belum diisi', AppColors.muted, CupertinoIcons.question_circle)
         : verified
-            ? ('Terverifikasi AHU', AppColors.emerald, Icons.verified_rounded)
-            : ('Menunggu verifikasi', AppColors.amber, Icons.hourglass_top_rounded);
+            ? ('Terverifikasi AHU', AppColors.emerald, CupertinoIcons.checkmark_seal_fill)
+            : ('Menunggu verifikasi', AppColors.amber, CupertinoIcons.hourglass);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 12, vertical: compact ? 4 : 7),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppRadius.chip),
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -150,7 +154,7 @@ class _AhuPageState extends State<AhuPage> {
           .select('id,full_name,member_number,ahu_registration_number,ahu_registration_date,ahu_valid_until')
           .not('ahu_registration_number', 'is', null)
           .eq('ahu_verified', false)
-          .order('full_name')
+          .order('full_name', ascending: true)
           .limit(100));
     } catch (_) {
       _queue = [];
@@ -159,7 +163,7 @@ class _AhuPageState extends State<AhuPage> {
   }
 
   Future<void> _verify(Map<String, dynamic> r) async {
-    final ok = await showDialog<bool>(
+    final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Verifikasi pendaftaran AHU?'),
@@ -185,7 +189,7 @@ class _AhuPageState extends State<AhuPage> {
   Widget build(BuildContext context) {
     final sc = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pendaftaran AHU')),
+      appBar: GlassAppBar(title: const Text('Pendaftaran AHU')),
       body: PageGlow(accent: AppColors.teal, child: ListenableBuilder(
         listenable: Access.instance,
         builder: (context, _) {
@@ -196,7 +200,7 @@ class _AhuPageState extends State<AhuPage> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(AppRadius.hero),
                 gradient: const LinearGradient(
                     begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppColors.navyDeep, AppColors.navy, Color(0xFF1B4A9C)]),
                 boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.26), blurRadius: 24, offset: const Offset(0, 12))],
@@ -206,22 +210,22 @@ class _AhuPageState extends State<AhuPage> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                    child: Image.asset(AppAssets.logoAhu, height: 28, errorBuilder: (_, __, ___) => const Icon(Icons.account_balance, color: AppColors.navy)),
+                    child: Image.asset(AppAssets.logoAhu, height: 28, errorBuilder: (_, __, ___) => const Icon(CupertinoIcons.building_2_fill, color: AppColors.navy)),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text('Kurator dan Pengurus\nterdaftar di AHU',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800, height: 1.25)),
+                        style: TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w800, height: 1.25)),
                   ),
                 ]),
                 const SizedBox(height: 16),
                 AhuBadge(number: number, verified: verified),
                 if (number.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  Text(number, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text(number, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
                   Text('Terbit ${ahuDate(m['ahu_registration_date'])}  •  Berlaku s.d. ${ahuDate(m['ahu_valid_until'])}',
-                      style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 13)),
+                      style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.small)),
                 ],
               ]),
             ),
@@ -235,7 +239,7 @@ class _AhuPageState extends State<AhuPage> {
                   decoration: const InputDecoration(
                     labelText: 'Nomor Surat Bukti Pendaftaran',
                     hintText: 'AHU-123.AH.04.03-2021',
-                    prefixIcon: Icon(Icons.badge_outlined),
+                    prefixIcon: Icon(CupertinoIcons.person_crop_rectangle),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -246,18 +250,18 @@ class _AhuPageState extends State<AhuPage> {
                 Text(
                   'Lencana "Terverifikasi AHU" hanya diberikan pengelola setelah mencocokkan dengan dokumen atau situs AHU. '
                   'Mengubah data ini akan mencabut verifikasi sampai diverifikasi ulang.',
-                  style: TextStyle(fontSize: 13, height: 1.4, color: sc.onSurfaceVariant),
+                  style: TextStyle(fontSize: AppType.small, height: 1.4, color: sc.onSurfaceVariant),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 10),
                   Text(_error!, style: const TextStyle(color: AppColors.red)),
                 ],
                 const SizedBox(height: 16),
-                PrimaryButton(label: _saving ? 'Menyimpan...' : 'Simpan', icon: Icons.save_outlined, loading: _saving, onPressed: _saving ? null : _save),
+                PrimaryButton(label: _saving ? 'Menyimpan...' : 'Simpan', icon: CupertinoIcons.tray_arrow_down, loading: _saving, onPressed: _saving ? null : _save),
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: () => openAhuOnline(context),
-                  icon: const Icon(Icons.open_in_new_rounded),
+                  icon: const Icon(CupertinoIcons.arrow_up_right_square),
                   label: const Text('Buka AHU Online'),
                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
                 ),
@@ -267,7 +271,7 @@ class _AhuPageState extends State<AhuPage> {
               SectionHeader('Menunggu verifikasi', actionLabel: 'Muat ulang', onAction: _loadQueue),
               const SizedBox(height: 8),
               if (_queueLoading)
-                const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+                const SkeletonList(count: 3)
               else if (_queue.isEmpty)
                 AppCard(child: Text('Tidak ada antrean. Semua data AHU yang masuk sudah diverifikasi.', style: TextStyle(color: sc.onSurfaceVariant)))
               else
@@ -293,10 +297,10 @@ class _AhuPageState extends State<AhuPage> {
   }
 
   Widget _dateField(String label, String? value, VoidCallback onTap) => InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         onTap: onTap,
         child: InputDecorator(
-          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(Icons.calendar_today_outlined)),
+          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(CupertinoIcons.calendar_today)),
           child: Text(value == null ? 'Pilih tanggal' : ahuDate(value)),
         ),
       );

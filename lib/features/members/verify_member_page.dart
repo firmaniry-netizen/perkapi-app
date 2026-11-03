@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -10,6 +11,7 @@ import '../../core/widgets/member_avatar.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../ahu/ahu_page.dart';
 import 'qr_scanner_page.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 /// Verifikasi Kartu Anggota: tempel isi QR (perkapi:member:<token>) atau token-nya.
 /// Hanya pengelola anggota (manage_member). Verifikasi dilakukan di database
@@ -90,21 +92,22 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
   Widget build(BuildContext context) {
     if (!Access.instance.can('manage_member')) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Verifikasi Kartu Anggota')),
-      body: PageGlow(accent: AppColors.teal, child: ListView(padding: EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Verifikasi Kartu', subtitle: 'Pastikan keaslian kartu anggota lewat QR', icon: Icons.verified_user_rounded, accent: AppColors.teal)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Verifikasi Kartu Anggota')),
+      body: PageGlow(accent: AppColors.teal, child: ListView(padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom)), children: [
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Verifikasi Kartu', subtitle: 'Pastikan keaslian kartu anggota lewat QR', icon: CupertinoIcons.checkmark_shield_fill, accent: AppColors.teal)),
         const SizedBox(height: 16),
         const Text('Tempel isi QR kartu anggota (contoh: perkapi:member:xxxxxxxx-...) lalu tekan Verifikasi.'),
         const SizedBox(height: 12),
         TextField(
           controller: _ctl,
-          decoration: const InputDecoration(labelText: 'Isi QR / token', prefixIcon: Icon(Icons.qr_code_2)),
+          decoration: const InputDecoration(labelText: 'Isi QR / token', prefixIcon: Icon(CupertinoIcons.qrcode)),
           onSubmitted: (_) => _verify(),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: _busy ? null : _scan,
-          icon: const Icon(Icons.qr_code_scanner),
+          icon: const Icon(CupertinoIcons.qrcode_viewfinder),
           label: const Text('Pindai dengan kamera'),
         ),
         const SizedBox(height: 8),
@@ -112,16 +115,16 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
           onPressed: _busy ? null : _verify,
           icon: _busy
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.verified_user_outlined),
+              : const Icon(CupertinoIcons.checkmark_shield),
           label: const Text('Verifikasi'),
         ),
         const SizedBox(height: 16),
-        if (_error != null) Text(_error!, style: const TextStyle(color: Color(0xFFC62828))),
+        if (_error != null) Text(_error!, style: const TextStyle(color: AppColors.red)),
         if (_checked && _result == null)
           const Card(
             color: Color(0xFFFFEBEE),
             child: ListTile(
-              leading: Icon(Icons.cancel, color: Color(0xFFC62828)),
+              leading: Icon(CupertinoIcons.xmark_circle_fill, color: AppColors.red),
               title: Text('Kartu tidak dikenali', style: TextStyle(color: Colors.black87)),
               subtitle: Text('Token tidak ditemukan.', style: TextStyle(color: Colors.black54)),
             ),
@@ -133,13 +136,13 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
               padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Icon(_valid ? Icons.check_circle : Icons.warning_amber_rounded,
-                      color: _valid ? const Color(0xFF2E7D32) : const Color(0xFFEF6C00)),
+                  Icon(_valid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.exclamationmark_triangle,
+                      color: _valid ? AppColors.emerald : AppColors.amber),
                   const SizedBox(width: 8),
                   Text(_valid ? 'KARTU VALID' : 'KARTU TIDAK AKTIF / KEDALUWARSA',
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: _valid ? const Color(0xFF2E7D32) : const Color(0xFFEF6C00))),
+                          color: _valid ? AppColors.emerald : AppColors.amber)),
                 ]),
                 const SizedBox(height: 12),
                 Center(

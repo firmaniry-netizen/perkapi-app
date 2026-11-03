@@ -20,7 +20,7 @@ class PageGlow extends StatelessWidget {
           gradient: RadialGradient(
             center: const Alignment(0.9, -1.0),
             radius: 1.1,
-            colors: [accent.withValues(alpha: dark ? 0.22 : 0.14), accent.withValues(alpha: 0)],
+            colors: [accent.withValues(alpha: dark ? 0.28 : 0.20), accent.withValues(alpha: 0)],
           ),
         ),
       ),

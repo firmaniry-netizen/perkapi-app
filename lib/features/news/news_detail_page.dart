@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/motion.dart';
 import 'news_post.dart';
 import 'news_widgets.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Halaman berita modern: foto sampul besar (geser untuk foto lain), lembar isi melengkung,
 /// kategori berwarna, tanggal, tulisan, dan deretan foto kecil.
@@ -85,7 +88,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
             padding: const EdgeInsets.only(left: 16),
             child: Center(
               child: GlassCircleButton(
-                icon: Icons.arrow_back_rounded,
+                icon: CupertinoIcons.arrow_left,
                 tooltip: 'Kembali',
                 onTap: () => Navigator.maybePop(context),
               ),
@@ -99,7 +102,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                   child: _deleting
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
                       : GlassCircleButton(
-                          icon: Icons.delete_outline_rounded,
+                          icon: CupertinoIcons.trash,
                           tooltip: 'Hapus berita (admin)',
                           color: const Color(0x99C8202F),
                           onTap: _delete,
@@ -140,7 +143,8 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     for (var k = 0; k < p.rows.length; k++)
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 240),
+                        duration: Duration(milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 240),
+                        curve: const Cubic(0.23, 1, 0.32, 1),
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         width: k == _i ? 22 : 7,
                         height: 7,
@@ -181,7 +185,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                       decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(12)),
                       child: const Text('BARU',
-                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                          style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
                     ),
                   ],
                 ]),
@@ -198,15 +202,15 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 index: 2,
                 dy: 10,
                 child: Row(children: [
-                  Icon(Icons.calendar_today_rounded, size: 15, color: sc.onSurfaceVariant),
+                  Icon(CupertinoIcons.calendar_today, size: 15, color: sc.onSurfaceVariant),
                   const SizedBox(width: 6),
                   Text(formatTanggal(p.date),
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
+                      style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
                   const SizedBox(width: 14),
-                  Icon(Icons.photo_library_rounded, size: 15, color: sc.onSurfaceVariant),
+                  Icon(CupertinoIcons.photo_on_rectangle, size: 15, color: sc.onSurfaceVariant),
                   const SizedBox(width: 6),
                   Text('${p.rows.length} foto',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
+                      style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
                 ]),
               ),
               const SizedBox(height: 18),
@@ -222,11 +226,11 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 Reveal(
                   index: 3,
                   dy: 10,
-                  child: SelectableText(p.body, style: const TextStyle(fontSize: 16, height: 1.7)),
+                  child: SelectableText(p.body, style: const TextStyle(fontSize: AppType.lead, height: 1.7)),
                 ),
               if (p.rows.length > 1) ...[
                 const SizedBox(height: 28),
-                const Text('Foto kegiatan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                const Text('Foto kegiatan', style: TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 92,
@@ -237,7 +241,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                     itemBuilder: (_, i) => Pressable(
                       onTap: () => _viewer(i),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(AppRadius.button),
                         child: SizedBox(width: 92, height: 92, child: NewsCover(url: _urls[p.paths[i]], cacheWidth: 300)),
                       ),
                     ),
@@ -276,10 +280,10 @@ class _NewsPhotoViewerState extends State<NewsPhotoViewer> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.navyDeep,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         backgroundColor: AppColors.navyDeep,
         foregroundColor: Colors.white,
-        title: Text('${_i + 1}/${widget.paths.length}', style: const TextStyle(color: Colors.white, fontSize: 16)),
+        title: Text('${_i + 1}/${widget.paths.length}', style: const TextStyle(color: Colors.white, fontSize: AppType.lead)),
       ),
       body: PageView.builder(
         controller: _pc,

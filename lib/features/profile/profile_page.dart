@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/access_service.dart';
@@ -11,6 +12,7 @@ import '../members/avatar_editor.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
 import '../../core/widgets/illustrations.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -28,12 +30,13 @@ class _ProfilePageState extends State<ProfilePage> {
           minTileHeight: 56,
           leading: SolidTile(icon: icon, color: AppColors.forKey(route), size: 40, radius: 14),
           title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-          trailing: Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+          trailing: Icon(CupertinoIcons.chevron_right, color: scheme.onSurfaceVariant),
           onTap: () => context.push(route),
         );
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
-      body: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Profil')),
+      body: ListView(padding: barPad(context, const EdgeInsets.fromLTRB(20, 4, 20, 120)), children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.hero),
           child: Stack(children: [
@@ -77,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             .titleLarge
                             ?.copyWith(color: Colors.white)),
                     const SizedBox(height: 4),
-                    Text(a.roleLabel, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text(a.roleLabel, style: const TextStyle(color: Colors.white70, fontSize: AppType.small)),
                     const SizedBox(height: 10),
                     StatusChip('${m['status'] ?? '-'}'),
                   ]),
@@ -106,19 +109,19 @@ class _ProfilePageState extends State<ProfilePage> {
         AppCard(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(children: [
-            menu(Icons.qr_code_2_outlined, 'Kartu anggota', '/member-card'),
-            menu(Icons.verified_outlined, 'Pendaftaran AHU', '/ahu'),
-            menu(Icons.notification_important_outlined, 'Peringatan anggota', '/alerts'),
-            menu(Icons.shield_outlined, 'Keamanan & SOS', '/safety'),
-            if (a.can('view_location')) menu(Icons.my_location_outlined, 'Pelacakan GPS', '/tracking'),
-            menu(Icons.settings_outlined, 'Pengaturan & keamanan', '/settings'),
-            menu(Icons.apps_rounded, 'Semua menu', '/more'),
+            menu(CupertinoIcons.qrcode, 'Kartu anggota', '/member-card'),
+            menu(CupertinoIcons.checkmark_seal, 'Pendaftaran AHU', '/ahu'),
+            menu(CupertinoIcons.bell, 'Peringatan anggota', '/alerts'),
+            menu(CupertinoIcons.shield, 'Keamanan & SOS', '/safety'),
+            if (a.can('view_location')) menu(CupertinoIcons.location, 'Pelacakan GPS', '/tracking'),
+            menu(CupertinoIcons.gear, 'Pengaturan & keamanan', '/settings'),
+            menu(CupertinoIcons.square_grid_2x2, 'Semua menu', '/more'),
           ]),
         ),
         const SizedBox(height: 20),
         OutlinedButton.icon(
           onPressed: () => AuthRepository().signOut(),
-          icon: const Icon(Icons.logout_rounded),
+          icon: const Icon(CupertinoIcons.square_arrow_right),
           label: const Text('Keluar'),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(52),
@@ -133,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _row(String k, String v) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(children: [
-          Text(k, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
+          Text(k, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: AppType.small)),
           const SizedBox(width: 16),
           Expanded(child: Text(v, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w700))),
         ]),
@@ -176,10 +179,10 @@ class _DirectoryToggleState extends State<_DirectoryToggle> {
     final m = Access.instance.member ?? {};
     final on = m['show_in_directory'] == true;
     final approved = Access.instance.isApproved;
-    return SwitchListTile(
+    return SwitchListTile.adaptive(
       value: on,
       onChanged: _busy || !approved ? null : _set,
-      secondary: const Icon(Icons.travel_explore_rounded),
+      secondary: const Icon(CupertinoIcons.globe),
       title: const Text('Tampilkan saya di direktori publik', style: TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text(approved
           ? 'Masyarakat dapat memastikan Anda anggota PERKAPI lewat situs resmi. Email dan nomor HP tidak ditampilkan.'

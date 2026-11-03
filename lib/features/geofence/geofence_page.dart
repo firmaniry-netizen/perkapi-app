@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,8 @@ import '../../core/services/supabase_service.dart';
 import '../../core/widgets/icon_badge.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
 
 /// Admin: kelola area. Anggota yang sedang dilacak dan keluar/masuk area akan memicu notifikasi ke admin utama.
 class GeofencePage extends StatefulWidget {
@@ -31,7 +34,7 @@ class _GeofencePageState extends State<GeofencePage> {
 
   Future<void> _load() async {
     try {
-      final r = await SupabaseService.client.from('geofences').select().order('created_at');
+      final r = await SupabaseService.client.from('geofences').select().order('created_at', ascending: true);
       if (mounted) setState(() { _rows = List<Map<String, dynamic>>.from(r as List); _loading = false; _error = null; });
     } catch (_) {
       if (mounted) setState(() { _loading = false; _error = 'Gagal memuat. Jalankan sql/14_geofence_broadcast_reminders_reports.sql.'; });
@@ -57,7 +60,7 @@ class _GeofencePageState extends State<GeofencePage> {
               TextField(controller: rad, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Radius (meter, 50 sampai 50000)')),
               const SizedBox(height: 8),
               TextButton.icon(
-                icon: const Icon(Icons.my_location),
+                icon: const Icon(CupertinoIcons.location_fill),
                 label: const Text('Pakai lokasi saya sekarang'),
                 onPressed: () async {
                   try {
@@ -135,14 +138,14 @@ class _GeofencePageState extends State<GeofencePage> {
   Widget build(BuildContext context) {
     if (!_allowed) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Area (Geofence)')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => _edit(), icon: const Icon(Icons.add), label: const Text('Tambah area')),
+      appBar: GlassAppBar(title: const Text('Area (Geofence)')),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.add), label: const Text('Tambah area')),
       body: PageGlow(accent: AppColors.teal, child: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonList()
           : _error != null
               ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(_error!, textAlign: TextAlign.center)))
               : _rows.isEmpty
-                  ? const Center(child: Padding(padding: EdgeInsets.all(24), child: Text('Belum ada area. Tambahkan satu untuk mendapat notifikasi saat anggota yang dilacak keluar atau masuk area.', textAlign: TextAlign.center)))
+                  ? const EmptyState(icon: CupertinoIcons.map, title: 'Belum ada area', message: 'Tambahkan satu untuk mendapat notifikasi saat anggota yang dilacak keluar atau masuk area.')
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                       itemCount: _rows.length,
@@ -152,12 +155,12 @@ class _GeofencePageState extends State<GeofencePage> {
                         return Card(
                           child: ListTile(
                             onTap: () => _edit(g),
-                            leading: const IconBadge(Icons.pin_drop_outlined, size: 44),
+                            leading: const IconBadge(CupertinoIcons.placemark, size: 44),
                             title: Text('${g['name']}', style: const TextStyle(fontWeight: FontWeight.w800)),
                             subtitle: Text('Radius ${g['radius_m']} m · ${(g['lat'] as num).toStringAsFixed(4)}, ${(g['lng'] as num).toStringAsFixed(4)}'),
                             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                              Switch(value: g['active'] == true, onChanged: (v) => _toggle(g, v)),
-                              IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _delete(g)),
+                              Switch.adaptive(value: g['active'] == true, onChanged: (v) => _toggle(g, v)),
+                              IconButton(icon: const Icon(CupertinoIcons.trash), onPressed: () => _delete(g)),
                             ]),
                           ),
                         );

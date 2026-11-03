@@ -1,9 +1,9 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_tokens.dart';
-import '../core/widgets/motion.dart';
 
 /// Tema PERKAPI: dongker (utama), merah segel (aksi), putih (isi).
 /// Seluruh teks memakai Plus Jakarta Sans (judul 800 rapat, seperti situs); aksen miring memakai Instrument Serif.
@@ -23,6 +23,9 @@ class AppTheme {
     final muted = isDark ? AppColors.navySoft : AppColors.muted;
     final accent = isDark ? AppColors.navyLight : AppColors.navy; // ikon/teks aksen
     final action = isDark ? AppColors.navyAction : AppColors.navy; // tombol umum
+    // Liquid Glass (iOS 26): permukaan mengambang tembus pandang + kilau tepi putih tipis.
+    final glassFill = surface.withValues(alpha: isDark ? 0.74 : 0.80);
+    final glassRim = BorderSide(color: Colors.white.withValues(alpha: isDark ? 0.16 : 0.75));
 
     final scheme = ColorScheme.fromSeed(seedColor: AppColors.navy, brightness: b).copyWith(
       primary: isDark ? AppColors.navyLight : AppColors.navy,
@@ -72,13 +75,15 @@ class AppTheme {
       textTheme: textTheme,
       scaffoldBackgroundColor: bg,
       canvasColor: bg,
+      // Perilaku iOS di semua HP: transisi geser + usap dari tepi kiri untuk kembali, sakelar & seleksi teks gaya iOS.
+      platform: TargetPlatform.iOS,
       pageTransitionsTheme: const PageTransitionsTheme(builders: {
-        TargetPlatform.android: FadeThroughBuilder(),
-        TargetPlatform.iOS: FadeThroughBuilder(),
-        TargetPlatform.windows: FadeThroughBuilder(),
-        TargetPlatform.macOS: FadeThroughBuilder(),
-        TargetPlatform.linux: FadeThroughBuilder(),
-        TargetPlatform.fuchsia: FadeThroughBuilder(),
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.windows: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.linux: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.fuchsia: CupertinoPageTransitionsBuilder(),
       }),
       dividerTheme: DividerThemeData(color: line, space: 1, thickness: 1),
       appBarTheme: AppBarTheme(
@@ -98,9 +103,15 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card), side: BorderSide(color: line.withValues(alpha: isDark ? 1 : 0.7))),
       ),
+      // Baris daftar ala iOS: judul tebal, subjudul redup, jarak ikon-teks lega.
       listTileTheme: ListTileThemeData(
         iconColor: muted,
-        minVerticalPadding: 8,
+        minVerticalPadding: 10,
+        horizontalTitleGap: 14,
+        minLeadingWidth: 24,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        titleTextStyle: textTheme.titleSmall?.copyWith(color: onSurface, fontWeight: FontWeight.w700),
+        subtitleTextStyle: textTheme.bodySmall?.copyWith(color: muted, height: 1.35),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -155,44 +166,57 @@ class AppTheme {
             IconThemeData(color: s.contains(WidgetState.selected) ? accent : muted)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.red,
+        // tombol kaca merah: tint tembus pandang + kilau tepi putih
+        backgroundColor: AppColors.red.withValues(alpha: 0.88),
         foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        elevation: 6,
+        highlightElevation: 2,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999), side: BorderSide(color: Colors.white.withValues(alpha: isDark ? 0.25 : 0.55))),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: surface,
+        backgroundColor: glassFill,
+        modalBackgroundColor: glassFill,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
         dragHandleColor: isDark ? AppColors.navyLine : const Color(0xFFC9D2E6),
         dragHandleSize: const Size(44, 5),
         clipBehavior: Clip.antiAlias,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+        shape: RoundedRectangleBorder(borderRadius: const BorderRadius.vertical(top: Radius.circular(32)), side: glassRim),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: surface,
+        backgroundColor: glassFill,
         surfaceTintColor: Colors.transparent,
         elevation: 12,
         shadowColor: AppColors.navy.withValues(alpha: 0.35),
         titleTextStyle: textTheme.titleLarge?.copyWith(color: onSurface, fontSize: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28), side: BorderSide(color: line)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32), side: glassRim),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? const Color(0xFF1B2A4A) : AppColors.navy,
+        backgroundColor: (isDark ? const Color(0xFF1B2A4A) : AppColors.navy).withValues(alpha: 0.90),
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22), side: BorderSide(color: Colors.white.withValues(alpha: 0.18))),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: surface,
-        side: BorderSide(color: line),
+        backgroundColor: glassFill,
+        side: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.14) : line),
         labelStyle: textTheme.labelMedium?.copyWith(color: onSurface),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
       ),
+      // Tab = kontrol segmen kaca: pil kaca terang menandai tab aktif (tanpa garis bawah).
       tabBarTheme: TabBarThemeData(
-        dividerColor: line,
-        indicatorColor: AppColors.red,
+        dividerColor: Colors.transparent,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          color: isDark ? Colors.white.withValues(alpha: 0.14) : Colors.white.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.22 : 1)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08), blurRadius: 10, offset: const Offset(0, 3))],
+        ),
         labelColor: accent,
         unselectedLabelColor: muted,
       ),

@@ -1,13 +1,15 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_photos.dart';
 import '../../core/constants/app_tokens.dart';
 import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/utils/format_id.dart';
+import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/member_avatar.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
@@ -18,6 +20,7 @@ import '../alerts/alert_service.dart';
 import '../news/news_post.dart';
 import '../news/news_widgets.dart';
 import 'member_hero_card.dart';
+import '../../core/widgets/smooth_overlays.dart';
 
 /// Beranda (redesain 3.0): satu titik fokus (kartu anggota 3D), lalu hal yang paling sering dicari:
 /// pintasan, agenda terdekat, berita, informasi. Statistik & kartu AI dihapus (AI kini satu ubin pintasan).
@@ -31,6 +34,55 @@ class _DashboardPageState extends State<DashboardPage> {
   late Future<_Data> _f = _load();
   final _scroll = ScrollController();
   int _notifUnread = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeWhatsNew());
+  }
+
+  /// Sekali saja setelah pembaruan tampilan: ringkasan "Baru di versi ini" dalam lembar kaca.
+  Future<void> _maybeWhatsNew() async {
+    const key = 'whats_new_liquid_glass_v1';
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(key) == true || !mounted) return;
+    await prefs.setBool(key, true);
+    if (!mounted) return;
+    final scheme = Theme.of(context).colorScheme;
+    Widget row(IconData icon, Color c, String title, String sub) => Padding(
+          padding: const EdgeInsets.only(bottom: AppSpace.lg),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            SolidTile(icon: icon, color: c, size: 44, radius: 14),
+            const SizedBox(width: AppSpace.md),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                const SizedBox(height: 2),
+                Text(sub, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.small, height: 1.4)),
+              ]),
+            ),
+          ]),
+        );
+    await showSmoothSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(AppSpace.xl, AppSpace.sm, AppSpace.xl, AppSpace.xl),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+          Text('Baru di versi ini', style: AppType.headline(AppType.h2)),
+          const SizedBox(height: AppSpace.xs),
+          Text('Tampilan PERKAPI diperbarui.', style: TextStyle(color: scheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpace.xl),
+          row(Icons.blur_on_rounded, AppColors.navyAction, 'Tampilan kaca', 'Menu, tombol, lembar, dan dialog kini berbahan kaca seperti iOS terbaru.'),
+          row(CupertinoIcons.star_fill, AppColors.goldDeep, 'Menu favorit', 'Di "Semua menu", tahan sebuah menu untuk menyematkannya ke Favorit.'),
+          row(CupertinoIcons.search, AppColors.teal, 'Cari menu', 'Ketik nama menu di "Semua menu" untuk langsung menemukannya.'),
+          row(CupertinoIcons.textformat, AppColors.violet, 'Lebih rapi', 'Ukuran huruf, warna, dan sudut kini seragam di semua halaman.'),
+          const SizedBox(height: AppSpace.sm),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Mengerti')),
+        ]),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -62,7 +114,7 @@ class _DashboardPageState extends State<DashboardPage> {
           .from('events')
           .select('id,title,starts_at,location')
           .gte('starts_at', today)
-          .order('starts_at')
+          .order('starts_at', ascending: true)
           .limit(6));
     } catch (_) {}
     return _Data(news, events, feed);
@@ -84,6 +136,7 @@ class _DashboardPageState extends State<DashboardPage> {
       body: SafeArea(
         bottom: false,
         child: Stack(children: [
+          const Positioned.fill(child: _MeshBackdrop()),
           Positioned.fill(
             child: FutureBuilder<_Data>(
               future: _f,
@@ -130,7 +183,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                           onTap: () => context.push('/search'),
                           child: Row(children: [
-                            Icon(Icons.search_rounded, color: scheme.onSurfaceVariant),
+                            Icon(CupertinoIcons.search, color: scheme.onSurfaceVariant),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text('Cari anggota, catatan, peraturan',
@@ -158,7 +211,7 @@ class _DashboardPageState extends State<DashboardPage> {
               },
             ),
           ),
-          Positioned(top: 0, left: 0, right: 0, child: _GlassHeader(controller: _scroll, child: _header(context, a, scheme))),
+          Positioned(top: 0, left: 0, right: 0, child: LiquidHeader(controller: _scroll, child: _header(context, a, scheme))),
         ]),
       ),
     );
@@ -185,13 +238,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: AppType.accent(24, color: Theme.of(context).brightness == Brightness.dark ? AppColors.gold : AppColors.goldDeep, height: 1.05)),
             ]),
           ),
-          AppIconButton(icon: Icons.apps_rounded, tooltip: 'Semua menu', onTap: () => context.push('/more')),
+          AppIconButton(icon: CupertinoIcons.square_grid_2x2, tooltip: 'Semua menu', onTap: () => context.push('/more')),
           const SizedBox(width: 8),
           // SATU lonceng: kotak masuk berisi Peringatan + Notifikasi (lencana = jumlah keduanya).
           ListenableBuilder(
             listenable: AlertService.instance,
             builder: (context, _) => AppIconButton(
-              icon: Icons.notifications_none_rounded,
+              icon: CupertinoIcons.bell,
               tooltip: 'Kotak masuk',
               badge: AlertService.instance.unread + _notifUnread,
               pulse: true,
@@ -206,36 +259,67 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  /// 7 pintasan + "Semua menu" (2 baris x 4). Yang sudah ada di navigasi bawah (Buku Saku, Profesi, Informasi) tidak diulang.
+  /// Empat pintasan utama sebagai kartu FOTO asli kegiatan PERKAPI (bukan ikon), lalu empat pintasan kecil.
+  /// Yang sudah ada di navigasi bawah (Buku Saku, Profesi, Informasi) tidak diulang.
   Widget _quickGrid(BuildContext context) {
-    final tiles = <(IconData, String, String)>[
-      (Icons.newspaper_rounded, 'Berita', '/gallery'),
-      (Icons.event_rounded, 'Agenda', '/events'),
-      (Icons.gavel_rounded, 'Peraturan', '/regulations'),
-      (Icons.forum_rounded, 'Forum', '/forum'),
-      (Icons.chat_bubble_rounded, 'Chat', '/chat'),
-      (Icons.auto_awesome_rounded, 'Tanya AI', '/ai'),
-      (Icons.calendar_month_rounded, 'Kalender', '/calendar'),
-      (Icons.grid_view_rounded, 'Semua', '/more'),
+    final photos = <(String, String, String, IconData, Color)>[
+      ('Berita', '/gallery', AppPhotos.koran, CupertinoIcons.news, AppColors.iosOrange),
+      ('Agenda', '/events', AppPhotos.konferensi, CupertinoIcons.calendar, AppColors.iosRed),
+      ('Peraturan', '/regulations', AppPhotos.bukuHukum, CupertinoIcons.hammer_fill, AppColors.iosIndigo),
+      ('Forum', '/forum', AppPhotos.rapatBisnis, CupertinoIcons.chat_bubble_2_fill, AppColors.iosGreen),
     ];
-    return GridView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: quickTileGrid(context),
-      children: [
-        for (var k = 0; k < tiles.length; k++)
-          PopIn(
-            index: k,
-            child: QuickTile(
-              heroTag: 'tile:${tiles[k].$3.split('/').where((e) => e.isNotEmpty).last}',
-              icon: tiles[k].$1,
-              label: tiles[k].$2,
-              color: tiles[k].$3 == '/more' ? AppColors.navy : AppColors.forKey(tiles[k].$3),
-              onTap: () => context.push(tiles[k].$3),
+    final tiles = <(IconData, String, String)>[
+      (CupertinoIcons.chat_bubble_fill, 'Chat', '/chat'),
+      (CupertinoIcons.sparkles, 'Tanya AI', '/ai'),
+      (CupertinoIcons.heart_circle, 'Donasi', '/donations'),
+      (CupertinoIcons.square_grid_2x2, 'Semua', '/more'),
+    ];
+    return Column(children: [
+      GridView(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.55,
+        ),
+        children: [
+          for (var k = 0; k < photos.length; k++)
+            PopIn(
+              index: k,
+              child: _PhotoTile(
+                label: photos[k].$1,
+                photo: photos[k].$3,
+                icon: photos[k].$4,
+                tint: photos[k].$5,
+                onTap: () => context.push(photos[k].$2),
+              ),
             ),
-          ),
-      ],
-    );
+        ],
+      ),
+      const SizedBox(height: 10),
+      GridView(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: quickTileGrid(context),
+        children: [
+          for (var k = 0; k < tiles.length; k++)
+            PopIn(
+              index: k + photos.length,
+              child: QuickTile(
+                heroTag: 'tile:${tiles[k].$3.split('/').where((e) => e.isNotEmpty).last}',
+                icon: tiles[k].$1,
+                label: tiles[k].$2,
+                color: tiles[k].$3 == '/more' ? const Color(0xFF8E8E93) : AppColors.forKey(tiles[k].$3),
+                onTap: () => context.push(tiles[k].$3),
+              ),
+            ),
+        ],
+      ),
+    ]);
   }
 
   /// Berita terbaru: tampil untuk SEMUA pengguna. Tombol hapus hanya muncul bagi admin.
@@ -247,17 +331,17 @@ class _DashboardPageState extends State<DashboardPage> {
         padding: const EdgeInsets.all(16),
         onTap: () => context.push('/gallery?add=1'),
         child: Row(children: [
-          const SolidTile(icon: Icons.newspaper_rounded, color: AppColors.goldDeep, size: 52, radius: 18),
+          const SolidTile(icon: CupertinoIcons.news, color: AppColors.goldDeep, size: 52, radius: 18),
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Belum ada berita', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+              const Text('Belum ada berita', style: TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
               const SizedBox(height: 2),
               Text('Tulis kabar kegiatan pertama. Berita tampil di beranda semua anggota.',
-                  style: TextStyle(fontSize: 13, height: 1.35, color: scheme.onSurfaceVariant)),
+                  style: TextStyle(fontSize: AppType.small, height: 1.35, color: scheme.onSurfaceVariant)),
             ]),
           ),
-          const Icon(Icons.add_circle_rounded, color: AppColors.red, size: 30),
+          const Icon(CupertinoIcons.add_circled_solid, color: AppColors.red, size: 30),
         ]),
       );
     }
@@ -298,10 +382,10 @@ class _DashboardPageState extends State<DashboardPage> {
         onTap: () => context.push('/module/announcements/${n['id']}'),
         minTileHeight: 64,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        leading: const SolidTile(icon: Icons.campaign_rounded, color: AppColors.goldDeep, size: 44, radius: 14),
+        leading: const SolidTile(icon: CupertinoIcons.speaker_2_fill, color: AppColors.goldDeep, size: 44, radius: 14),
         title: Text('${n['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: Text('${n['category'] ?? 'Pengumuman'} • ${fmtValue(n['created_at'])}', maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+        trailing: Icon(CupertinoIcons.chevron_right, color: scheme.onSurfaceVariant),
       ));
       if (i < rows.length - 1) children.add(const Divider(indent: 76));
     }
@@ -328,7 +412,7 @@ class _AgendaStrip extends StatelessWidget {
       return AppCard(
         onTap: Access.instance.can('manage_event') ? () => context.push('/module/events/new') : null,
         child: Row(children: [
-          const SolidTile(icon: Icons.event_available_rounded, color: AppColors.goldDeep, size: 48, radius: 16),
+          const SolidTile(icon: CupertinoIcons.calendar_badge_plus, color: AppColors.goldDeep, size: 48, radius: 16),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
@@ -424,34 +508,106 @@ class _ScrollDepth extends StatelessWidget {
   }
 }
 
-/// Header beranda: transparan di puncak, lalu berubah menjadi kaca buram + garis tipis saat daftar digulir.
-/// Blur baru dipasang setelah ada gulir (hemat tenaga di HP menengah).
-class _GlassHeader extends StatelessWidget {
-  const _GlassHeader({required this.controller, required this.child});
-  final ScrollController controller;
-  final Widget child;
+
+/// Kartu pintasan berfoto: foto kegiatan, bayangan dongker di bawah, ikon garis + label putih.
+class _PhotoTile extends StatelessWidget {
+  const _PhotoTile({required this.label, required this.photo, required this.icon, required this.tint, required this.onTap});
+  final Color tint;
+  final String label;
+  final String photo;
+  final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bg = theme.scaffoldBackgroundColor;
-    final line = theme.dividerTheme.color ?? Colors.transparent;
-    return AnimatedBuilder(
-      animation: controller,
-      child: child,
-      builder: (_, c) {
-        final off = controller.hasClients ? controller.offset : 0.0;
-        final t = (off / 24).clamp(0.0, 1.0);
-        final bar = DecoratedBox(
+    final r = BorderRadius.circular(AppRadius.card);
+    return Semantics(
+      button: true,
+      label: label,
+      child: Pressable(
+        onTap: onTap,
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: bg.withValues(alpha: 0.80 * t),
-            border: Border(bottom: BorderSide(color: line.withValues(alpha: t))),
+            borderRadius: r,
+            boxShadow: [BoxShadow(color: tint.withValues(alpha: 0.30), blurRadius: 18, offset: const Offset(0, 8))],
           ),
-          child: c,
+          child: ClipRRect(
+            borderRadius: r,
+            child: Stack(fit: StackFit.expand, children: [
+              ColoredBox(color: AppColors.navy, child: Image.asset(
+                photo,
+                fit: BoxFit.cover,
+                cacheWidth: 600,
+                filterQuality: FilterQuality.medium,
+                excludeFromSemantics: true,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              )),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [tint.withValues(alpha: 0.0), Color.lerp(tint, Colors.black, 0.35)!.withValues(alpha: 0.92)],
+                    stops: const [0.2, 1],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 10,
+                child: Row(children: [
+                  SolidTile(icon: icon, color: tint, size: 26, radius: 8),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w700)),
+                  ),
+                ]),
+              ),
+              Positioned.fill(
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    onTap: () {
+                      tapHaptic();
+                      onTap();
+                    },
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Latar beranda ala wallpaper iOS: tiga cahaya warna lembut (biru, merah muda, oranye) di atas warna latar.
+class _MeshBackdrop extends StatelessWidget {
+  const _MeshBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final a = dark ? 0.30 : 0.22;
+    Widget blob(Alignment at, Color c, double r) => Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(center: at, radius: r, colors: [c.withValues(alpha: a), c.withValues(alpha: 0)]),
+            ),
+          ),
         );
-        if (t == 0) return bar;
-        return ClipRect(child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14), child: bar));
-      },
+    return IgnorePointer(
+      child: Stack(children: [
+        blob(const Alignment(-1.1, -1.0), AppColors.iosBlue, 0.95),
+        blob(const Alignment(1.2, -0.55), AppColors.iosPink, 0.85),
+        blob(const Alignment(0.2, 0.15), AppColors.iosOrange, 0.75),
+        blob(const Alignment(-0.9, 0.9), AppColors.iosPurple, 0.8),
+      ]),
     );
   }
 }

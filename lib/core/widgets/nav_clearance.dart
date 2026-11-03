@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../features/shell/nav_items.dart';
 
 /// Tinggi bar navigasi mengambang (kapsul 64 + jarak bawah 12) di AppShell.
 /// Halaman di dalam ShellRoute memakai Scaffold sendiri, sehingga FAB-nya tidak tahu ada bar itu
@@ -11,6 +14,12 @@ class NavClearance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bar hanya ada di halaman utama (lihat isTopLevelRoute); di halaman fitur tidak perlu jarak tambahan.
+    var top = true;
+    try {
+      top = isTopLevelRoute(GoRouterState.of(context).uri.path);
+    } catch (_) {}
+    if (!top) return child;
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Padding(padding: EdgeInsets.only(bottom: kFloatNavHeight + bottom), child: child);
   }

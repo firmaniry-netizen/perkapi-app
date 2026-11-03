@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/ui_kit.dart';
@@ -14,6 +15,9 @@ import '../../core/widgets/swipe_row.dart';
 import 'alert_service.dart';
 import 'alert_style.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Kotak masuk: SATU tempat untuk Peringatan (dari pengurus/sistem) dan Notifikasi (aktivitas akun),
 /// ditambah tab "Terkirim" untuk pengelola peringatan. Dibuka dari satu lonceng di Beranda.
@@ -59,35 +63,51 @@ class _AlertsPageState extends State<AlertsPage> {
       if (notif != null) ModuleListView(module: notif, showAdd: false) else const EmptyState(),
       if (admin) const _SentList(),
     ];
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kotak masuk'),
-        actions: [
-          IconButton(
-            tooltip: 'Tandai semua dibaca',
-            icon: const Icon(Icons.done_all),
-            onPressed: AlertService.instance.markAllRead,
-          ),
-        ],
-      ),
-      floatingActionButton: admin
-          ? FloatingActionButton.extended(
-              onPressed: _compose,
-              icon: const Icon(Icons.campaign_outlined),
-              label: const Text('Kirim peringatan'),
-            )
-          : null,
-      body: PageGlow(
-        accent: AppColors.red,
-        child: DefaultTabController(
-          length: tabs.length,
-          initialIndex: widget.initialTab.clamp(0, tabs.length - 1),
-          child: Column(children: [
-            TabBar(tabs: tabs),
-            Expanded(child: TabBarView(children: views)),
-          ]),
+    // Tab dipindah ke bar kaca (bottom AppBar): pil kaca menandai tab aktif, isi bergulir di bawahnya.
+    return DefaultTabController(
+      length: tabs.length,
+      initialIndex: widget.initialTab.clamp(0, tabs.length - 1),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: GlassAppBar(
+          title: const Text('Kotak masuk'),
+          actions: [
+            IconButton(
+              tooltip: 'Tandai semua dibaca',
+              icon: const Icon(CupertinoIcons.checkmark_alt),
+              onPressed: AlertService.instance.markAllRead,
+            ),
+          ],
+          bottom: TabBar(tabs: tabs),
+        ),
+        floatingActionButton: admin
+            ? FloatingActionButton.extended(
+                onPressed: _compose,
+                icon: const Icon(CupertinoIcons.speaker_2),
+                label: const Text('Kirim peringatan'),
+              )
+            : null,
+        body: PageGlow(
+          accent: AppColors.red,
+          child: TabBarView(children: [for (final v in views) _BelowBar(child: v)]),
         ),
       ),
+    );
+  }
+}
+
+/// Isi tab mulai tepat di bawah bar kaca (status bar + judul + tab). Padding atas dari Scaffold
+/// dipakai sekali di sini lalu dihapus, supaya daftar di dalamnya tidak menambah jarak ganda.
+class _BelowBar extends StatelessWidget {
+  const _BelowBar({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top;
+    return Padding(
+      padding: EdgeInsets.only(top: top),
+      child: MediaQuery.removePadding(context: context, removeTop: true, child: child),
     );
   }
 }
@@ -159,7 +179,7 @@ class _InboxState extends State<_Inbox> {
           ? null
           : SwipeAction(
               label: 'Tandai dibaca',
-              icon: Icons.done_rounded,
+              icon: CupertinoIcons.checkmark,
               color: AppColors.emerald,
               onCommit: () => AlertService.instance.markRead(a),
             ),
@@ -172,7 +192,7 @@ class _InboxState extends State<_Inbox> {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: s.color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: s.color.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(AppRadius.control)),
             child: Icon(s.icon, color: s.color),
           ),
           const SizedBox(width: 12),
@@ -181,27 +201,28 @@ class _InboxState extends State<_Inbox> {
               Text(a.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: a.isRead ? FontWeight.w600 : FontWeight.w800, fontSize: 15)),
+                  style: TextStyle(fontWeight: a.isRead ? FontWeight.w600 : FontWeight.w800, fontSize: AppType.lead)),
               const SizedBox(height: 3),
               Text(
                 a.body.isEmpty ? (a.isSystem ? 'Otomatis' : fmtDateTime(a.createdAt)) : a.body,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant),
               ),
             ]),
           ),
           // titik "belum dibaca" mengecil & memudar saat dibaca (silang-pudar, bukan hilang mendadak)
           AnimatedScale(
             scale: a.isRead ? 0.25 : 1,
-            duration: const Duration(milliseconds: 220),
+            // "kurangi gerak": titik hanya memudar (opacity di bawah tetap), tanpa mengecil
+            duration: Duration(milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 220),
             curve: const Cubic(0.2, 0, 0, 1),
             child: AnimatedOpacity(
               opacity: a.isRead ? 0 : 1,
               duration: const Duration(milliseconds: 220),
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, top: 4),
-                child: Icon(Icons.circle, size: 10, color: s.color),
+                child: Icon(CupertinoIcons.circle_fill, size: 10, color: s.color),
               ),
             ),
           ),
@@ -221,7 +242,7 @@ class _InboxState extends State<_Inbox> {
         }
         if (svc.items.isEmpty) {
           return const EmptyState(
-              icon: Icons.verified_user_outlined,
+              icon: CupertinoIcons.checkmark_shield,
               title: 'Semua aman',
               message: 'Tidak ada peringatan untuk Anda. Peringatan penting dari pengurus akan muncul di sini.');
         }
@@ -246,7 +267,7 @@ class _InboxState extends State<_Inbox> {
                   ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
                       SizedBox(height: 40),
                       EmptyState(
-                          icon: Icons.done_all_rounded,
+                          icon: CupertinoIcons.checkmark_alt,
                           title: 'Semua sudah dibaca',
                           message: 'Tidak ada peringatan baru. Lihat semua peringatan di saringan "Semua".'),
                     ])
@@ -351,7 +372,7 @@ class _SentListState extends State<_SentList> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) return const SkeletonList();
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
     if (_rows.isEmpty) return const EmptyState(message: 'Belum ada peringatan terkirim');
     return RefreshIndicator(
@@ -371,10 +392,10 @@ class _SentListState extends State<_SentList> {
               subtitle: Text(
                   '${_target(r)} • ${fmtDateTime(DateTime.tryParse('${r['created_at']}')?.toLocal())}'),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                Switch(value: active, onChanged: (v) => _toggle(r, v)),
+                Switch.adaptive(value: active, onChanged: (v) => _toggle(r, v)),
                 IconButton(
                     tooltip: 'Hapus',
-                    icon: const Icon(Icons.delete_outline),
+                    icon: const Icon(CupertinoIcons.trash),
                     onPressed: () => _delete(r)),
               ]),
             ),

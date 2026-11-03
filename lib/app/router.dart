@@ -38,6 +38,9 @@ import '../features/shell/app_shell.dart';
 import '../features/shell/more_page.dart';
 import '../features/splash/splash_page.dart';
 import '../features/welcome/welcome_page.dart';
+import '../features/donations/campaign_form_page.dart';
+import '../features/donations/donation_detail_page.dart';
+import '../features/donations/donations_page.dart';
 import '../shared/widgets/state_widgets.dart';
 
 class AppRoutes {
@@ -110,6 +113,10 @@ GoRouter buildRouter() {
           GoRoute(path: '/geofences', builder: (_, __) => const GeofencePage()),
           GoRoute(path: '/broadcast', builder: (_, __) => const BroadcastPage()),
           GoRoute(path: '/chat', builder: (_, __) => const ChatListPage()),
+          GoRoute(path: '/donations', builder: (_, __) => const DonationsPage()),
+          GoRoute(path: '/donations/new', builder: (_, __) => const CampaignFormPage()),
+          GoRoute(path: '/donations/:id', builder: (_, s) => DonationDetailPage(id: s.pathParameters['id']!)),
+          GoRoute(path: '/donations/:id/edit', builder: (_, s) => CampaignFormPage(id: s.pathParameters['id']!)),
           GoRoute(path: '/chat/:id', builder: (_, s) => ChatPage(threadId: s.pathParameters['id']!)),
           GoRoute(path: '/reports', builder: (_, __) => const ReportsPage()),
           GoRoute(path: '/search', builder: (_, __) => const SearchPage()),

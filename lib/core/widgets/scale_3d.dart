@@ -3,6 +3,7 @@ import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 import '../constants/app_colors.dart';
 import 'motion.dart';
+import '../constants/app_tokens.dart';
 
 /// Timbangan keadilan 3D asli (model GLB di assets/models/timbangan.glb).
 /// Berputar otomatis, bisa diputar dengan geser jari. Memakai WebView, jadi sebaiknya hanya
@@ -41,7 +42,7 @@ class Scale3D extends StatelessWidget {
             left: 16,
             bottom: 12,
             child: IgnorePointer(
-              child: Text('Geser untuk memutar', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+              child: Text('Geser untuk memutar', style: TextStyle(color: Colors.white70, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
             ),
           ),
         ]),

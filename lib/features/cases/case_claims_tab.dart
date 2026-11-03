@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/services/access_service.dart';
@@ -8,6 +9,8 @@ import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../reports/export_service.dart';
 import 'case_models.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import '../../core/constants/app_tokens.dart';
 
 const _statuses = ['Diajukan', 'Diakui', 'Bersyarat', 'Dibantah'];
 const _types = ['Konkuren', 'Separatis', 'Preferen'];
@@ -62,7 +65,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
     });
     try {
       _rows = List<Map<String, dynamic>>.from(
-          await _db.from('case_claims').select().eq('case_id', widget.ctx.id).order('creditor_name'));
+          await _db.from('case_claims').select().eq('case_id', widget.ctx.id).order('creditor_name', ascending: true));
     } catch (_) {
       _error = 'Gagal memuat tagihan. Pastikan skrip sql/23_case_workbench.sql sudah dijalankan.';
     }
@@ -82,7 +85,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
     String? creditorId = r?['creditor_id'] as String?;
     final creditors = widget.ctx.creditors;
 
-    final ok = await showDialog<bool>(
+    final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
@@ -277,7 +280,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _edit(),
-                icon: const Icon(Icons.add_rounded),
+                icon: const Icon(CupertinoIcons.add),
                 label: const Text('Tambah'),
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -286,7 +289,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
           ],
           PopupMenuButton<String>(
             tooltip: 'Menu',
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(CupertinoIcons.ellipsis_vertical),
             onSelected: (v) {
               if (v == 'csv') _export(false);
               if (v == 'pdf') _export(true);
@@ -319,7 +322,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
         ),
         const SizedBox(height: 8),
         if (shown.isEmpty)
-          const EmptyState(message: 'Belum ada tagihan.\nTambah satu per satu atau impor dari daftar kreditur.', icon: Icons.request_quote_outlined),
+          const EmptyState(message: 'Belum ada tagihan.\nTambah satu per satu atau impor dari daftar kreditur.', icon: CupertinoIcons.money_dollar_circle),
         for (var i = 0; i < shown.length; i++)
           Reveal(
             index: i % 8,
@@ -344,32 +347,32 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
             Row(children: [
               Container(width: 8, height: 8, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
               const SizedBox(width: 6),
-              Text(label, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(label, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
             ]),
             const SizedBox(height: 3),
-            Text(rp(v), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+            Text(rp(v), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: AppType.body)),
           ]),
         );
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppRadius.hero),
         gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppColors.navyDeep, AppColors.navy, Color(0xFF1B4A9C)]),
         boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.24), blurRadius: 22, offset: const Offset(0, 10))],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('${_rows.length} tagihan  •  total diajukan', style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 13)),
+        Text('${_rows.length} tagihan  •  total diajukan', style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.small)),
         const SizedBox(height: 4),
-        Text(rp(total), style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
+        Text(rp(total), style: const TextStyle(color: Colors.white, fontSize: AppType.display, fontWeight: FontWeight.w800)),
         const SizedBox(height: 14),
         Row(children: [cell('Diakui', dia, const Color(0xFF5CE08A)), cell('Bersyarat', bers, const Color(0xFFFFC857))]),
         const SizedBox(height: 10),
-        Row(children: [cell('Dibantah', bant, const Color(0xFFFF6B73)), cell('Belum diputuskan', pend, const Color(0xFF7FB2FF))]),
+        Row(children: [cell('Dibantah', bant, AppColors.redLight), cell('Belum diputuskan', pend, const Color(0xFF7FB2FF))]),
         const SizedBox(height: 12),
         Wrap(spacing: 14, runSpacing: 4, children: [
           for (final t in _types)
             Text('$t diakui: ${rp(_sum(_rows.where((r) => r['status'] == 'Diakui' && r['claim_type'] == t), _effective))}',
-                style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: 12)),
+                style: const TextStyle(color: Color(0xB3FFFFFF), fontSize: AppType.caption)),
         ]),
       ]),
     );
@@ -391,20 +394,20 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999), border: Border.all(color: c.withValues(alpha: 0.35))),
-            child: Text(st, style: TextStyle(color: c, fontWeight: FontWeight.w800, fontSize: 12)),
+            decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.chip), border: Border.all(color: c.withValues(alpha: 0.35))),
+            child: Text(st, style: TextStyle(color: c, fontWeight: FontWeight.w800, fontSize: AppType.caption)),
           ),
         ]),
         const SizedBox(height: 8),
         Row(children: [
-          Text(rp(amount), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-          if (showRec) Text('   diakui ${rp(numOf(r['recognized_amount']))}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: c)),
+          Text(rp(amount), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+          if (showRec) Text('   diakui ${rp(numOf(r['recognized_amount']))}', style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w700, color: c)),
           const Spacer(),
-          Text('${r['claim_type']}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
+          Text('${r['claim_type']}', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),
         ]),
         if (notes.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(notes, style: TextStyle(fontSize: 13, height: 1.35, color: sc.onSurfaceVariant)),
+          Text(notes, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
         ],
       ]),
     );

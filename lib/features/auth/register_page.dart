@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
@@ -99,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     IconButton(
                       tooltip: 'Kembali',
                       color: Colors.white,
-                      icon: const Icon(Icons.arrow_back_rounded),
+                      icon: const Icon(CupertinoIcons.arrow_left),
                       onPressed: _loading ? null : _backToLogin,
                     ),
                     const SizedBox(width: 4),
@@ -133,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final scheme = Theme.of(context).colorScheme;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       const SizedBox(height: 12),
-      Icon(Icons.mark_email_read_outlined, size: 56, color: scheme.primary),
+      Icon(CupertinoIcons.envelope_open, size: 56, color: scheme.primary),
       const SizedBox(height: 16),
       Text('Pendaftaran terkirim',
           textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
@@ -167,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.name],
-          decoration: const InputDecoration(labelText: 'Nama lengkap', prefixIcon: Icon(Icons.person_outline)),
+          decoration: const InputDecoration(labelText: 'Nama lengkap', prefixIcon: Icon(CupertinoIcons.person)),
           validator: (v) => (v == null || v.trim().length < 3) ? 'Isi nama lengkap (minimal 3 huruf)' : null,
         ),
         const SizedBox(height: 14),
@@ -177,7 +178,7 @@ class _RegisterPageState extends State<RegisterPage> {
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.email],
-          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
+          decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(CupertinoIcons.mail)),
           validator: (v) {
             final t = v?.trim() ?? '';
             if (t.isEmpty) return 'Isi email';
@@ -192,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.telephoneNumber],
-          decoration: const InputDecoration(labelText: 'No. HP (opsional)', prefixIcon: Icon(Icons.phone_outlined)),
+          decoration: const InputDecoration(labelText: 'No. HP (opsional)', prefixIcon: Icon(CupertinoIcons.phone)),
           validator: (v) {
             final t = v?.trim() ?? '';
             if (t.isEmpty) return null;
@@ -205,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
             value: _branchId,
             isExpanded: true,
             decoration: const InputDecoration(
-                labelText: 'Cabang (opsional)', prefixIcon: Icon(Icons.location_city_outlined)),
+                labelText: 'Cabang (opsional)', prefixIcon: Icon(CupertinoIcons.building_2_fill)),
             items: [
               for (final b in _branches)
                 DropdownMenuItem<String>(
@@ -225,10 +226,10 @@ class _RegisterPageState extends State<RegisterPage> {
           autofillHints: const [AutofillHints.newPassword],
           decoration: InputDecoration(
             labelText: 'Password (minimal 8 karakter)',
-            prefixIcon: const Icon(Icons.lock_outline),
+            prefixIcon: const Icon(CupertinoIcons.lock),
             suffixIcon: IconButton(
               tooltip: _obscure ? 'Tampilkan password' : 'Sembunyikan password',
-              icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+              icon: Icon(_obscure ? CupertinoIcons.eye : CupertinoIcons.eye_slash),
               onPressed: () => setState(() => _obscure = !_obscure),
             ),
           ),
@@ -249,13 +250,13 @@ class _RegisterPageState extends State<RegisterPage> {
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.newPassword],
           onFieldSubmitted: (_) => _submit(),
-          decoration: const InputDecoration(labelText: 'Ulangi password', prefixIcon: Icon(Icons.lock_outline)),
+          decoration: const InputDecoration(labelText: 'Ulangi password', prefixIcon: Icon(CupertinoIcons.lock)),
           validator: (v) => v == _pw.text ? null : 'Password tidak sama',
         ),
         if (_error != null) ...[
           const SizedBox(height: 12),
           Row(children: [
-            Icon(Icons.error_outline, color: scheme.error, size: 18),
+            Icon(CupertinoIcons.exclamationmark_circle, color: scheme.error, size: 18),
             const SizedBox(width: 8),
             Expanded(child: Text(_error!, style: TextStyle(color: scheme.error))),
           ]),

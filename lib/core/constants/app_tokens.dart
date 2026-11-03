@@ -27,6 +27,11 @@ class AppType {
   static const double body = 14; // isi
   static const double caption = 12; // keterangan, label
   static const double micro = 11; // lencana, label navigasi (ukuran TERKECIL yang boleh dipakai)
+  static const double small = 13; // teks sekunder di kartu/daftar
+  static const double lead = 16; // isi yang ditonjolkan, judul baris
+  static const double heading = 20; // judul kecil di dalam halaman
+  static const double h2 = 22; // judul bagian besar
+  static const double hero = 40; // angka/ikon besar (dipakai hemat)
 
   /// Pasangan huruf SITUS RESMI: judul Plus Jakarta Sans 800 rapat, ditambah kata aksen miring emas
   /// berhuruf Instrument Serif (mis. "Berita & *pengumuman*"). Serif dibundel di fonts/.
@@ -48,7 +53,7 @@ class AppMotion {
   static const medium = Duration(milliseconds: 320); // kartu, pil navigasi
   static const slow = Duration(milliseconds: 620); // muncul bertahap
   static const emphasized = Cubic(0.16, 1, 0.3, 1); // masuk halus (ease-out kuat)
-  static const spring = Curves.easeOutBack; // elemen fisik (tombol, gelembung menu)
+  static const spring = Cubic(0.23, 1, 0.32, 1); // elemen fisik: ease-out kuat, tanpa memantul (teredam kritis)
 }
 
 /// Bayangan dua lapis, bertinta dongker (tidak pernah abu murni).

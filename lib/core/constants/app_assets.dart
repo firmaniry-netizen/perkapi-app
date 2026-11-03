@@ -14,9 +14,9 @@ class AppAssets {
   static const logoKementerian = 'images/logo_kementerian.png';
 
   // Foto latar (opsional; panduan di docs/GAMBAR.md). Bila file tidak ada, tampilan tetap dongker polos.
-  static const heroLogin = 'images/hero_login.jpg'; // latar halaman masuk
-  static const heroMember = 'images/hero_member.jpg'; // kartu anggota dashboard + kepala layar dalam
+  static const heroLogin = 'images/foto/palu.jpg'; // latar halaman masuk
+  static const heroMember = 'images/foto/meja_kerja.jpg'; // kartu anggota dashboard + kepala layar dalam
 
   // Gambar latar berita (opsional). Jika file tidak ada, sampul memakai gradasi dongker saja.
-  static const newsPlaceholder = 'images/news_placeholder.jpg';
+  static const newsPlaceholder = 'images/foto/timbangan.jpg';
 }

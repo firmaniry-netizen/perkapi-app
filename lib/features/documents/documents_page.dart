@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,6 +15,9 @@ import '../../core/widgets/smooth_overlays.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/upload_helper.dart';
 import '../../core/widgets/nav_clearance.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Dokumen: bucket privat + signed URL berkedaluwarsa (tidak ada URL publik).
 /// Fitur: upload, versi dokumen (riwayat + upload versi baru), ringkasan AI.
@@ -175,9 +179,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            tile(Icons.upload_file_outlined, 'Upload dokumen', 'PDF, Word, Excel, atau gambar (maks 20 MB)', 'file'),
-            tile(Icons.photo_library_outlined, 'Foto dari galeri', 'Pilih foto yang sudah ada di HP', 'gallery'),
-            tile(Icons.photo_camera_outlined, 'Ambil foto', 'Foto dokumen langsung dengan kamera', 'camera'),
+            tile(CupertinoIcons.doc_on_clipboard, 'Upload dokumen', 'PDF, Word, Excel, atau gambar (maks 20 MB)', 'file'),
+            tile(CupertinoIcons.photo_on_rectangle, 'Foto dari galeri', 'Pilih foto yang sudah ada di HP', 'gallery'),
+            tile(CupertinoIcons.camera, 'Ambil foto', 'Foto dokumen langsung dengan kamera', 'camera'),
           ]),
         ),
       ),
@@ -367,11 +371,12 @@ class _DocumentsPageState extends State<DocumentsPage> {
     final canWrite = Access.instance.can('manage_document');
     if (!Access.instance.can('view_document')) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Dokumen'), actions: [
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Dokumen'), actions: [
         if (canWrite)
           IconButton(
             onPressed: _busy ? null : _reindexAll,
-            icon: const Icon(Icons.manage_search),
+            icon: const Icon(CupertinoIcons.search),
             tooltip: 'Indeks isi PDF (agar bisa dicari)',
           ),
       ]),
@@ -381,25 +386,27 @@ class _DocumentsPageState extends State<DocumentsPage> {
           onPressed: _busy ? null : _addSheet,
           icon: _busy
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.upload_file),
+              : const Icon(CupertinoIcons.doc_on_clipboard),
           label: Text(_busy ? 'Mengunggah...' : 'Upload'),
         ),
       ),
       body: PageGlow(accent: AppColors.sky, child: Column(children: [
+        // bar kaca di atas: isi mulai tepat di bawahnya (status bar + judul)
+        SizedBox(height: MediaQuery.paddingOf(context).top),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
           child: ScreenHero(
             title: 'Dokumen',
             subtitle: 'Arsip, versi, dan tanda tangan digital',
-            icon: Icons.folder_outlined,
+            icon: CupertinoIcons.folder,
             accent: AppColors.sky,
-            chips: [(Icons.description_outlined, '${_rows.length} dokumen')],
+            chips: [(CupertinoIcons.doc_text, '${_rows.length} dokumen')],
           ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           child: TextField(
-            decoration: const InputDecoration(hintText: 'Cari judul atau isi dokumen', prefixIcon: Icon(Icons.search), isDense: true),
+            decoration: const InputDecoration(hintText: 'Cari judul atau isi dokumen', prefixIcon: Icon(CupertinoIcons.search), isDense: true),
             onSubmitted: (v) {
               _q = v;
               _load();
@@ -408,7 +415,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
         ),
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const SkeletonList()
               : _error != null
                   ? ErrorState(message: _error!, onRetry: _load)
                   : _rows.isEmpty
@@ -421,7 +428,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                 child: FilledButton.icon(
                                   style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                                   onPressed: _busy ? null : () => _upload(kind: 'file'),
-                                  icon: const Icon(Icons.upload_file),
+                                  icon: const Icon(CupertinoIcons.doc_on_clipboard),
                                   label: const Text('Dokumen'),
                                 ),
                               ),
@@ -430,7 +437,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                 child: OutlinedButton.icon(
                                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                                   onPressed: _busy ? null : _addSheet,
-                                  icon: const Icon(Icons.photo_camera_outlined),
+                                  icon: const Icon(CupertinoIcons.camera),
                                   label: const Text('Foto'),
                                 ),
                               ),
@@ -450,7 +457,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                               padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
                               onTap: () => _details(d, canWrite),
                               child: Row(children: [
-                                const IconBadge(Icons.description_outlined),
+                                const IconBadge(CupertinoIcons.doc_text),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -460,16 +467,16 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                         style: const TextStyle(fontWeight: FontWeight.w800)),
                                     const SizedBox(height: 3),
                                     Text('v${d['version'] ?? 1} • ${fmtValue(d['created_at'])}',
-                                        style: TextStyle(fontSize: 13, color: sc.onSurfaceVariant)),
+                                        style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
                                   ]),
                                 ),
                                 if (canWrite)
                                   IconButton(
                                       tooltip: 'Hapus',
-                                      icon: const Icon(Icons.delete_outline),
+                                      icon: const Icon(CupertinoIcons.trash),
                                       onPressed: () => _delete(d))
                                 else
-                                  Icon(Icons.chevron_right_rounded, color: sc.onSurfaceVariant),
+                                  Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
                               ]),
                             );
                           },
@@ -543,23 +550,23 @@ class _DocSheetState extends State<_DocSheet> {
           Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton.icon(
               onPressed: () => widget.onOpen(bucket, d['file_path'] as String, '${d['id']}'),
-              icon: const Icon(Icons.open_in_new),
+              icon: const Icon(CupertinoIcons.arrow_up_right_square),
               label: const Text('Buka'),
             ),
             OutlinedButton.icon(
               onPressed: widget.onSummarize,
-              icon: const Icon(Icons.auto_awesome),
+              icon: const Icon(CupertinoIcons.sparkles),
               label: const Text('Ringkas dengan AI'),
             ),
             if (widget.canWrite)
               OutlinedButton.icon(
                 onPressed: widget.onNewVersion,
-                icon: const Icon(Icons.upload_file),
+                icon: const Icon(CupertinoIcons.doc_on_clipboard),
                 label: const Text('Upload versi baru'),
               ),
           ]),
           const SizedBox(height: 4),
-          const Text('Ringkasan AI mendukung PDF, JPG, PNG (maks 10 MB).', style: TextStyle(fontSize: 11)),
+          const Text('Ringkasan AI mendukung PDF, JPG, PNG (maks 10 MB).', style: TextStyle(fontSize: AppType.micro)),
           const Divider(height: 28),
           DocumentSignatures(docId: '${d['id']}'),
           const Divider(height: 28),
@@ -574,7 +581,7 @@ class _DocSheetState extends State<_DocSheet> {
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.history),
+                leading: const Icon(CupertinoIcons.clock),
                 title: Text('Versi ${v['version']}'),
                 subtitle: Text('${fmtValue(v['created_at'])} • ${_size(v['size_bytes'])}'),
                 onTap: () => widget.onOpen(

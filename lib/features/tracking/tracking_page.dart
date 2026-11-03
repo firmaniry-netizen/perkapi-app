@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -10,6 +11,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../shared/widgets/state_widgets.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
+import '../../core/constants/app_tokens.dart';
 
 class _Tracked {
   _Tracked(Map<String, dynamic> j)
@@ -104,9 +108,9 @@ class _TrackingPageState extends State<TrackingPage> {
     final scheme = Theme.of(context).colorScheme;
     final located = _rows.where((r) => r.pos != null).toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('Pelacakan GPS'), actions: [
-        IconButton(onPressed: () => context.push('/geofences'), icon: const Icon(Icons.pin_drop_outlined), tooltip: 'Area (geofence)'),
-        IconButton(onPressed: _load, icon: const Icon(Icons.refresh_rounded), tooltip: 'Muat ulang'),
+      appBar: GlassAppBar(title: const Text('Pelacakan GPS'), actions: [
+        IconButton(onPressed: () => context.push('/geofences'), icon: const Icon(CupertinoIcons.placemark), tooltip: 'Area (geofence)'),
+        IconButton(onPressed: _load, icon: const Icon(CupertinoIcons.arrow_clockwise), tooltip: 'Muat ulang'),
       ]),
       body: Column(children: [
         SizedBox(
@@ -129,9 +133,9 @@ class _TrackingPageState extends State<TrackingPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(color: r.sos ? AppColors.red : AppColors.navy, borderRadius: BorderRadius.circular(10)),
-                        child: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                        child: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
                       ),
-                      Icon(Icons.location_on, size: 36, color: r.sos ? AppColors.red : const Color(0xFF2456B8)),
+                      Icon(CupertinoIcons.location_solid, size: 36, color: r.sos ? AppColors.red : AppColors.navyAction),
                     ]),
                   ),
               ]),
@@ -141,11 +145,11 @@ class _TrackingPageState extends State<TrackingPage> {
         ),
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const SkeletonList()
               : _error != null
                   ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(_error!, textAlign: TextAlign.center)))
                   : _rows.isEmpty
-                      ? Center(child: Text('Belum ada anggota yang mengaktifkan izin lokasi atau SOS.', style: TextStyle(color: scheme.onSurfaceVariant)))
+                      ? const EmptyState(icon: CupertinoIcons.location_slash, title: 'Belum ada lokasi', message: 'Belum ada anggota yang mengaktifkan izin lokasi atau SOS.')
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: _rows.length,
@@ -159,7 +163,7 @@ class _TrackingPageState extends State<TrackingPage> {
                               ),
                               child: ListTile(
                                 onTap: r.pos == null ? null : () => _map.move(r.pos!, 16),
-                                leading: Icon(r.sos ? Icons.sos_rounded : Icons.person_pin_circle_outlined, color: r.sos ? AppColors.red : scheme.primary, size: 30),
+                                leading: Icon(r.sos ? CupertinoIcons.exclamationmark_octagon : CupertinoIcons.person_crop_circle, color: r.sos ? AppColors.red : scheme.primary, size: 30),
                                 title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.w800)),
                                 subtitle: Text(r.sos
                                     ? 'SOS${r.note != null ? ': ${r.note}' : ''} · ${_ago(r.at)}'

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,8 @@ import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
 import 'registration_repository.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/widgets/motion.dart';
 
 /// Persetujuan pendaftaran anggota baru. Hanya untuk admin utama (SUPER_ADMIN).
 /// Pemeriksaan sebenarnya ada di database (RPC memeriksa is_super()); ini hanya UX.
@@ -76,7 +79,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
   Widget build(BuildContext context) {
     if (!Access.instance.isSuper) return const AccessDenied();
     return Scaffold(
-      appBar: AppBar(title: const Text('Persetujuan pendaftaran')),
+      appBar: GlassAppBar(title: const Text('Persetujuan pendaftaran')),
       body: PageGlow(accent: AppColors.amber, child: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -84,8 +87,8 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
             width: double.infinity,
             child: SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'pending', label: Text('Menunggu'), icon: Icon(Icons.hourglass_top_rounded)),
-                ButtonSegment(value: 'rejected', label: Text('Ditolak'), icon: Icon(Icons.block_outlined)),
+                ButtonSegment(value: 'pending', label: Text('Menunggu'), icon: Icon(CupertinoIcons.hourglass)),
+                ButtonSegment(value: 'rejected', label: Text('Ditolak'), icon: Icon(CupertinoIcons.nosign)),
               ],
               selected: {_filter},
               onSelectionChanged: (s) {
@@ -100,7 +103,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
             future: _future,
             builder: (context, snap) {
               if (snap.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const SkeletonList();
               }
               if (snap.hasError) {
                 return ErrorState(
@@ -111,7 +114,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
               final items = snap.data ?? [];
               if (items.isEmpty) {
                 return EmptyState(
-                  icon: Icons.how_to_reg_outlined,
+                  icon: CupertinoIcons.person_badge_plus,
                   message: _filter == 'pending' ? 'Tidak ada pendaftaran yang menunggu.' : 'Belum ada pendaftaran yang ditolak.',
                 );
               }
@@ -155,12 +158,12 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
           ),
           StatusChip(it.status == 'pending' ? 'Menunggu' : 'Ditolak'),
         ]),
-        line(Icons.mail_outline, it.email),
-        if ((it.phone ?? '').isNotEmpty) line(Icons.phone_outlined, it.phone!),
-        if ((it.branchName ?? '').isNotEmpty) line(Icons.location_city_outlined, it.branchName!),
-        if (date != null) line(Icons.schedule_outlined, 'Mendaftar $date'),
+        line(CupertinoIcons.mail, it.email),
+        if ((it.phone ?? '').isNotEmpty) line(CupertinoIcons.phone, it.phone!),
+        if ((it.branchName ?? '').isNotEmpty) line(CupertinoIcons.building_2_fill, it.branchName!),
+        if (date != null) line(CupertinoIcons.clock, 'Mendaftar $date'),
         if (it.status == 'rejected' && (it.rejectionReason ?? '').isNotEmpty)
-          line(Icons.info_outline, 'Alasan: ${it.rejectionReason}'),
+          line(CupertinoIcons.info_circle, 'Alasan: ${it.rejectionReason}'),
         const SizedBox(height: 12),
         if (busy)
           const Center(child: Padding(padding: EdgeInsets.all(4), child: CircularProgressIndicator()))
@@ -170,7 +173,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _reject(it),
-                  icon: const Icon(Icons.close_rounded),
+                  icon: const Icon(CupertinoIcons.xmark),
                   label: const Text('Tolak'),
                 ),
               ),
@@ -178,7 +181,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _approve(it),
-                icon: const Icon(Icons.check_rounded),
+                icon: const Icon(CupertinoIcons.checkmark),
                 label: const Text('Setujui'),
               ),
             ),

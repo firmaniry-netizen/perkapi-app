@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
+import '../constants/app_colors.dart';
 
 /// Gerak PERKAPI. Aturan: gerak hanya menjawab tindakan atau menandai perubahan status.
 /// Semua widget di sini mati otomatis saat Reduce Motion aktif (MediaQuery.disableAnimations).
@@ -109,6 +110,8 @@ class _SkeletonListState extends State<SkeletonList> with SingleTickerProviderSt
     return Semantics(
       label: 'Memuat',
       child: ListView.separated(
+        // shrinkWrap: aman di mana saja (pengganti lingkaran loading, juga di dalam daftar lain)
+        shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         itemCount: widget.count,
@@ -155,8 +158,8 @@ class _PressableState extends State<Pressable> {
       onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
         scale: (_down && !still) ? widget.scale : 1,
-        duration: Duration(milliseconds: still ? 0 : (_down ? 100 : 340)),
-        curve: _down ? Curves.easeOutCubic : Curves.easeOutBack,
+        duration: Duration(milliseconds: still ? 0 : (_down ? 100 : 200)),
+        curve: const Cubic(0.23, 1, 0.32, 1),
         child: widget.child,
       ),
     );
@@ -254,9 +257,9 @@ class _PulseTwiceState extends State<PulseTwice> with SingleTickerProviderStateM
   late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
   late final Animation<double> _scale = TweenSequence<double>([
     TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.18).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
-    TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 1),
+    TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 1),
     TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.18).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
-    TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeIn)), weight: 1),
+    TweenSequenceItem(tween: Tween(begin: 1.18, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 1),
   ]).animate(_c);
 
   @override
@@ -342,7 +345,7 @@ class Sheen extends StatelessWidget {
 }
 
 
-/// Muncul "membal": skala 0,6 ke 1 (easeOutBack) + fade, berjenjang per [index] (35 ms).
+/// Muncul halus: skala 0,94 ke 1 (ease-out kuat, tanpa memantul) + fade, berjenjang per [index] (35 ms).
 /// Dipakai untuk ubin menu agar terasa hidup saat layar/menu dibuka. Mati saat Reduce Motion.
 class PopIn extends StatelessWidget {
   const PopIn({super.key, required this.child, this.index = 0});
@@ -357,11 +360,11 @@ class PopIn extends StatelessWidget {
       delay: Duration(milliseconds: 80 + 35 * i),
       builder: (go) => TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: go ? 1 : 0),
-        duration: const Duration(milliseconds: 520),
-        curve: Curves.easeOutBack,
+        duration: const Duration(milliseconds: 380),
+        curve: const Cubic(0.23, 1, 0.32, 1),
         builder: (context, t, c) => Opacity(
           opacity: t.clamp(0.0, 1.0),
-          child: Transform.scale(scale: 0.6 + 0.4 * t, child: c),
+          child: Transform.scale(scale: 0.94 + 0.06 * t, child: c),
         ),
         child: child,
       ),
@@ -379,7 +382,7 @@ void successHaptic() {
 /// Cincin cahaya yang "bernapas" pelan di belakang [child] (logo layar kunci / menunggu persetujuan).
 /// Satu-satunya gerak berulang di aplikasi; menandai "sedang menunggu". Diam saat "kurangi gerak".
 class BreathingRing extends StatefulWidget {
-  const BreathingRing({super.key, required this.child, this.color = const Color(0xFFE8B53A), this.size = 132});
+  const BreathingRing({super.key, required this.child, this.color = AppColors.gold, this.size = 132});
   final Widget child;
   final Color color;
   final double size;

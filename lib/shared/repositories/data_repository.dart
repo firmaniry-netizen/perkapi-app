@@ -133,7 +133,7 @@ class DataRepository {
 
   static Future<List<Map<String, dynamic>>> lookup(String table, String label) async {
     try {
-      final rows = await _db.from(table).select('id,$label').order(label).limit(200);
+      final rows = await _db.from(table).select('id,$label').order(label, ascending: true).limit(200);
       return List<Map<String, dynamic>>.from(rows);
     } catch (_) {
       return [];

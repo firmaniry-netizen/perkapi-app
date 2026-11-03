@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
+
+import '../../core/widgets/liquid_glass.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/smooth_overlays.dart';
 import 'news_post.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Sampul berita: gradasi dongker + gambar bawaan (opsional) + foto berita yang memudar masuk.
 class NewsCover extends StatelessWidget {
@@ -26,7 +30,7 @@ class NewsCover extends StatelessWidget {
       ),
       Image.asset(AppAssets.newsPlaceholder, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
       if (url == null)
-        const Center(child: Icon(Icons.newspaper_rounded, size: 40, color: Color(0x33FFFFFF))),
+        const Center(child: Icon(CupertinoIcons.news, size: 40, color: Color(0x33FFFFFF))),
       if (url != null)
         Image.network(
           url!,
@@ -35,7 +39,7 @@ class NewsCover extends StatelessWidget {
           filterQuality: FilterQuality.low,
           frameBuilder: (ctx, child, frame, sync) =>
               sync ? child : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 320), child: child),
-          errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_outlined, color: Colors.white54)),
+          errorBuilder: (_, __, ___) => const Center(child: Icon(CupertinoIcons.photo, color: Colors.white54)),
         ),
     ]);
   }
@@ -58,7 +62,7 @@ class NewsPill extends StatelessWidget {
             child: Text(text.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.6)),
+                style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.6)),
           ),
         ]),
       );
@@ -81,15 +85,12 @@ class GlassCircleButton extends StatelessWidget {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color ?? const Color(0x66000000),
-                border: Border.all(color: const Color(0x33FFFFFF)),
-              ),
-              child: Icon(icon, size: 20, color: Colors.white),
+            child: LiquidGlass(
+              shape: BoxShape.circle,
+              blur: 14,
+              shadow: false,
+              tint: color ?? const Color(0x47000000),
+              child: SizedBox(width: 40, height: 40, child: Icon(icon, size: 20, color: Colors.white)),
             ),
           ),
         ),
@@ -105,7 +106,7 @@ Future<bool> confirmDeleteNews(BuildContext context, NewsPost p) async {
         width: 52,
         height: 52,
         decoration: BoxDecoration(color: AppColors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
-        child: const Icon(Icons.delete_forever_rounded, color: AppColors.red, size: 28),
+        child: const Icon(CupertinoIcons.trash_fill, color: AppColors.red, size: 28),
       ),
       title: const Text('Hapus berita ini?'),
       content: Text(
@@ -179,8 +180,8 @@ class _NewsCarouselState extends State<NewsCarousel> {
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           for (var k = 0; k < widget.posts.length; k++)
             AnimatedContainer(
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutCubic,
+              duration: Duration(milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 260),
+              curve: const Cubic(0.23, 1, 0.32, 1),
               margin: const EdgeInsets.symmetric(horizontal: 3),
               width: k == _i ? 22 : 7,
               height: 7,
@@ -225,7 +226,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
           Positioned(
             left: 14,
             top: 14,
-            right: widget.onDelete != null ? 62 : 14,
+            right: widget.onDelete != null && !p.isSite ? 62 : 14,
             child: Row(children: [
               Flexible(child: NewsPill(p.album, color: accent, icon: newsAlbumIcon(p.album))),
               if (p.isFresh) ...[
@@ -234,17 +235,17 @@ class _NewsCarouselState extends State<NewsCarousel> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(12)),
                   child: const Text('BARU',
-                      style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                      style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
                 ),
               ],
             ]),
           ),
-          if (widget.onDelete != null)
+          if (widget.onDelete != null && !p.isSite)
             Positioned(
               right: 10,
               top: 10,
               child: GlassCircleButton(
-                icon: Icons.delete_outline_rounded,
+                icon: CupertinoIcons.trash,
                 tooltip: 'Hapus berita (admin)',
                 onTap: () => widget.onDelete!(p),
               ),
@@ -257,20 +258,20 @@ class _NewsCarouselState extends State<NewsCarousel> {
               Text(p.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800, height: 1.25)),
+                  style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w800, height: 1.25)),
               const SizedBox(height: 8),
               Row(children: [
-                const Icon(Icons.schedule_rounded, size: 14, color: Color(0xCCFFFFFF)),
+                const Icon(CupertinoIcons.clock, size: 14, color: Color(0xCCFFFFFF)),
                 const SizedBox(width: 4),
                 Text(timeAgoId(p.date),
-                    style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 12),
-                const Icon(Icons.photo_library_rounded, size: 14, color: Color(0xCCFFFFFF)),
+                const Icon(CupertinoIcons.photo_on_rectangle, size: 14, color: Color(0xCCFFFFFF)),
                 const SizedBox(width: 4),
                 Text('${p.rows.length}',
-                    style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12, fontWeight: FontWeight.w600)),
+                    style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                 const Spacer(),
-                const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+                const Icon(CupertinoIcons.arrow_right, size: 18, color: Colors.white),
               ]),
             ]),
           ),

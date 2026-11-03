@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../core/constants/app_colors.dart';
@@ -7,6 +8,8 @@ import '../../core/services/supabase_service.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/widgets/ui_kit.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Memeriksa apakah notifikasi dan pengingat benar-benar sampai ke HP ini:
 /// Firebase di aplikasi, izin notifikasi, perangkat terdaftar, dan jadwal pengingat otomatis di server.
@@ -73,7 +76,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifikasi & Pengingat')),
+      appBar: GlassAppBar(title: const Text('Notifikasi & Pengingat')),
       body: PageGlow(
         accent: AppColors.amber,
         child: RefreshIndicator(
@@ -141,7 +144,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                         padding: const EdgeInsets.only(top: 7, right: 10),
                         child: Container(width: 5, height: 5, decoration: BoxDecoration(color: AppColors.amber, shape: BoxShape.circle)),
                       ),
-                      Expanded(child: Text(t, style: TextStyle(fontSize: 14, height: 1.45, color: scheme.onSurface))),
+                      Expanded(child: Text(t, style: TextStyle(fontSize: AppType.body, height: 1.45, color: scheme.onSurface))),
                     ]),
                   );
 
@@ -155,7 +158,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                     child: ScreenHero(
                       title: 'Notifikasi & Pengingat',
                       subtitle: 'Pastikan tenggat sampai ke HP Anda',
-                      icon: Icons.notifications_active_rounded,
+                      icon: CupertinoIcons.bell_fill,
                       accent: AppColors.amber,
                     ),
                   ),
@@ -176,7 +179,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                   const SizedBox(height: 16),
                   PrimaryButton(
                     label: 'Kirim notifikasi uji',
-                    icon: Icons.send_rounded,
+                    icon: CupertinoIcons.paperplane_fill,
                     loading: _sending,
                     onPressed: _sending ? null : _sendTest,
                   ),
@@ -184,7 +187,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                     padding: const EdgeInsets.only(top: 10),
                     child: Text(
                       'Setelah menekan tombol, tekan Home agar aplikasi di latar, lalu tunggu beberapa detik. Notifikasi uji juga muncul di daftar Notifikasi.',
-                      style: TextStyle(fontSize: 13, height: 1.45, color: scheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: AppType.small, height: 1.45, color: scheme.onSurfaceVariant),
                     ),
                   ),
                   const SectionHeader('Pengingat yang dikirim otomatis'),
@@ -218,7 +221,7 @@ class _CheckRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final color = ok == true ? AppColors.emerald : (ok == false ? AppColors.red : AppColors.amber);
-    final icon = ok == true ? Icons.check_rounded : (ok == false ? Icons.close_rounded : Icons.more_horiz_rounded);
+    final icon = ok == true ? CupertinoIcons.checkmark : (ok == false ? CupertinoIcons.xmark : CupertinoIcons.ellipsis);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -228,7 +231,7 @@ class _CheckRow extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 2),
-            Text(detail, style: TextStyle(fontSize: 13, height: 1.4, color: scheme.onSurfaceVariant)),
+            Text(detail, style: TextStyle(fontSize: AppType.small, height: 1.4, color: scheme.onSurfaceVariant)),
             if (action != null) ...[const SizedBox(height: 8), action!],
           ]),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +17,7 @@ import 'module_extras.dart';
 import '../../core/widgets/smooth_overlays.dart';
 import '../../core/constants/app_tokens.dart';
 import '../../core/utils/format_id.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 /// Form generik create/edit/detail dibangun dari ModuleDef.fields.
 class ModuleFormPage extends StatefulWidget {
@@ -114,7 +116,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
           FilledButton(
             style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFC62828), minimumSize: const Size(88, 44)),
+                backgroundColor: AppColors.red, minimumSize: const Size(88, 44)),
             onPressed: () => Navigator.pop(c, true),
             child: const Text('Hapus'),
           ),
@@ -143,7 +145,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
     String? req(String? s) => f.required && (s == null || s.trim().isEmpty) ? 'Wajib diisi' : null;
     switch (f.type) {
       case FieldType.boolean:
-        return SwitchListTile(
+        return SwitchListTile.adaptive(
           title: Text(f.label),
           value: value == true,
           onChanged: enabled ? (b) => setState(() => _v[f.key] = b) : null,
@@ -273,13 +275,13 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
               suffixIcon: (!empty && enabled && !f.required)
                   ? IconButton(
                       tooltip: 'Kosongkan',
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(CupertinoIcons.xmark),
                       onPressed: () {
                         setState(() => _v[f.key] = null);
                         state.didChange(null);
                       },
                     )
-                  : Icon(withTime ? Icons.event_rounded : Icons.calendar_today_outlined),
+                  : Icon(withTime ? CupertinoIcons.calendar : CupertinoIcons.calendar_today),
             ),
             child: Text(empty ? '' : text),
           ),
@@ -319,18 +321,18 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
     if (!Access.instance.can(mod.readPerm)) return const AccessDenied();
     final canWrite = !mod.readOnly && Access.instance.can(mod.writePerm);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(_isNew ? 'Tambah ${mod.title}' : mod.title),
         actions: [
           if (!_isNew && canWrite)
             IconButton(
                 tooltip: 'Hapus',
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(CupertinoIcons.trash),
                 onPressed: () => _delete(mod)),
         ],
       ),
       body: PageGlow(accent: AppColors.forKey(mod.id), child: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const SkeletonList()
           : _error != null
               ? ErrorState(message: _error!)
               : Form(
@@ -354,7 +356,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
                       if (canWrite)
                         PrimaryButton(
                           label: 'Simpan',
-                          icon: Icons.check_rounded,
+                          icon: CupertinoIcons.checkmark,
                           loading: _saving,
                           onPressed: _saving ? null : () => _save(mod),
                         ),

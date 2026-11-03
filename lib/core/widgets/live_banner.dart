@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_colors.dart';
 import '../services/live_notifier.dart';
+import '../constants/app_tokens.dart';
 
 /// Membungkus seluruh aplikasi; banner notifikasi meluncur dari atas.
 class LiveBanner extends StatelessWidget {
@@ -27,16 +29,20 @@ class LiveBanner extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: ValueListenableBuilder<LiveNotice?>(
                   valueListenable: LiveNotifier.instance.current,
+                  // Masuk 280 ms ease-out kuat (tanpa pantulan); "kurangi gerak" = pudar saja, tanpa geser.
                   builder: (_, n, __) => AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 380),
-                    switchInCurve: Curves.easeOutBack,
-                    switchOutCurve: Curves.easeIn,
+                    duration: const Duration(milliseconds: 280),
+                    reverseDuration: const Duration(milliseconds: 180),
+                    switchInCurve: const Cubic(0.23, 1, 0.32, 1),
+                    switchOutCurve: const Cubic(0.23, 1, 0.32, 1),
                     transitionBuilder: (c, a) => FadeTransition(
                       opacity: a,
-                      child: SlideTransition(
-                        position: Tween(begin: const Offset(0, -1), end: Offset.zero).animate(a),
-                        child: c,
-                      ),
+                      child: MediaQuery.disableAnimationsOf(context)
+                          ? c
+                          : SlideTransition(
+                              position: Tween(begin: const Offset(0, -1), end: Offset.zero).animate(a),
+                              child: c,
+                            ),
                     ),
                     child: n == null ? const SizedBox.shrink(key: ValueKey('none')) : _Card(key: ValueKey(n.id), n: n, router: router),
                   ),
@@ -61,14 +67,14 @@ class _Card extends StatelessWidget {
         ? AppColors.red
         : (n.type == 'warning' || n.type == 'tracking')
             ? const Color(0xFFE59A1F)
-            : const Color(0xFF2456B8);
+            : AppColors.navyAction;
     final icon = n.urgent
-        ? Icons.sos_rounded
+        ? CupertinoIcons.exclamationmark_octagon
         : n.type == 'tracking'
-            ? Icons.my_location_rounded
+            ? CupertinoIcons.location_fill
             : n.type == 'warning'
-                ? Icons.warning_amber_rounded
-                : Icons.notifications_active_rounded;
+                ? CupertinoIcons.exclamationmark_triangle
+                : CupertinoIcons.bell_fill;
     return Material(
       color: Colors.transparent,
       child: Dismissible(
@@ -103,21 +109,21 @@ class _Card extends StatelessWidget {
                   Text(n.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14, height: 1.25)),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: AppType.body, height: 1.25)),
                   if (n.body.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(n.body,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: 13, height: 1.3)),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: AppType.small, height: 1.3)),
                     ),
                 ]),
               ),
               IconButton(
                 tooltip: 'Tutup',
                 onPressed: LiveNotifier.instance.dismiss,
-                icon: Icon(Icons.close_rounded, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                icon: Icon(CupertinoIcons.xmark, color: Colors.white.withValues(alpha: 0.7), size: 20),
               ),
             ]),
           ),

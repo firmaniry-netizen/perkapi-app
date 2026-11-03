@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 /// Kebijakan Privasi PERKAPI. Isinya mengikuti data yang BENAR-BENAR diproses kode aplikasi
 /// (akun, foto, lokasi absensi, kamera pemindai QR, kunci biometrik/PIN, konten, AI, log).
@@ -57,9 +58,10 @@ class PrivacyPolicyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Kebijakan Privasi')),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Kebijakan Privasi')),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + MediaQuery.paddingOf(context).bottom),
+        padding: barPad(context, EdgeInsets.fromLTRB(20, 8, 20, 24 + MediaQuery.paddingOf(context).bottom)),
         children: [
           Text('Berlaku sejak $effective', style: TextStyle(color: t.colorScheme.onSurfaceVariant)),
           const SizedBox(height: 8),

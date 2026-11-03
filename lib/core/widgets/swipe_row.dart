@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import '../constants/app_colors.dart';
 import 'motion.dart';
 import 'motion_physics.dart';
+import '../constants/app_tokens.dart';
 
 /// Aksi yang muncul di belakang baris saat digeser.
 class SwipeAction {
@@ -78,12 +79,12 @@ class _SwipeRowState extends State<SwipeRow> with SingleTickerProviderStateMixin
     final flick = v.abs() > 900 && v.sign == _x.value.sign && _x.value.abs() > 24;
     if (action != null && (_armed || flick)) {
       if (action.removes) {
-        // keluar searah geseran (ease-in, lebih singkat dari masuk), lalu jalankan aksi
+        // keluar searah geseran (ease-out, lebih singkat dari masuk), lalu jalankan aksi
         final target = _x.value.sign * (_width + 24);
         if (still) {
           _x.value = target;
         } else {
-          await _x.animateTo(target, duration: const Duration(milliseconds: 160), curve: Curves.easeIn);
+          await _x.animateTo(target, duration: const Duration(milliseconds: 160), curve: Curves.easeOutCubic);
         }
         action.onCommit();
         return;
@@ -171,7 +172,7 @@ class _ActionMark extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 6),
-      Text(action.label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w800)),
+      Text(action.label, style: TextStyle(color: fg, fontSize: AppType.caption, fontWeight: FontWeight.w800)),
     ]);
   }
 }

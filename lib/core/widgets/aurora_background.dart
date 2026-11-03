@@ -72,7 +72,7 @@ class _AuroraPainter extends CustomPainter {
       );
     }
 
-    blob(0.35, 0.30, 0.0, 0.95, const Color(0xFF2456B8).withValues(alpha: 0.55));
+    blob(0.35, 0.30, 0.0, 0.95, AppColors.navyAction.withValues(alpha: 0.55));
     blob(0.40, 0.35, 2.1, 0.80, AppColors.red.withValues(alpha: 0.22));
     blob(0.30, 0.40, 4.2, 0.85, const Color(0xFF16397A).withValues(alpha: 0.70));
   }

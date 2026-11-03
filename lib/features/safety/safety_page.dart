@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -6,6 +7,8 @@ import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import '../tracking/location_service.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Untuk SEMUA anggota: atur izin berbagi lokasi dan tombol darurat (SOS).
 class SafetyPage extends StatefulWidget {
@@ -77,9 +80,10 @@ class _SafetyPageState extends State<SafetyPage> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Keamanan & SOS')),
-      body: PageGlow(accent: AppColors.red, child: ListView(padding: const EdgeInsets.all(20), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Keamanan & SOS', subtitle: 'Atur izin pelacakan dan tombol darurat', icon: Icons.shield_rounded, accent: AppColors.red)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: const Text('Keamanan & SOS')),
+      body: PageGlow(accent: AppColors.red, child: ListView(padding: barPad(context, const EdgeInsets.all(20)), children: [
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Keamanan & SOS', subtitle: 'Atur izin pelacakan dan tombol darurat', icon: CupertinoIcons.shield_fill, accent: AppColors.red)),
         const SizedBox(height: 16),
         if (_svc.error != null)
           Padding(
@@ -90,7 +94,7 @@ class _SafetyPageState extends State<SafetyPage> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SwitchListTile(
+              SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Izinkan admin melacak saya bila diperlukan', style: TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: const Text('Lokasi hanya terkirim saat aplikasi terbuka DAN admin meminta pelacakan, atau saat Anda menekan SOS.'),
@@ -101,13 +105,13 @@ class _SafetyPageState extends State<SafetyPage> {
               Text(
                 'Hanya admin utama yang dapat melihat lokasi. Mencabut izin menghapus semua data lokasi Anda. '
                 'Riwayat lokasi otomatis dihapus setelah 7 hari. Saat pelacakan aktif, notifikasi tetap "PERKAPI membagikan lokasi" tampil dan lokasi terus terkirim walau layar mati.',
-                style: TextStyle(fontSize: 13, height: 1.45, color: scheme.onSurfaceVariant),
+                style: TextStyle(fontSize: AppType.small, height: 1.45, color: scheme.onSurfaceVariant),
               ),
               if (_svc.sharing)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: Row(children: [
-                    const Icon(Icons.circle, size: 10, color: AppColors.red),
+                    const Icon(CupertinoIcons.circle_fill, size: 10, color: AppColors.red),
                     const SizedBox(width: 8),
                     Text('Lokasi Anda sedang dibagikan ke admin', style: TextStyle(fontWeight: FontWeight.w700, color: scheme.onSurface)),
                   ]),
@@ -119,7 +123,7 @@ class _SafetyPageState extends State<SafetyPage> {
         Center(
           child: _svc.sos
               ? Column(children: [
-                  const Icon(Icons.sos_rounded, size: 64, color: AppColors.red),
+                  const Icon(CupertinoIcons.exclamationmark_octagon, size: 64, color: AppColors.red),
                   const SizedBox(height: 8),
                   const Text('SOS aktif. Admin melihat lokasi Anda.', style: TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
@@ -136,7 +140,7 @@ class _SafetyPageState extends State<SafetyPage> {
                       boxShadow: [BoxShadow(color: AppColors.red.withValues(alpha: 0.45), blurRadius: 32, spreadRadius: 4)],
                     ),
                     alignment: Alignment.center,
-                    child: const Text('SOS', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                    child: const Text('SOS', style: TextStyle(color: Colors.white, fontSize: AppType.hero, fontWeight: FontWeight.w900, letterSpacing: 2)),
                   ),
                 ),
         ),
@@ -144,7 +148,7 @@ class _SafetyPageState extends State<SafetyPage> {
         Center(
           child: OutlinedButton.icon(
             onPressed: _busy ? null : () => _run(() => _svc.checkIn()),
-            icon: const Icon(Icons.verified_user_outlined),
+            icon: const Icon(CupertinoIcons.checkmark_shield),
             label: Text(_svc.sos ? 'Saya aman (batalkan SOS)' : 'Saya aman (check-in)'),
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../constants/app_assets.dart';
+import '../constants/app_tokens.dart';
 
 /// Baris logo mitra/instansi ("Didukung oleh") di atas kotak putih agar logo resmi
 /// tetap terbaca di tema gelap. Logo yang filenya tidak ada otomatis dilewati;
@@ -43,7 +44,7 @@ class _PartnerLogosState extends State<PartnerLogos> {
         if (list.isEmpty) return const SizedBox.shrink();
         return Column(mainAxisSize: MainAxisSize.min, children: [
           Text('Didukung oleh',
-              style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              style: TextStyle(fontSize: AppType.micro, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

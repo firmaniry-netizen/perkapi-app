@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/aurora_background.dart';
+import '../../core/widgets/liquid_glass.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +10,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/perkapi_logo.dart';
+import '../../core/constants/app_tokens.dart';
 
 const _welcomeKey = 'welcome_done';
 
@@ -31,9 +35,9 @@ class _WelcomePageState extends State<WelcomePage> {
   int _i = 0;
 
   static const _slides = <(IconData, String, String)>[
-    (Icons.balance_rounded, 'Wadah profesi\nkurator dan pengurus', 'PERKAPI mempertemukan anggota, informasi, dan rujukan hukum dalam satu tempat.'),
-    (Icons.dashboard_customize_rounded, 'Semua kebutuhan\ndalam satu aplikasi', 'Agenda, berita, buku saku, forum, dan notifikasi organisasi ada di genggaman Anda.'),
-    (Icons.badge_rounded, 'Kartu anggota\ndigital', 'Tunjukkan kartu berQR dan verifikasi anggota dengan cepat, kapan saja.'),
+    (CupertinoIcons.hammer, 'Wadah profesi\nkurator dan pengurus', 'PERKAPI mempertemukan anggota, informasi, dan rujukan hukum dalam satu tempat.'),
+    (CupertinoIcons.square_grid_2x2, 'Semua kebutuhan\ndalam satu aplikasi', 'Agenda, berita, buku saku, forum, dan notifikasi organisasi ada di genggaman Anda.'),
+    (CupertinoIcons.person_crop_rectangle_fill, 'Kartu anggota\ndigital', 'Tunjukkan kartu berQR dan verifikasi anggota dengan cepat, kapan saja.'),
   ];
 
   Future<void> _finish() async {
@@ -69,7 +73,8 @@ class _WelcomePageState extends State<WelcomePage> {
         decoration: const BoxDecoration(
           gradient: RadialGradient(center: Alignment(0.5, -0.4), radius: 1.2, colors: [Color(0xFF1B3F9A), AppColors.navy, Color(0xFF091434)]),
         ),
-        child: SafeArea(
+        // Cahaya aurora bergerak pelan di belakang: memberi kaca sesuatu untuk dibiaskan.
+        child: AuroraBackground(child: SafeArea(
           child: Column(children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 8, 0),
@@ -91,20 +96,22 @@ class _WelcomePageState extends State<WelcomePage> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 28),
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Container(
+                      // Bola kaca emas: tint emas tembus pandang + pendar, ikon putih.
+                      SizedBox(
                         width: 120,
                         height: 120,
-                        decoration: BoxDecoration(
+                        child: LiquidGlass(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(colors: [AppColors.gold, Color(0xFFB8860B)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 28, offset: const Offset(0, 14))],
+                          blur: 16,
+                          tint: AppColors.gold.withValues(alpha: 0.55),
+                          glow: AppColors.gold,
+                          child: Center(child: Icon(s.$1, size: 56, color: Colors.white)),
                         ),
-                        child: Icon(s.$1, size: 60, color: AppColors.navy),
                       ),
                       const SizedBox(height: 36),
                       Text(s.$2, style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900, height: 1.1)),
                       const SizedBox(height: 14),
-                      Text(s.$3, style: const TextStyle(color: Color(0xFFCBD5F4), fontSize: 16, height: 1.5)),
+                      Text(s.$3, style: const TextStyle(color: Color(0xFFCBD5F4), fontSize: AppType.lead, height: 1.5)),
                     ]),
                   );
                 },
@@ -115,7 +122,8 @@ class _WelcomePageState extends State<WelcomePage> {
               child: Row(children: [
                 for (var k = 0; k < _slides.length; k++)
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
+                    duration: Duration(milliseconds: MediaQuery.disableAnimationsOf(context) ? 0 : 250),
+                    curve: const Cubic(0.23, 1, 0.32, 1),
                     margin: const EdgeInsets.only(right: 8),
                     height: 6,
                     width: k == _i ? 28 : 8,
@@ -124,9 +132,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.red,
+                    backgroundColor: AppColors.red.withValues(alpha: 0.88),
                     minimumSize: const Size(0, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+                    shape: StadiumBorder(side: BorderSide(color: Colors.white.withValues(alpha: 0.45))),
                   ),
                   onPressed: _next,
                   child: Text(last ? 'Mulai' : 'Lanjut', style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -134,7 +143,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ]),
             ),
           ]),
-        ),
+        )),
       ),
     );
   }

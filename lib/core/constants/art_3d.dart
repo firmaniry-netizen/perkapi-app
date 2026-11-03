@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 /// Gambar ikon 3D PERKAPI (images/3d/*.png, 384 px, latar transparan) — dirender khusus dengan warna merek
 /// (dongker, emas, merah marun). Dipakai otomatis oleh [SolidTile] / [QuickTile] / [IconBadge] dan ilustrasi
@@ -11,40 +12,40 @@ class Art3D {
 
   // IconData menimpa ==, jadi tidak bisa dipakai sebagai kunci peta `const`.
   static final Map<IconData, String> _byIcon = {
-    for (final i in [Icons.newspaper_rounded, Icons.photo_library_outlined]) i: 'berita',
-    for (final i in [Icons.event_outlined, Icons.event_rounded, Icons.event, Icons.calendar_month_outlined, Icons.calendar_month_rounded, Icons.event_available_rounded]) i: 'kalender',
-    for (final i in [Icons.gavel_outlined, Icons.gavel_rounded, Icons.balance_rounded]) i: 'hukum',
-    for (final i in [Icons.forum_outlined, Icons.forum_rounded]) i: 'forum',
-    for (final i in [Icons.chat_bubble_outline, Icons.chat_bubble_rounded]) i: 'chat',
-    for (final i in [Icons.auto_awesome_outlined, Icons.auto_awesome_rounded, Icons.auto_awesome]) i: 'ai',
-    for (final i in [Icons.grid_view_rounded, Icons.apps_rounded, Icons.dashboard_outlined]) i: 'semua',
-    for (final i in [Icons.badge_outlined, Icons.qr_code_2_outlined]) i: 'kartu',
-    Icons.menu_book_outlined: 'saku',
-    Icons.workspace_premium_outlined: 'medali',
-    for (final i in [Icons.campaign_outlined, Icons.campaign_rounded]) i: 'pengumuman',
-    for (final i in [Icons.apartment_outlined, Icons.location_city_outlined, Icons.account_balance_outlined]) i: 'gedung',
-    for (final i in [Icons.account_tree_outlined, Icons.account_tree_rounded]) i: 'struktur',
-    Icons.groups_outlined: 'anggota',
-    for (final i in [Icons.shield_outlined, Icons.verified_user_outlined, Icons.privacy_tip_outlined]) i: 'perisai',
-    for (final i in [Icons.my_location_outlined, Icons.pin_drop_outlined, Icons.location_on_outlined, Icons.travel_explore_rounded]) i: 'lokasi',
-    for (final i in [Icons.assessment_outlined, Icons.insights_rounded]) i: 'laporan',
-    for (final i in [Icons.assignment_outlined, Icons.description_outlined, Icons.how_to_reg_outlined, Icons.folder_outlined]) i: 'dokumen',
-    Icons.verified_outlined: 'verifikasi',
-    Icons.autorenew_rounded: 'perpanjang',
+    for (final i in [CupertinoIcons.news, CupertinoIcons.photo_on_rectangle]) i: 'berita',
+    for (final i in [CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar_badge_plus]) i: 'kalender',
+    for (final i in [CupertinoIcons.hammer, CupertinoIcons.hammer_fill, CupertinoIcons.hammer]) i: 'hukum',
+    for (final i in [CupertinoIcons.chat_bubble_2, CupertinoIcons.chat_bubble_2_fill]) i: 'forum',
+    for (final i in [CupertinoIcons.chat_bubble, CupertinoIcons.chat_bubble_fill]) i: 'chat',
+    for (final i in [CupertinoIcons.sparkles, CupertinoIcons.sparkles, CupertinoIcons.sparkles]) i: 'ai',
+    for (final i in [CupertinoIcons.square_grid_2x2, CupertinoIcons.square_grid_2x2, CupertinoIcons.square_grid_2x2]) i: 'semua',
+    for (final i in [CupertinoIcons.person_crop_rectangle, CupertinoIcons.qrcode]) i: 'kartu',
+    CupertinoIcons.book: 'saku',
+    CupertinoIcons.rosette: 'medali',
+    for (final i in [CupertinoIcons.speaker_2, CupertinoIcons.speaker_2_fill]) i: 'pengumuman',
+    for (final i in [CupertinoIcons.building_2_fill, CupertinoIcons.building_2_fill, CupertinoIcons.building_2_fill]) i: 'gedung',
+    for (final i in [CupertinoIcons.list_bullet_indent, CupertinoIcons.list_bullet_indent]) i: 'struktur',
+    CupertinoIcons.person_3: 'anggota',
+    for (final i in [CupertinoIcons.shield, CupertinoIcons.checkmark_shield, CupertinoIcons.hand_raised]) i: 'perisai',
+    for (final i in [CupertinoIcons.location, CupertinoIcons.placemark, CupertinoIcons.location, CupertinoIcons.globe]) i: 'lokasi',
+    for (final i in [CupertinoIcons.chart_bar, CupertinoIcons.chart_bar_alt_fill]) i: 'laporan',
+    for (final i in [CupertinoIcons.doc_plaintext, CupertinoIcons.doc_text, CupertinoIcons.person_badge_plus, CupertinoIcons.folder]) i: 'dokumen',
+    CupertinoIcons.checkmark_seal: 'verifikasi',
+    CupertinoIcons.arrow_2_circlepath: 'perpanjang',
     for (final i in [
-      Icons.notifications_none_rounded,
-      Icons.notifications_rounded,
-      Icons.notifications_outlined,
-      Icons.notifications_active_outlined,
-      Icons.notifications_active_rounded,
-      Icons.notification_important_outlined,
+      CupertinoIcons.bell,
+      CupertinoIcons.bell_fill,
+      CupertinoIcons.bell,
+      CupertinoIcons.bell,
+      CupertinoIcons.bell_fill,
+      CupertinoIcons.bell,
     ])
       i: 'lonceng',
-    Icons.settings_outlined: 'pengaturan',
-    for (final i in [Icons.account_circle_outlined, Icons.person_outline]) i: 'profil',
-    for (final i in [Icons.history_outlined, Icons.history, Icons.schedule_rounded]) i: 'riwayat',
-    Icons.public_rounded: 'global',
-    Icons.home_outlined: 'beranda',
+    CupertinoIcons.gear: 'pengaturan',
+    for (final i in [CupertinoIcons.person_crop_circle, CupertinoIcons.person]) i: 'profil',
+    for (final i in [CupertinoIcons.clock, CupertinoIcons.clock, CupertinoIcons.clock]) i: 'riwayat',
+    CupertinoIcons.globe: 'global',
+    CupertinoIcons.house: 'beranda',
   };
 
   /// Jalur aset gambar 3D untuk [icon], atau null bila tidak ada padanannya.

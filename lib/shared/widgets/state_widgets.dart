@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_tokens.dart';
 import '../../core/utils/format_id.dart';
 
 import '../../core/widgets/illustrations.dart';
+import '../../core/constants/app_colors.dart';
 
 Widget _stateIcon(BuildContext context, IconData icon, Color tone) => Container(
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(AppRadius.hero),
         color: tone.withValues(alpha: 0.10),
         border: Border.all(color: tone.withValues(alpha: 0.18)),
       ),
@@ -22,7 +24,7 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     this.message = 'Belum ada data',
-    this.icon = Icons.inbox_outlined,
+    this.icon = CupertinoIcons.tray,
     this.title,
     this.actionLabel,
     this.onAction,
@@ -48,13 +50,13 @@ class EmptyState extends StatelessWidget {
           ],
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 320),
-            child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 14, height: 1.5)),
+            child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.body, height: 1.5)),
           ),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: 18),
             FilledButton.icon(
               onPressed: onAction,
-              icon: const Icon(Icons.add_rounded),
+              icon: const Icon(CupertinoIcons.add),
               label: Text(actionLabel!),
               style: FilledButton.styleFrom(minimumSize: const Size(200, 48)),
             ),
@@ -111,14 +113,14 @@ class ErrorState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _stateIcon(context, Icons.cloud_off_rounded, scheme.error),
+          _stateIcon(context, CupertinoIcons.wifi_slash, scheme.error),
           const SizedBox(height: 16),
-          Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, height: 1.5)),
+          Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: AppType.body, height: 1.5)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
             FilledButton.tonalIcon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(CupertinoIcons.arrow_clockwise),
               label: const Text('Coba lagi'),
               style: FilledButton.styleFrom(minimumSize: const Size(160, 48)),
             ),
@@ -134,7 +136,7 @@ class AccessDenied extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
         body: EmptyState(
-          icon: Icons.lock_outline,
+          icon: CupertinoIcons.lock,
           message: 'Akses ditolak.\nRole Anda tidak memiliki izin untuk halaman ini.',
         ),
       );
@@ -155,8 +157,8 @@ class StatusChip extends StatelessWidget {
     if (RegExp(r'ditolak|batal|nonaktif|tidak hadir|gagal|terlambat|mendesak|urgent|dihapus').hasMatch(l)) {
       return const Color(0xFFB3261E);
     }
-    if (RegExp(r'menunggu|proses|draft|tertunda|pending|baru|belum').hasMatch(l)) return const Color(0xFFB26A00);
-    if (RegExp(r'aktif|selesai|disetujui|terbayar|hadir|dibaca|lunas').hasMatch(l)) return const Color(0xFF1B7F4B);
+    if (RegExp(r'menunggu|proses|draft|tertunda|pending|baru|belum').hasMatch(l)) return AppColors.goldDeep;
+    if (RegExp(r'aktif|selesai|disetujui|terbayar|hadir|dibaca|lunas').hasMatch(l)) return AppColors.emerald;
     return const Color(0xFF3B5BA5);
   }
 
@@ -165,11 +167,11 @@ class StatusChip extends StatelessWidget {
     final c = _tone();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.chip)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Container(width: 6, height: 6, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c))),
+        Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: c))),
       ]),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -12,6 +13,9 @@ import '../../core/widgets/page_glow.dart';
 import '../../core/widgets/tilt_3d.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 SupabaseClient get _db => SupabaseService.client;
 
@@ -41,7 +45,13 @@ class OrgPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = path;
-    final url = (p == null || p.isEmpty) ? null : _db.storage.from('org-photos').getPublicUrl(p);
+    final url = (p == null || p.isEmpty)
+        ? null
+        : RegExp(r'^https?://').hasMatch(p)
+            ? p
+            : p.startsWith('img/')
+                ? 'https://perkapi.or.id/$p' // foto yang disimpan bersama situs
+                : _db.storage.from('org-photos').getPublicUrl(p);
     final initial = name.trim().isEmpty ? '?' : String.fromCharCode(name.trim().runes.first).toUpperCase();
     final fallback = Container(
       color: AppColors.navy,
@@ -91,7 +101,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
 
   Future<void> _load() async {
     try {
-      final rows = await _db.from('org_structure').select().order('sort_order').order('name');
+      final rows = await _db.from('org_structure').select().order('sort_order', ascending: true).order('name', ascending: true);
       if (!mounted) return;
       setState(() {
         _items = rows.map((r) => OrgMember(r)).toList();
@@ -103,7 +113,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
   }
 
   Future<void> _edit([OrgMember? m]) async {
-    final saved = await showModalBottomSheet<bool>(
+    final saved = await showSmoothSheet<bool>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
@@ -118,13 +128,13 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
       return;
     }
     if (m.bio.isEmpty) return;
-    showModalBottomSheet<void>(
+    showSmoothSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (_) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(m.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+          Text(m.name, style: const TextStyle(fontSize: AppType.heading, fontWeight: FontWeight.w900)),
           const SizedBox(height: 2),
           Text(m.position, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.navyAction)),
           const SizedBox(height: 12),
@@ -149,7 +159,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
         if (_canEdit)
           Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 24 + MediaQuery.paddingOf(context).bottom + 70),
-            child: FilledButton.icon(onPressed: () => _edit(), icon: const Icon(Icons.person_add_alt_1_rounded), label: const Text('Tambah pengurus')),
+            child: FilledButton.icon(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus), label: const Text('Tambah pengurus')),
           ),
       ]);
     } else {
@@ -168,7 +178,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
           ),
           if (_canEdit) ...[
             const SizedBox(height: 12),
-            FilledButton.icon(onPressed: () => _edit(), icon: const Icon(Icons.person_add_alt_1_rounded), label: const Text('Tambah pengurus')),
+            FilledButton.icon(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus), label: const Text('Tambah pengurus')),
           ],
           if (leaders.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -177,7 +187,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
           if (!_canEdit)
             Padding(
               padding: const EdgeInsets.only(top: 18),
-              child: Text('Struktur ini dikelola admin PERKAPI.', style: TextStyle(fontSize: 12, color: sc.onSurfaceVariant)),
+              child: Text('Struktur ini dikelola admin PERKAPI.', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
             ),
           for (final e in groups.entries) ...[
             Padding(
@@ -185,7 +195,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
               child: Row(children: [
                 Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.navyAction, borderRadius: BorderRadius.circular(4))),
                 const SizedBox(width: 8),
-                Text(e.key, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+                Text(e.key, style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900)),
               ]),
             ),
             for (final m in e.value)
@@ -200,13 +210,13 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(m.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                          Text(m.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
                           const SizedBox(height: 2),
                           Text(m.position, style: TextStyle(color: sc.onSurfaceVariant, height: 1.3)),
-                          if (!m.isActive) const Text('Nonaktif', style: TextStyle(fontSize: 12, color: AppColors.amber, fontWeight: FontWeight.w700)),
+                          if (!m.isActive) const Text('Nonaktif', style: TextStyle(fontSize: AppType.caption, color: AppColors.amber, fontWeight: FontWeight.w700)),
                         ]),
                       ),
-                      if (_canEdit) Icon(Icons.edit_outlined, size: 18, color: sc.onSurfaceVariant),
+                      if (_canEdit) Icon(CupertinoIcons.pencil, size: 18, color: sc.onSurfaceVariant),
                     ]),
                   ),
                 ),
@@ -216,10 +226,10 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
       );
     }
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const Text('Struktur Organisasi'),
         actions: [
-          if (_canEdit && _error == null) IconButton(tooltip: 'Tambah pengurus', onPressed: () => _edit(), icon: const Icon(Icons.person_add_alt_1_rounded)),
+          if (_canEdit && _error == null) IconButton(tooltip: 'Tambah pengurus', onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus)),
         ],
       ),
       body: PageGlow(accent: AppColors.navyAction, child: body),
@@ -302,9 +312,9 @@ class _LeaderCard extends StatelessWidget {
                   right: 16,
                   bottom: 16,
                   child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(m.position.toUpperCase(), style: const TextStyle(color: AppColors.gold, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    Text(m.position.toUpperCase(), style: const TextStyle(color: AppColors.gold, fontSize: AppType.caption, fontWeight: FontWeight.w900, letterSpacing: 1)),
                     const SizedBox(height: 3),
-                    Text(m.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w900, height: 1.15)),
+                    Text(m.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w900, height: 1.15)),
                   ]),
                 ),
               ]),
@@ -419,7 +429,7 @@ class _EditSheetState extends State<_EditSheet> {
   }
 
   Future<void> _delete() async {
-    final ok = await showDialog<bool>(
+    final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: const Text('Hapus pengurus?'),
@@ -458,25 +468,25 @@ class _EditSheetState extends State<_EditSheet> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(item == null ? 'Tambah pengurus' : 'Ubah pengurus', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+          Text(item == null ? 'Tambah pengurus' : 'Ubah pengurus', style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900)),
           const SizedBox(height: 14),
           Row(children: [
             _bytes != null
                 ? ClipOval(child: Image.memory(_bytes!, width: 72, height: 72, fit: BoxFit.cover))
                 : OrgPhoto(name: _name.text, path: item?.photoPath, size: 72),
             const SizedBox(width: 14),
-            OutlinedButton.icon(onPressed: _busy ? null : _pick, icon: const Icon(Icons.photo_camera_outlined, size: 18), label: Text(_bytes != null || (item?.photoPath ?? '').isNotEmpty ? 'Ganti foto' : 'Pilih foto')),
+            OutlinedButton.icon(onPressed: _busy ? null : _pick, icon: const Icon(CupertinoIcons.camera, size: 18), label: Text(_bytes != null || (item?.photoPath ?? '').isNotEmpty ? 'Ganti foto' : 'Pilih foto')),
           ]),
           const SizedBox(height: 4),
-          const Text('Foto pengurus tampil juga di situs publik. JPG/PNG, maksimal 2 MB.', style: TextStyle(fontSize: 12)),
+          const Text('Foto pengurus tampil juga di situs publik. JPG/PNG, maksimal 2 MB.', style: TextStyle(fontSize: AppType.caption)),
           _field(_name, 'Nama lengkap'),
           _field(_pos, 'Jabatan (mis. Ketua Umum)'),
           _field(_div, 'Kelompok (mis. Pengurus Harian, Dewan Pembina)'),
           _field(_sort, 'Urutan (angka kecil tampil lebih awal)', type: TextInputType.number),
           _field(_period, 'Periode'),
           _field(_bio, 'Profil singkat (opsional)', lines: 3),
-          SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Tampilkan di carousel 3D teratas'), value: _leader, onChanged: (v) => setState(() => _leader = v)),
-          SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Aktif (tampil di situs publik)'), value: _active, onChanged: (v) => setState(() => _active = v)),
+          SwitchListTile.adaptive(contentPadding: EdgeInsets.zero, title: const Text('Tampilkan di carousel 3D teratas'), value: _leader, onChanged: (v) => setState(() => _leader = v)),
+          SwitchListTile.adaptive(contentPadding: EdgeInsets.zero, title: const Text('Aktif (tampil di situs publik)'), value: _active, onChanged: (v) => setState(() => _active = v)),
           if (_err != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(_err!, style: const TextStyle(color: AppColors.red, fontWeight: FontWeight.w600))),
           const SizedBox(height: 12),
           Row(children: [

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/services/supabase_service.dart';
-import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
 import 'signature_pad.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Tanda tangan elektronik pada dokumen: mencatat siapa, kapan, dan versi file mana yang ditandatangani.
 /// Ini tanda tangan elektronik biasa (bukti persetujuan internal), BUKAN tanda tangan tersertifikasi.
@@ -92,14 +93,14 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
       if (_loading)
         const Padding(padding: EdgeInsets.all(12), child: Center(child: CircularProgressIndicator()))
       else if (_error != null)
-        Text(_error!, style: TextStyle(color: scheme.error, fontSize: 13))
+        Text(_error!, style: TextStyle(color: scheme.error, fontSize: AppType.small))
       else ...[
         if (_rows.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Text('Belum ada yang menandatangani.')),
         for (final r in _rows)
           ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(r['is_current'] == true ? Icons.verified_outlined : Icons.history_toggle_off, color: r['is_current'] == true ? scheme.primary : scheme.onSurfaceVariant),
+            leading: Icon(r['is_current'] == true ? CupertinoIcons.checkmark_seal : CupertinoIcons.clock, color: r['is_current'] == true ? scheme.primary : scheme.onSurfaceVariant),
             title: Text('${r['signer_name']}'),
             subtitle: Text('${fmtValue(r['signed_at'])} · ${r['is_current'] == true ? 'versi saat ini' : 'versi sebelumnya'}'),
             onTap: () => _view('${r['signature_path']}'),
@@ -107,11 +108,11 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
         const SizedBox(height: 6),
         OutlinedButton.icon(
           onPressed: _busy || _signedCurrent ? null : _sign,
-          icon: _busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.draw_outlined),
+          icon: _busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(CupertinoIcons.signature),
           label: Text(_signedCurrent ? 'Sudah Anda tandatangani' : 'Tandatangani dokumen ini'),
         ),
         const SizedBox(height: 4),
-        Text('Tanda tangan elektronik biasa (bukti persetujuan internal), bukan tanda tangan tersertifikasi.', style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant)),
+        Text('Tanda tangan elektronik biasa (bukti persetujuan internal), bukan tanda tangan tersertifikasi.', style: TextStyle(fontSize: AppType.micro, color: scheme.onSurfaceVariant)),
       ],
     ]);
   }

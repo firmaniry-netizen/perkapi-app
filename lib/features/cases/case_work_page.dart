@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -11,6 +12,9 @@ import 'case_claims_tab.dart';
 import 'case_letters.dart';
 import 'case_letter_form.dart';
 import 'case_models.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Ruang kerja satu perkara: Linimasa tahapan, Tagihan kreditur, dan Surat otomatis.
 class CaseWorkPage extends StatefulWidget {
@@ -31,11 +35,11 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
       future: _f,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return Scaffold(appBar: AppBar(title: const Text('Ruang kerja perkara')), body: const SkeletonList());
+          return Scaffold(appBar: GlassAppBar(title: const Text('Ruang kerja perkara')), body: const SkeletonList());
         }
         if (snap.hasError || snap.data == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Ruang kerja perkara')),
+            appBar: GlassAppBar(title: const Text('Ruang kerja perkara')),
             body: ErrorState(message: 'Gagal memuat perkara. Periksa koneksi atau hak akses Anda.', onRetry: _reload),
           );
         }
@@ -43,12 +47,12 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
         return DefaultTabController(
           length: 3,
           child: Scaffold(
-            appBar: AppBar(
+            appBar: GlassAppBar(
               title: Text(c.number.isEmpty ? 'Ruang kerja perkara' : c.number, overflow: TextOverflow.ellipsis),
               bottom: const TabBar(tabs: [
-                Tab(icon: Icon(Icons.timeline_rounded), text: 'Linimasa'),
-                Tab(icon: Icon(Icons.request_quote_outlined), text: 'Tagihan'),
-                Tab(icon: Icon(Icons.description_outlined), text: 'Surat'),
+                Tab(icon: Icon(CupertinoIcons.chart_bar), text: 'Linimasa'),
+                Tab(icon: Icon(CupertinoIcons.money_dollar_circle), text: 'Tagihan'),
+                Tab(icon: Icon(CupertinoIcons.doc_text), text: 'Surat'),
               ]),
             ),
             body: PageGlow(accent: AppColors.navyAction, child: Column(children: [
@@ -76,14 +80,14 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-          child: const Icon(Icons.gavel_rounded, color: AppColors.navy, size: 22),
+          child: const Icon(CupertinoIcons.hammer_fill, color: AppColors.navy, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+            Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
             Text('${c.type}  •  ${c.court.isEmpty ? 'Pengadilan belum diisi' : c.court}',
-                maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: sc.onSurfaceVariant)),
+                maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
           ]),
         ),
       ]),
@@ -165,7 +169,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
           .from('case_stages')
           .select()
           .eq('case_id', widget.ctx.id)
-          .order('sort_order')
+          .order('sort_order', ascending: true)
           .order('due_date', ascending: true, nullsFirst: false));
     } catch (_) {
       _error = 'Gagal memuat linimasa. Pastikan skrip sql/23_case_workbench.sql sudah dijalankan.';
@@ -184,7 +188,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
   }
 
   Future<void> _delete(Map<String, dynamic> r) async {
-    final ok = await showDialog<bool>(
+    final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Hapus tahapan?'),
@@ -211,7 +215,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
     final title = TextEditingController(text: '${r?['title'] ?? ''}');
     final notes = TextEditingController(text: '${r?['notes'] ?? ''}');
     DateTime? due = parseDate(r?['due_date']);
-    final saved = await showDialog<bool>(
+    final saved = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
@@ -221,7 +225,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
               TextField(controller: title, textCapitalization: TextCapitalization.sentences, decoration: const InputDecoration(labelText: 'Nama tahapan')),
               const SizedBox(height: 12),
               InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
                   final d = await showDatePicker(context: ctx, initialDate: due ?? today(), firstDate: DateTime(2000), lastDate: DateTime(2100));
                   if (d != null) setD(() => due = d);
@@ -229,8 +233,8 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Tanggal / batas waktu',
-                    prefixIcon: const Icon(Icons.event_outlined),
-                    suffixIcon: due == null ? null : IconButton(icon: const Icon(Icons.close), onPressed: () => setD(() => due = null)),
+                    prefixIcon: const Icon(CupertinoIcons.calendar),
+                    suffixIcon: due == null ? null : IconButton(icon: const Icon(CupertinoIcons.xmark), onPressed: () => setD(() => due = null)),
                   ),
                   child: Text(due == null ? 'Belum ditentukan' : dmy(isoDate(due!))),
                 ),
@@ -277,7 +281,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
   Future<void> _fromTemplate() async {
     var pkpu = widget.ctx.type.toUpperCase().contains('PKPU');
     DateTime base = widget.ctx.caseDate ?? today();
-    final go = await showDialog<bool>(
+    final go = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
@@ -291,13 +295,13 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
               ),
               const SizedBox(height: 14),
               InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
                   final d = await showDatePicker(context: ctx, initialDate: base, firstDate: DateTime(2000), lastDate: DateTime(2100));
                   if (d != null) setD(() => base = d);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Tanggal putusan', prefixIcon: Icon(Icons.event_outlined)),
+                  decoration: const InputDecoration(labelText: 'Tanggal putusan', prefixIcon: Icon(CupertinoIcons.calendar)),
                   child: Text(dmy(isoDate(base))),
                 ),
               ),
@@ -306,7 +310,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
                 'Tanggal terisi otomatis hanya untuk batas yang tercantum di UU 37/2004: pengumuman putusan pailit 5 hari (Pasal 15 ayat 4), '
                 'sidang PKPU Sementara maks. 45 hari (Pasal 225 ayat 4), PKPU Tetap maks. 270 hari (Pasal 228 ayat 6). '
                 'Cocokkan dengan undang-undang dan penetapan Hakim Pengawas; tahap lain isi sendiri.',
-                style: TextStyle(fontSize: 13, height: 1.4),
+                style: TextStyle(fontSize: AppType.small, height: 1.4),
               ),
             ]),
           ),
@@ -339,14 +343,14 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
 
   /// (label, warna, ikon) menurut status tahapan.
   (String, Color, IconData) _status(Map<String, dynamic> r) {
-    if (r['done_at'] != null) return ('Selesai ${dmy(r['done_at'])}', AppColors.emerald, Icons.check_circle_rounded);
+    if (r['done_at'] != null) return ('Selesai ${dmy(r['done_at'])}', AppColors.emerald, CupertinoIcons.checkmark_circle_fill);
     final due = parseDate(r['due_date']);
-    if (due == null) return ('Tanggal belum ditentukan', AppColors.muted, Icons.radio_button_unchecked);
+    if (due == null) return ('Tanggal belum ditentukan', AppColors.muted, CupertinoIcons.circle);
     final diff = due.difference(today()).inDays;
-    if (diff < 0) return ('Terlambat ${-diff} hari', AppColors.red, Icons.error_rounded);
-    if (diff == 0) return ('Hari ini', AppColors.orange, Icons.notifications_active_rounded);
-    if (diff <= 3) return ('H-$diff', AppColors.amber, Icons.schedule_rounded);
-    return ('$diff hari lagi', AppColors.navyAction, Icons.radio_button_unchecked);
+    if (diff < 0) return ('Terlambat ${-diff} hari', AppColors.red, CupertinoIcons.exclamationmark_circle_fill);
+    if (diff == 0) return ('Hari ini', AppColors.orange, CupertinoIcons.bell_fill);
+    if (diff <= 3) return ('H-$diff', AppColors.amber, CupertinoIcons.clock);
+    return ('$diff hari lagi', AppColors.navyAction, CupertinoIcons.circle);
   }
 
   @override
@@ -377,7 +381,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _fromTemplate,
-                icon: const Icon(Icons.auto_fix_high_rounded),
+                icon: const Icon(CupertinoIcons.wand_stars),
                 label: const Text('Dari template'),
                 style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -386,7 +390,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _edit(),
-                icon: const Icon(Icons.add_rounded),
+                icon: const Icon(CupertinoIcons.add),
                 label: const Text('Tambah'),
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -394,7 +398,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
           ]),
         const SizedBox(height: 14),
         if (_rows.isEmpty)
-          const EmptyState(message: 'Belum ada tahapan.\nGunakan template Kepailitan/PKPU atau tambah sendiri.', icon: Icons.timeline_rounded),
+          const EmptyState(message: 'Belum ada tahapan.\nGunakan template Kepailitan/PKPU atau tambah sendiri.', icon: CupertinoIcons.chart_bar),
         for (var i = 0; i < _rows.length; i++)
           Reveal(
             index: i % 8,
@@ -438,11 +442,11 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
                     const SizedBox(height: 4),
                     Text(
                       r['due_date'] == null ? label : '${dmy(r['due_date'])}  •  $label',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+                      style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w700, color: color),
                     ),
                     if (notes.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(notes, style: TextStyle(fontSize: 13, height: 1.35, color: sc.onSurfaceVariant)),
+                      Text(notes, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                     ],
                   ]),
                 ),
@@ -475,15 +479,15 @@ class _LettersTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final sc = Theme.of(context).colorScheme;
     const items = <(LetterKind, IconData, String)>[
-      (LetterKind.undangan, Icons.groups_rounded, 'Undangan Rapat Kreditur'),
-      (LetterKind.pemberitahuan, Icons.campaign_rounded, 'Pemberitahuan dan Permintaan Pengajuan Tagihan'),
-      (LetterKind.beritaAcara, Icons.fact_check_rounded, 'Berita Acara Rapat Kreditur'),
+      (LetterKind.undangan, CupertinoIcons.person_3_fill, 'Undangan Rapat Kreditur'),
+      (LetterKind.pemberitahuan, CupertinoIcons.speaker_2_fill, 'Pemberitahuan dan Permintaan Pengajuan Tagihan'),
+      (LetterKind.beritaAcara, CupertinoIcons.checkmark_rectangle, 'Berita Acara Rapat Kreditur'),
     ];
     return ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 120 + MediaQuery.paddingOf(context).bottom), children: [
       Text(
         'Surat terisi otomatis dari data perkara, debitur, kreditur, dan ${ctx.officerName}. Hasilnya PDF yang bisa dibagikan. '
         'Isi adalah draf umum: periksa dan sesuaikan sebelum dikirim.',
-        style: TextStyle(fontSize: 13, height: 1.45, color: sc.onSurfaceVariant),
+        style: TextStyle(fontSize: AppType.small, height: 1.45, color: sc.onSurfaceVariant),
       ),
       const SizedBox(height: 14),
       for (final it in items)
@@ -496,12 +500,12 @@ class _LettersTab extends StatelessWidget {
               Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
+                decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.control)),
                 child: Icon(it.$2, color: AppColors.navy),
               ),
               const SizedBox(width: 14),
               Expanded(child: Text(it.$3, style: const TextStyle(fontWeight: FontWeight.w800, height: 1.3))),
-              Icon(Icons.chevron_right, color: sc.onSurfaceVariant),
+              Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
             ]),
           ),
         ),

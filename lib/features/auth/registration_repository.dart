@@ -71,7 +71,7 @@ class RegistrationRepository {
       RoleOption('STAFF', 'STAFF'),
     ];
     try {
-      final res = await _db.from('roles').select('code,name').order('name');
+      final res = await _db.from('roles').select('code,name').order('name', ascending: true);
       final out = <RoleOption>[];
       for (final r in res as List) {
         final code = (r['code'] ?? '').toString();

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/motion.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,8 +19,11 @@ import '../../core/utils/format_id.dart';
 /// Daftar generik dengan search (debounce), pagination, pull-to-refresh,
 /// state loading/empty/error. Dipakai di banyak modul.
 class ModuleListView extends StatefulWidget {
-  const ModuleListView({super.key, required this.module, this.showAdd = true});
+  const ModuleListView({super.key, required this.module, this.showAdd = true, this.header});
   final ModuleDef module;
+
+  /// Kepala opsional (mis. ScreenHero) yang ikut bergulir di atas kolom cari.
+  final Widget? header;
   final bool showAdd;
 
   @override
@@ -114,31 +118,44 @@ class _ModuleListViewState extends State<ModuleListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ValueListenableBuilder<bool>(
+    // Satu gulir untuk semua: kepala (cari, mode offline) ikut bergulir sehingga di halaman dengan
+    // extendBodyBehindAppBar isi lewat DI BELAKANG bar kaca. Di halaman biasa padding atas = 0.
+    final top = MediaQuery.paddingOf(context).top;
+    return RefreshIndicator(
+      edgeOffset: top,
+      onRefresh: _refresh,
+      child: CustomScrollView(
+        controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: top)),
+          if (widget.header != null) SliverToBoxAdapter(child: widget.header!),
+          SliverToBoxAdapter(
+            child: ValueListenableBuilder<bool>(
           valueListenable: OfflineCache.offline,
           builder: (_, off, __) => (off && m.offlineCache)
               ? Container(
                   width: double.infinity,
                   margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF6C00).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.amber.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(AppRadius.control),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(children: [
-                    const Icon(Icons.cloud_off_rounded, size: 18, color: Color(0xFFEF6C00)),
+                    const Icon(CupertinoIcons.wifi_slash, size: 18, color: AppColors.amber),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text('Mode offline • menampilkan data tersimpan terakhir. Tarik ke bawah untuk menyegarkan.',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12, height: 1.35)),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: AppType.caption, height: 1.35)),
                     ),
                   ]),
                 )
               : const SizedBox.shrink(),
         ),
-        Padding(
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
           child: Row(children: [
             Expanded(
@@ -146,7 +163,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                 onChanged: _onSearch,
                 decoration: InputDecoration(
                   hintText: 'Cari ${m.title.toLowerCase()}',
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(CupertinoIcons.search),
                   isDense: true,
                 ),
               ),
@@ -154,7 +171,7 @@ class _ModuleListViewState extends State<ModuleListView> {
             if (m.markAllRead)
               IconButton(
                 tooltip: 'Tandai semua dibaca',
-                icon: const Icon(Icons.done_all),
+                icon: const Icon(CupertinoIcons.checkmark_alt),
                 onPressed: () async {
                   try {
                     await DataRepository.markAllNotificationsRead();
@@ -169,37 +186,22 @@ class _ModuleListViewState extends State<ModuleListView> {
             if (widget.showAdd && _canWrite)
               GradientIconButton(
                 tooltip: 'Tambah',
-                icon: Icons.add_rounded,
+                icon: CupertinoIcons.add,
                 onTap: () => _open(null),
               ),
           ]),
         ),
-        // Pergantian keadaan (memuat -> daftar / kosong / galat) memudar silang, bukan berganti mendadak
-        // (padanan entering FadeInDown + exiting FadeOut: masuk 260 ms, keluar lebih singkat 150 ms).
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: reduceMotion(context) ? Duration.zero : const Duration(milliseconds: 260),
-            reverseDuration: reduceMotion(context) ? Duration.zero : const Duration(milliseconds: 150),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeIn,
-            transitionBuilder: (child, a) => FadeTransition(
-              opacity: a,
-              child: SlideTransition(position: Tween(begin: const Offset(0, 0.02), end: Offset.zero).animate(a), child: child),
-            ),
-            child: KeyedSubtree(
-              key: ValueKey(_loading ? 'memuat' : _error != null ? 'galat' : _items.isEmpty ? 'kosong' : 'daftar'),
-              child: _body(),
-            ),
           ),
-        ),
-      ],
+          ..._slivers(),
+        ],
+      ),
     );
   }
 
   /// Keadaan kosong per modul + satu tombol aksi bila pengguna boleh menambah data.
   Widget _empty() {
     if (_q.isNotEmpty) {
-      return const EmptyState(icon: Icons.search_off_rounded, title: 'Tidak ditemukan', message: 'Coba kata kunci lain atau periksa ejaan.');
+      return const EmptyState(icon: CupertinoIcons.search, title: 'Tidak ditemukan', message: 'Coba kata kunci lain atau periksa ejaan.');
     }
     final (title, msg, cta) = switch (m.id) {
       'events' => ('Belum ada agenda', 'Rapat, pelatihan, dan kegiatan organisasi akan tampil di sini.', 'Buat agenda'),
@@ -222,18 +224,17 @@ class _ModuleListViewState extends State<ModuleListView> {
     );
   }
 
-  Widget _body() {
-    if (_loading) return const SkeletonList();
-    if (_error != null) return ErrorState(message: _error!, onRetry: _refresh);
-    if (_items.isEmpty) return _empty();
-    return RefreshIndicator(
-      onRefresh: _refresh,
-      child: ListView.separated(
-        controller: _scroll,
+  List<Widget> _slivers() {
+    if (_loading) return const [SliverToBoxAdapter(child: SkeletonList())];
+    if (_error != null) return [SliverFillRemaining(hasScrollBody: false, child: ErrorState(message: _error!, onRetry: _refresh))];
+    if (_items.isEmpty) return [SliverFillRemaining(hasScrollBody: false, child: _empty())];
+    return [
+      SliverPadding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
-        itemCount: _items.length + (_loadingMore ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (_, i) {
+        sliver: SliverList.separated(
+          itemCount: _items.length + (_loadingMore ? 1 : 0),
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (_, i) {
           if (i >= _items.length) {
             return const Padding(
               padding: EdgeInsets.all(16),
@@ -274,13 +275,13 @@ class _ModuleListViewState extends State<ModuleListView> {
                   Text(title.isEmpty ? '(tanpa judul)' : title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
                   if (sub.isNotEmpty) ...[
                     const SizedBox(height: 3),
                     Text(sub,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
+                        style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant)),
                   ],
                   if (status.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -292,7 +293,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(color: AppColors.soft(tone, dark: dark), shape: BoxShape.circle),
-                child: Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.onSoft(tone, dark: dark)),
+                child: Icon(CupertinoIcons.arrow_right, size: 16, color: AppColors.onSoft(tone, dark: dark)),
               ),
                 ]),
               ),
@@ -313,8 +314,9 @@ class _ModuleListViewState extends State<ModuleListView> {
           ),
           );
         },
+        ),
       ),
-    );
+    ];
   }
 }
 
@@ -339,7 +341,7 @@ class _EventCard extends StatelessWidget {
     final chips = <Widget>[
       if (today) const _MiniChip('Hari ini', AppColors.red),
       if (past) const _MiniChip('Selesai', Color(0xFF6B7591)),
-      if (row['is_public'] == true) const _MiniChip('Di situs', AppColors.teal, icon: Icons.public_rounded),
+      if (row['is_public'] == true) const _MiniChip('Di situs', AppColors.teal, icon: CupertinoIcons.globe),
     ];
     return Opacity(
       opacity: past ? 0.62 : 1,
@@ -365,28 +367,28 @@ class _EventCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('${row['title'] ?? '(tanpa judul)'}',
-                  maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, height: 1.25)),
+                  maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
               const SizedBox(height: 4),
               Row(children: [
-                Icon(Icons.schedule_rounded, size: 14, color: scheme.onSurfaceVariant),
+                Icon(CupertinoIcons.clock, size: 14, color: scheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     start == null ? 'Waktu belum diisi' : (timed ? '${FmtId.days[start.weekday - 1]} • ${FmtId.time(start)}' : FmtId.daysLong[start.weekday - 1]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
+                    style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant),
                   ),
                 ),
               ]),
               if ('${row['location'] ?? ''}'.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Row(children: [
-                  Icon(Icons.place_outlined, size: 14, color: scheme.onSurfaceVariant),
+                  Icon(CupertinoIcons.placemark, size: 14, color: scheme.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text('${row['location']}',
-                        maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
+                        maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant)),
                   ),
                 ]),
               ],
@@ -425,7 +427,7 @@ class _ThreadCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       onTap: onTap,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SolidTile(icon: Icons.forum_rounded, color: tone, size: 44, radius: 22),
+        SolidTile(icon: CupertinoIcons.chat_bubble_2_fill, color: tone, size: 44, radius: 22),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -436,10 +438,10 @@ class _ThreadCard extends StatelessWidget {
             ]),
             const SizedBox(height: 6),
             Text('${row['title'] ?? '(tanpa judul)'}',
-                maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, height: 1.25)),
+                maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
             if (body.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, height: 1.4, color: scheme.onSurfaceVariant)),
+              Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, height: 1.4, color: scheme.onSurfaceVariant)),
             ],
           ]),
         ),
@@ -463,17 +465,17 @@ class _NotifCard extends StatelessWidget {
       color: unread ? Color.alphaBlend(AppColors.navyAction.withValues(alpha: 0.07), scheme.surface) : null,
       onTap: onTap,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SolidTile(icon: Icons.notifications_rounded, color: AppColors.navyAction, size: 40, radius: 14),
+        const SolidTile(icon: CupertinoIcons.bell_fill, color: AppColors.navyAction, size: 40, radius: 14),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('${row['title'] ?? 'Notifikasi'}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: unread ? FontWeight.w800 : FontWeight.w600, fontSize: 15)),
+                style: TextStyle(fontWeight: unread ? FontWeight.w800 : FontWeight.w600, fontSize: AppType.lead)),
             if ('${row['body'] ?? ''}'.isNotEmpty) ...[
               const SizedBox(height: 3),
-              Text('${row['body']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant)),
+              Text('${row['body']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant)),
             ],
             const SizedBox(height: 4),
             Text(agoId(FmtId.parse(row['created_at'])), style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant)),
@@ -502,7 +504,7 @@ class _MiniChip extends StatelessWidget {
     final fg = AppColors.onSoft(color, dark: dark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: AppColors.soft(color, dark: dark), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: AppColors.soft(color, dark: dark), borderRadius: BorderRadius.circular(AppRadius.chip)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (icon != null) ...[Icon(icon, size: 12, color: fg), const SizedBox(width: 4)],
         Flexible(

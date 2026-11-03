@@ -2,9 +2,11 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
+import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/motion_physics.dart';
 
@@ -20,7 +22,7 @@ class BurstAction {
 ///
 /// Gerak:
 /// - Latar: blur 0 -> 10 + tirai dongker 0 -> 62%, 420 ms ease-out.
-/// - Gelembung: terbang dari pusat tombol ke posisi grid 3 kolom, skala 0,3 -> 1, berpegas (easeOutBack),
+/// - Gelembung: terbang dari pusat tombol ke posisi grid 3 kolom, skala 0,3 -> 1, ease-out kuat tanpa memantul,
 ///   berjenjang 45 ms per item. Label muncul setelah gelembung mendarat.
 /// - Tombol tengah berputar 45 derajat menjadi tanda tutup.
 /// - Tutup: semua kembali ke pusat 260 ms (easeInCubic).
@@ -153,7 +155,7 @@ class _ActionBurst extends StatelessWidget {
                   ? base
                   : reversing
                       ? Curves.easeInCubic.transform(base)
-                      : Interval(start, math.min(1.0, start + 0.62), curve: Curves.easeOutBack).transform(base);
+                      : Interval(start, math.min(1.0, start + 0.62), curve: const Cubic(0.23, 1, 0.32, 1)).transform(base);
               final p = Offset.lerp(origin, target(i), t)! + Offset(0, dy);
               final labelOn = Interval(math.min(0.95, start + 0.45), 1, curve: Curves.easeOut).transform(base);
               return Positioned(
@@ -187,17 +189,17 @@ class _ActionBurst extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Transform.rotate(
-                  angle: (still ? 1 : Curves.easeOutBack.transform(base.clamp(0.0, 1.0))) * math.pi / 4,
-                  child: Container(
+                  angle: (still ? 1 : const Cubic(0.23, 1, 0.32, 1).transform(base.clamp(0.0, 1.0))) * math.pi / 4,
+                  child: SizedBox(
                     width: 52,
                     height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.red,
+                    child: LiquidGlass(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.9), width: 2),
-                      boxShadow: [BoxShadow(color: AppColors.red.withValues(alpha: 0.45 * fade), blurRadius: 18, offset: const Offset(0, 6))],
+                      blur: 0,
+                      tint: AppColors.red.withValues(alpha: 0.86),
+                      glow: AppColors.red,
+                      child: const Center(child: Icon(CupertinoIcons.add, color: Colors.white, size: 28)),
                     ),
-                    child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
                   ),
                 ),
               ),
@@ -228,16 +230,17 @@ class _Bubble extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           onTap: onTap,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
+            // Gelembung kaca berwarna: tint modul tembus pandang di atas tirai buram, dengan pendar warnanya.
+            SizedBox(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
+              child: LiquidGlass(
                 shape: BoxShape.circle,
-                gradient: AppColors.tileGradient(c),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
-                boxShadow: [BoxShadow(color: c.withValues(alpha: 0.45), blurRadius: 18, offset: const Offset(0, 8))],
+                blur: 0, // tirai sudah buram; tanpa blur kedua agar animasi tetap mulus di HP menengah
+                tint: c.withValues(alpha: 0.62),
+                glow: c,
+                child: Center(child: Icon(action.icon, color: Colors.white, size: 27)),
               ),
-              child: Icon(action.icon, color: Colors.white, size: 27),
             ),
             const SizedBox(height: 8),
             Opacity(

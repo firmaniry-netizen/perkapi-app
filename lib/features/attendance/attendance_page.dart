@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -9,6 +10,8 @@ import '../../core/services/supabase_service.dart';
 import '../../core/widgets/icon_badge.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Check-in GPS. Lokasi hanya diambil SAAT tombol ditekan (tidak ada tracking diam-diam).
 class AttendancePage extends StatefulWidget {
@@ -94,19 +97,19 @@ class _AttendancePageState extends State<AttendancePage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Absensi & Check-in')),
+        appBar: GlassAppBar(title: const Text('Absensi & Check-in')),
         body: PageGlow(accent: AppColors.teal, child: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const SkeletonList()
             : _error != null
                 ? ErrorState(message: _error!, onRetry: _load)
                 : ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
-                    Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Absensi & Check-in', subtitle: 'Catat kehadiran dengan lokasi yang aman', icon: Icons.location_on_rounded, accent: AppColors.teal)),
+                    Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Absensi & Check-in', subtitle: 'Catat kehadiran dengan lokasi yang aman', icon: CupertinoIcons.location_solid, accent: AppColors.teal)),
                     const SizedBox(height: 16),
                     AppCard(
                       padding: const EdgeInsets.all(20),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          const IconBadge(Icons.location_on_outlined),
+                          const IconBadge(CupertinoIcons.location),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text('Lokasi hanya dibaca saat Anda menekan tombol Check-in.',
@@ -127,7 +130,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         const SizedBox(height: 16),
                         PrimaryButton(
                           label: 'Check-in sekarang',
-                          icon: Icons.check_rounded,
+                          icon: CupertinoIcons.checkmark,
                           loading: _busy,
                           onPressed: _busy ? null : _checkIn,
                         ),
@@ -143,7 +146,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           radius: 20,
                           padding: const EdgeInsets.all(14),
                           child: Row(children: [
-                            const Icon(Icons.check_circle_rounded, color: Color(0xFF1B7F4B)),
+                            const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.emerald),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -153,7 +156,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                     style: const TextStyle(fontWeight: FontWeight.w800)),
                                 const SizedBox(height: 2),
                                 Text(fmtValue(h['checked_in_at']),
-                                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                    style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                               ]),
                             ),
                             StatusChip('${h['status'] ?? 'Hadir'}'),

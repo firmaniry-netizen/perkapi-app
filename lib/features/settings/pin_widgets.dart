@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 
 import '../../core/services/pin_service.dart';
 import '../../core/widgets/smooth_overlays.dart';
+import '../../core/constants/app_tokens.dart';
 
 /// Keypad PIN untuk layar kunci aplikasi (tampil di atas latar gelap).
 class PinPad extends StatefulWidget {
@@ -58,7 +60,7 @@ class _PinPadState extends State<PinPad> {
           child: TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.white),
             onPressed: onTap,
-            child: icon != null ? Icon(icon) : Text(label, style: const TextStyle(fontSize: 22)),
+            child: icon != null ? Icon(icon) : Text(label, style: const TextStyle(fontSize: AppType.h2)),
           ),
         ),
       );
@@ -81,7 +83,7 @@ class _PinPadState extends State<PinPad> {
       ]),
       SizedBox(
         height: 28,
-        child: Center(child: Text(_error ?? '', style: const TextStyle(color: Color(0xFFFFAB91), fontSize: 12))),
+        child: Center(child: Text(_error ?? '', style: const TextStyle(color: Color(0xFFFFAB91), fontSize: AppType.caption))),
       ),
       for (final row in const [
         ['1', '2', '3'],
@@ -94,7 +96,7 @@ class _PinPadState extends State<PinPad> {
       Row(mainAxisSize: MainAxisSize.min, children: [
         _key(''),
         _key('0', onTap: () => _tap('0')),
-        _key('', icon: Icons.backspace_outlined, onTap: _back),
+        _key('', icon: CupertinoIcons.delete_left, onTap: _back),
       ]),
     ]);
   }

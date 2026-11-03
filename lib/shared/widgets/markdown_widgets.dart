@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 /// Penampil Markdown sederhana (tanpa paket tambahan).
 /// Didukung: # / ## / ### judul, **tebal**, *miring* / _miring_, `kode`,
@@ -71,7 +72,7 @@ class MarkdownView extends StatelessWidget {
       if (cb != null) {
         final done = cb.group(1)!.toLowerCase() == 'x';
         children.add(line(Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(done ? Icons.check_box : Icons.check_box_outline_blank, size: 18),
+          Icon(done ? CupertinoIcons.checkmark_square_fill : CupertinoIcons.square, size: 18),
           const SizedBox(width: 6),
           Expanded(
               child: Text.rich(TextSpan(
@@ -197,14 +198,14 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(children: [
-            _btn(Icons.title, 'Judul', () => _prefix((_) => '## ')),
-            _btn(Icons.format_bold, 'Tebal', () => _wrap('**', '**')),
-            _btn(Icons.format_italic, 'Miring', () => _wrap('_', '_')),
-            _btn(Icons.format_list_bulleted, 'Daftar', () => _prefix((_) => '- ')),
-            _btn(Icons.format_list_numbered, 'Daftar nomor', () => _prefix((i) => '${i + 1}. ')),
-            _btn(Icons.check_box_outlined, 'Checklist', () => _prefix((_) => '- [ ] ')),
-            _btn(Icons.format_quote, 'Kutipan', () => _prefix((_) => '> ')),
-            _btn(Icons.code, 'Kode', () => _wrap('`', '`')),
+            _btn(CupertinoIcons.textformat, 'Judul', () => _prefix((_) => '## ')),
+            _btn(CupertinoIcons.bold, 'Tebal', () => _wrap('**', '**')),
+            _btn(CupertinoIcons.italic, 'Miring', () => _wrap('_', '_')),
+            _btn(CupertinoIcons.list_bullet, 'Daftar', () => _prefix((_) => '- ')),
+            _btn(CupertinoIcons.list_number, 'Daftar nomor', () => _prefix((i) => '${i + 1}. ')),
+            _btn(CupertinoIcons.checkmark_square, 'Checklist', () => _prefix((_) => '- [ ] ')),
+            _btn(CupertinoIcons.quote_bubble, 'Kutipan', () => _prefix((_) => '> ')),
+            _btn(CupertinoIcons.chevron_left_slash_chevron_right, 'Kode', () => _wrap('`', '`')),
           ]),
         ),
       const SizedBox(height: 4),

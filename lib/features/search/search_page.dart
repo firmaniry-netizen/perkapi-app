@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../core/services/supabase_service.dart';
 import '../../shared/models/modules.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../../core/widgets/ui_kit.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 /// Pencarian global lintas modul (debounce). Hasil tetap dibatasi RLS.
 class SearchPage extends StatefulWidget {
@@ -81,14 +83,14 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Pencarian')),
+        appBar: GlassAppBar(title: const Text('Pencarian')),
         body: PageGlow(accent: AppColors.sky, child: Column(children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
               autofocus: true,
               onChanged: _onChanged,
-              decoration: const InputDecoration(hintText: 'Cari di semua modul', prefixIcon: Icon(Icons.search), isDense: true),
+              decoration: const InputDecoration(hintText: 'Cari di semua modul', prefixIcon: Icon(CupertinoIcons.search), isDense: true),
             ),
           ),
           SizedBox(
@@ -120,7 +122,7 @@ class _SearchPageState extends State<SearchPage> {
           if (_loading) const LinearProgressIndicator(),
           Expanded(
             child: _hits.isEmpty
-                ? EmptyState(message: _q.length < 2 ? 'Ketik minimal 2 huruf' : 'Tidak ada hasil', icon: Icons.search_off)
+                ? EmptyState(message: _q.length < 2 ? 'Ketik minimal 2 huruf' : 'Tidak ada hasil', icon: CupertinoIcons.search)
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(20, 4, 20, 24 + MediaQuery.paddingOf(context).bottom),
                     itemCount: _hits.length,
@@ -133,10 +135,10 @@ class _SearchPageState extends State<SearchPage> {
                           padding: EdgeInsets.zero,
                           child: ListTile(
                             minTileHeight: 64,
-                            leading: Icon(modules[h.module]?.icon ?? Icons.search, color: Theme.of(context).colorScheme.primary),
+                            leading: Icon(modules[h.module]?.icon ?? CupertinoIcons.search, color: Theme.of(context).colorScheme.primary),
                             title: Text(h.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                             subtitle: Text(modules[h.module]?.title ?? h.module),
-                            trailing: const Icon(Icons.chevron_right_rounded),
+                            trailing: const Icon(CupertinoIcons.chevron_right),
                             onTap: () => context.push('/module/${h.module}/${h.id}'),
                           ),
                         ),

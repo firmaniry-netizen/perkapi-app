@@ -7,6 +7,7 @@ import '../../core/widgets/ui_kit.dart';
 import '../../shared/models/modules.dart';
 import '../../shared/widgets/state_widgets.dart';
 import 'module_list_view.dart';
+import '../../core/widgets/glass_app_bar.dart';
 
 class ModuleListPage extends StatelessWidget {
   const ModuleListPage({super.key, required this.moduleId});
@@ -20,7 +21,8 @@ class ModuleListPage extends StatelessWidget {
     final accent = AppColors.forKey(m.id);
     final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: Text(m.title)),
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(title: Text(m.title)),
       body: Stack(children: [
         // Cahaya radial berwarna modul di belakang kepala layar: memberi kedalaman tanpa menambah elemen.
         Positioned(
@@ -40,19 +42,22 @@ class ModuleListPage extends StatelessWidget {
             ),
           ),
         ),
-        Positioned.fill(child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-          child: Reveal(index: 0, dy: -14, child: ScreenHero(
-            heroTag: 'tile:${m.id}',
-            title: m.title,
-            subtitle: 'Kelola dan telusuri data ${m.title.toLowerCase()}',
-            icon: m.icon,
-            accent: AppColors.forKey(m.id),
-          )),
+        // Kepala modul ikut bergulir bersama daftar, lewat di belakang bar kaca.
+        Positioned.fill(
+          child: ModuleListView(
+            module: m,
+            header: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+              child: Reveal(index: 0, dy: -14, child: ScreenHero(
+                heroTag: 'tile:${m.id}',
+                title: m.title,
+                subtitle: 'Kelola dan telusuri data ${m.title.toLowerCase()}',
+                icon: m.icon,
+                accent: AppColors.forKey(m.id),
+              )),
+            ),
+          ),
         ),
-        Expanded(child: ModuleListView(module: m)),
-      ])),
       ]),
     );
   }

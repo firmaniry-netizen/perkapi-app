@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import '../../core/widgets/page_glow.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +9,8 @@ import '../../core/widgets/icon_badge.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/widgets/glass_app_bar.dart';
+import '../../core/constants/app_tokens.dart';
 
 class _Entry {
   _Entry(this.kind, this.title, this.subtitle, this.route, this.when);
@@ -66,7 +69,7 @@ class _CalendarPageState extends State<CalendarPage> {
           .select('id,title,location,starts_at')
           .gte('starts_at', start.toUtc().toIso8601String())
           .lt('starts_at', end.toUtc().toIso8601String())
-          .order('starts_at');
+          .order('starts_at', ascending: true);
       for (final r in ev) {
         final t = DateTime.tryParse('${r['starts_at']}')?.toLocal();
         if (t == null) continue;
@@ -88,7 +91,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Color _color(String kind) => const Color(0xFF1565C0);
 
-  IconData _icon(String kind) => Icons.event;
+  IconData _icon(String kind) => CupertinoIcons.calendar;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +103,8 @@ class _CalendarPageState extends State<CalendarPage> {
     final selected = _byDay[_selected] ?? const <_Entry>[];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kalender')),
+      extendBodyBehindAppBar: true, // ListView tanpa padding: otomatis mulai di bawah bar kaca
+      appBar: GlassAppBar(title: const Text('Kalender')),
       body: PageGlow(accent: AppColors.orange, child: _error != null && !_loading
           ? ErrorState(message: _error!, onRetry: _load)
           : Align(
@@ -113,20 +117,26 @@ class _CalendarPageState extends State<CalendarPage> {
                 child: ScreenHero(
                   title: 'Kalender',
                   subtitle: 'Agenda dan kegiatan organisasi',
-                  icon: Icons.calendar_month_rounded,
+                  icon: CupertinoIcons.calendar,
                   accent: AppColors.orange,
                 ),
               ),
+              // Bulan dalam satu kartu (navigasi bulan, nama hari, kisi tanggal) seperti kalender iOS.
               Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                child: AppCard(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(children: [
-                  IconButton(onPressed: () => _shift(-1), icon: const Icon(Icons.chevron_left), tooltip: 'Bulan sebelumnya'),
+                  IconButton(onPressed: () => _shift(-1), icon: const Icon(CupertinoIcons.chevron_left), tooltip: 'Bulan sebelumnya'),
                   Expanded(
                     child: Text('${_months[_month.month - 1]} ${_month.year}',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   ),
-                  IconButton(onPressed: () => _shift(1), icon: const Icon(Icons.chevron_right), tooltip: 'Bulan berikutnya'),
+                  IconButton(onPressed: () => _shift(1), icon: const Icon(CupertinoIcons.chevron_right), tooltip: 'Bulan berikutnya'),
                 ]),
               ),
               Padding(
@@ -155,7 +165,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     final isToday = day == todayKey;
                     final kinds = entries.map((e) => e.kind).toSet().toList();
                     return InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.button),
                       onTap: () => setState(() => _selected = day),
                       child: Container(
                         margin: const EdgeInsets.all(2),
@@ -164,7 +174,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           border: isToday
                               ? Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5)
                               : null,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(AppRadius.button),
                         ),
                         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                           Text('${day.day}',
@@ -188,6 +198,9 @@ class _CalendarPageState extends State<CalendarPage> {
                       ),
                     );
                   },
+                ),
+              ),
+                  ]),
                 ),
               ),
               if (_loading) const LinearProgressIndicator(),
@@ -234,10 +247,10 @@ class _CalendarPageState extends State<CalendarPage> {
                             Text(e.subtitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ]),
                         ),
-                        Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        Icon(CupertinoIcons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ]),
                     ),
                   ),

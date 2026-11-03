@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
@@ -180,7 +181,7 @@ class _CardFace extends StatelessWidget {
                   _Pill(text: status, dot: active ? const Color(0xFF5CE08A) : const Color(0xFFFFB74D)),
                   const SizedBox(width: 6),
                   if (verified) ...[
-                    const _Pill(text: 'AHU', icon: Icons.verified_rounded),
+                    const _Pill(text: 'AHU', icon: CupertinoIcons.checkmark_seal_fill),
                     const SizedBox(width: 6),
                   ],
                   Flexible(child: _Pill(text: a.roleLabel)),
@@ -247,7 +248,7 @@ class _Chip extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.goldHi, AppColors.gold, Color(0xFFB8860B)],
+              colors: [AppColors.goldHi, AppColors.gold, AppColors.goldDeep],
             ),
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 4, offset: const Offset(0, 2))],
           ),
@@ -311,7 +312,7 @@ class _Pill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(AppRadius.chip),
           border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -344,6 +345,6 @@ class _QrBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(13),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))],
         ),
-        child: const Icon(Icons.qr_code_2_rounded, color: AppColors.navy, size: 24),
+        child: const Icon(CupertinoIcons.qrcode, color: AppColors.navy, size: 24),
       );
 }
