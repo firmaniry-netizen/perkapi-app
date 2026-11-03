@@ -92,6 +92,35 @@ workflows:
       - build/ios/iphonesimulator/Runner.zip
       - /tmp/xcodebuild_logs/*.log
 
+  ios-ipa-sideload:
+    name: iOS → IPA tanpa tanda tangan (pasang di iPhone lewat Sideloadly, Apple ID gratis)
+    # Hasil: PERKAPI-unsigned.ipa. Ditandatangani di Windows oleh Sideloadly memakai Apple ID biasa (gratis).
+    # Berlaku 7 hari, lalu pasang ulang. Notifikasi push tidak aktif di cara ini.
+    max_build_duration: 45
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - firebase
+    scripts:
+      - name: Pasang konfigurasi Firebase dari variabel rahasia (tidak disimpan di Git)
+        script: |
+          echo "$FIREBASE_OPTIONS_DART" | base64 --decode > lib/firebase_options.dart
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+      - name: Ambil paket Flutter
+        script: flutter pub get
+      - name: Build IPA tanpa tanda tangan
+        script: |
+          flutter build ios --release --no-codesign
+          mkdir -p build/ipa/Payload
+          cp -R build/ios/iphoneos/Runner.app build/ipa/Payload/
+          cd build/ipa && zip -qr PERKAPI-unsigned.ipa Payload
+    artifacts:
+      - build/ipa/PERKAPI-unsigned.ipa
+      - /tmp/xcodebuild_logs/*.log
+
   android-apk:
     name: Android → APK
     max_build_duration: 30
