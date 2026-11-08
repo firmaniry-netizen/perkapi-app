@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../features/shell/nav_items.dart' show isTopLevelRoute;
 
 import '../constants/app_colors.dart';
 import 'liquid_glass.dart';
@@ -54,9 +57,18 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     final onDark = backgroundColor != null && backgroundColor!.computeLuminance() < 0.3;
     final route = ModalRoute.of(context);
     final canPop = route?.impliesAppBarDismissal ?? false;
+    // Halaman yang dibuka langsung (context.go / notifikasi / tautan) tidak punya riwayat untuk "kembali".
+    // Di luar tab utama, tetap tampilkan tombol kembali yang membawa ke Beranda, seperti di iOS.
+    var toHome = false;
+    if (!canPop && automaticallyImplyLeading && leading == null) {
+      try {
+        final loc = GoRouterState.of(context).uri.path;
+        toHome = loc.isNotEmpty && loc != '/' && !isTopLevelRoute(loc);
+      } catch (_) {}
+    }
 
     Widget? lead = leading;
-    final glassBack = lead == null && automaticallyImplyLeading && canPop;
+    final glassBack = lead == null && automaticallyImplyLeading && (canPop || toHome);
     if (glassBack) {
       lead = Center(
         child: LiquidGlassButton(
@@ -64,7 +76,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           size: 40,
           clear: onDark,
           semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-          onTap: () => Navigator.maybePop(context),
+          onTap: () => canPop ? Navigator.maybePop(context) : context.go('/dashboard'),
           child: Icon(CupertinoIcons.chevron_back, size: 21, color: fg),
         ),
       );

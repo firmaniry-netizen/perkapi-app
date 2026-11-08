@@ -47,6 +47,7 @@ class _ChatPageState extends State<ChatPage> {
   List<Map<String, dynamic>> _msgs = []; // terbaru di indeks 0
   final Map<String, String> _names = {};
   final Map<String, DateTime> _reads = {}; // member_id -> terakhir dibaca
+  final Map<String, DateTime> _delivered = {}; // member_id -> terakhir pesan sampai di HP-nya
   final Map<String, DateTime> _typing = {}; // member_id -> kapan terakhir mengetik
   String _title = 'Chat';
   bool _group = false, _loading = true, _sending = false;
@@ -141,6 +142,8 @@ class _ChatPageState extends State<ChatPage> {
       for (final x in r) {
         final d = DateTime.tryParse('${x['last_read_at']}');
         if (d != null) _reads['${x['member_id']}'] = d;
+        final dv = DateTime.tryParse('${x['last_delivered_at']}');
+        if (dv != null) _delivered['${x['member_id']}'] = dv;
       }
     } catch (_) {
       // SQL 41 belum dijalankan: centang biru tidak tampil, chat tetap jalan
@@ -159,8 +162,14 @@ class _ChatPageState extends State<ChatPage> {
           table: 'chat_participants',
           filter: filter,
           callback: (p) {
+            final who = '${p.newRecord['member_id']}';
             final d = DateTime.tryParse('${p.newRecord['last_read_at']}');
-            if (d != null && mounted) setState(() => _reads['${p.newRecord['member_id']}'] = d);
+            final dv = DateTime.tryParse('${p.newRecord['last_delivered_at']}');
+            if (!mounted) return;
+            setState(() {
+              if (d != null) _reads[who] = d;
+              if (dv != null) _delivered[who] = dv;
+            });
           },
         )
         .onBroadcast(
@@ -483,15 +492,61 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   /// Dibaca semua peserta lain sejak pesan dikirim?
-  bool _readByAll(Map<String, dynamic> m) {
+  bool _readByAll(Map<String, dynamic> m) => _allSince(m, _reads);
+
+  /// Sudah sampai di HP semua peserta lain (atau sudah dibaca)?
+  bool _deliveredToAll(Map<String, dynamic> m) => _allSince(m, _delivered) || _readByAll(m);
+
+  bool _allSince(Map<String, dynamic> m, Map<String, DateTime> marks) {
     final at = DateTime.tryParse('${m['created_at']}');
     if (at == null) return false;
     final others = _names.keys.where((k) => k != _me).toList();
     if (others.isEmpty) return false;
     return others.every((k) {
-      final r = _reads[k];
+      final r = marks[k];
       return r != null && !r.isBefore(at);
     });
+  }
+
+  /// Centang ala WhatsApp: ✓ terkirim, ✓✓ abu-abu sampai, ✓✓ biru dibaca.
+  Widget _ticks(Map<String, dynamic> m, Color sub) {
+    final read = _readByAll(m);
+    final two = read || _deliveredToAll(m);
+    final c = read ? const Color(0xFF53BDEB) : sub;
+    if (!two) return Icon(CupertinoIcons.checkmark_alt, size: 15, color: c);
+    return SizedBox(
+      width: 21,
+      height: 15,
+      child: Stack(clipBehavior: Clip.none, children: [
+        Positioned(left: 0, top: 0, child: Icon(CupertinoIcons.checkmark_alt, size: 15, color: c)),
+        Positioned(left: 6, top: 0, child: Icon(CupertinoIcons.checkmark_alt, size: 15, color: c)),
+      ]),
+    );
+  }
+
+  /// Pesan saya paling baru (indeks di _msgs, 0 = paling baru), selain panggilan & yang dihapus.
+  int get _lastMineIndex => _msgs.indexWhere((e) => e['sender_id'] == _me && '${e['kind']}' != 'call' && e['deleted_at'] == null);
+
+  /// Keterangan "Dilihat" di bawah pesan terakhir saya bila sudah dibaca.
+  Widget _seenLabel(Map<String, dynamic> m, ColorScheme scheme) {
+    if (!_readByAll(m)) return const SizedBox.shrink();
+    String label;
+    if (_group) {
+      label = 'Dilihat semua';
+    } else {
+      final at = _reads[_peerId]?.toLocal();
+      final now = DateTime.now();
+      final hh = at == null ? '' : '${at.hour.toString().padLeft(2, '0')}.${at.minute.toString().padLeft(2, '0')}';
+      final today = at != null && at.year == now.year && at.month == now.month && at.day == now.day;
+      label = at == null ? 'Dilihat' : (today ? 'Dilihat $hh' : 'Dilihat ${at.day}/${at.month} $hh');
+    }
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 14, top: 2, bottom: 4),
+        child: Text(label, style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w600, color: scheme.onSurfaceVariant)),
+      ),
+    );
   }
 
   Map<String, dynamic>? _find(String? id) {
@@ -616,6 +671,7 @@ class _ChatPageState extends State<ChatPage> {
     return Column(children: [
       if (newDay) _dayChip(at, scheme),
       bubble,
+      if (i == _lastMineIndex) _seenLabel(m, scheme),
     ]);
   }
 
@@ -643,7 +699,8 @@ class _ChatPageState extends State<ChatPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(color: scheme.surfaceContainerHighest.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(AppRadius.control)),
-          child: Text('${m['body']} · ${chatTimeLabel(DateTime.tryParse('${m['created_at']}'))}',
+          // riwayat lama masih menyimpan emoji 📞/📹 di depan teks: dibuang saat ditampilkan
+          child: Text('${'${m['body']}'.replaceFirst(RegExp(r'^[^A-Za-z0-9]+'), '')} · ${chatTimeLabel(DateTime.tryParse('${m['created_at']}'))}',
               style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w600, color: missed ? AppColors.red : scheme.onSurfaceVariant)),
         ),
       ),
@@ -727,9 +784,7 @@ class _ChatPageState extends State<ChatPage> {
               Text(chatTimeLabel(DateTime.tryParse('${m['created_at']}')), style: TextStyle(fontSize: AppType.micro, color: sub)),
               if (mine && !deleted) ...[
                 const SizedBox(width: 4),
-                _readByAll(m)
-                    ? const Icon(CupertinoIcons.checkmark_alt, size: 16, color: Color(0xFF7DD3FC))
-                    : Icon(CupertinoIcons.checkmark, size: 16, color: sub),
+                _ticks(m, sub),
               ],
             ]),
           ),

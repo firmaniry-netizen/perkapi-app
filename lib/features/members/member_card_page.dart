@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -12,7 +13,7 @@ import '../../core/services/access_service.dart';
 import '../../core/widgets/member_avatar.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/motion_physics.dart';
-import '../../core/widgets/perkapi_logo.dart';
+import '../../core/services/supabase_service.dart';
 import '../ahu/ahu_page.dart';
 import '../../core/widgets/glass_app_bar.dart';
 import '../../core/constants/app_tokens.dart';
@@ -38,9 +39,32 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
   bool _dragging = false;
   bool _back = false;
 
+  // Penanda tangan di sisi belakang kartu; diperbarui dari tabel struktur organisasi.
+  String _ketua = 'Siking Suriyadi, S.H., M.H.';
+  String _sekjen = 'Iwan Kurniawan Hamid, S.H.';
+
+  Future<void> _loadSigners() async {
+    try {
+      final rows = List<Map<String, dynamic>>.from(await SupabaseService.client
+          .from('org_structure')
+          .select('position, name')
+          .inFilter('position', ['Ketua Umum', 'Sekretaris Jenderal']) as List);
+      if (!mounted) return;
+      setState(() {
+        for (final r in rows) {
+          final n = '${r['name'] ?? ''}'.trim();
+          if (n.isEmpty) continue;
+          if (r['position'] == 'Ketua Umum') _ketua = n;
+          if (r['position'] == 'Sekretaris Jenderal') _sekjen = n;
+        }
+      });
+    } catch (_) {}
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadSigners();
     if (!kIsWeb) {
       try {
         _sub = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval).listen(_onAccel, onError: (_) {});
@@ -129,7 +153,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
                 child: LayoutBuilder(builder: (context, box) {
                   _cardW = box.maxWidth <= 0 ? 300 : box.maxWidth;
                   return AspectRatio(
-                  aspectRatio: 0.64,
+                  aspectRatio: 638 / 1016, // ukuran desain ID card PERKAPI (CR80 tegak)
                   child: ValueListenableBuilder<Offset>(
                     valueListenable: _tilt,
                     builder: (context, t0, _) => TweenAnimationBuilder<Offset>(
@@ -163,6 +187,12 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
+              if ('${m['ahu_registration_number'] ?? ''}'.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => openAhuOnline(context),
+                  icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 16),
+                  label: const Text('Buka AHU Online'),
+                ),
               const SizedBox(height: 6),
               const Text(
                 'Kartu ini bukan dokumen resmi pemerintah. Lencana AHU hanya menandai data yang dicocokkan pengelola PERKAPI.',
@@ -176,21 +206,50 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
     );
   }
 
-  BoxDecoration _shell(Offset t, {required Gradient gradient}) => BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.hero),
-        gradient: gradient,
-        boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.38), blurRadius: 30, offset: Offset(-t.dx * 16, 16 - t.dy * 10))],
+  static const _ink = Color(0xFF14142B);
+  static const _red = Color(0xFFD61F26);
+  static const _olive = Color(0xFFA39200);
+  static const _bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+  String _validUntil(dynamic v) {
+    final d = DateTime.tryParse('${v ?? ''}');
+    if (d == null) return (v == null || '$v'.isEmpty) ? '-' : '$v';
+    return '${_bulan[d.month - 1]} ${d.year}';
+  }
+
+  TextStyle _font(double size, {FontWeight w = FontWeight.w600, Color c = _ink, double ls = 0, double h = 1.2}) =>
+      GoogleFonts.montserrat(fontSize: size, fontWeight: w, color: c, letterSpacing: ls, height: h);
+
+  /// Bingkai kartu: latar desain resmi (ornamen + logo), sudut membulat, bayangan ikut kemiringan, kilau.
+  Widget _card(Offset t, String bg, Widget Function(double w, double h) content) {
+    return LayoutBuilder(builder: (context, box) {
+      final w = box.maxWidth, h = box.maxHeight;
+      final r = BorderRadius.circular(w * 0.05);
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: r,
+          boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.30), blurRadius: 30, offset: Offset(-t.dx * 16, 16 - t.dy * 10))],
+        ),
+        child: ClipRRect(
+          borderRadius: r,
+          child: Stack(fit: StackFit.expand, children: [
+            Image.asset(bg, fit: BoxFit.cover, filterQuality: FilterQuality.medium),
+            content(w, h),
+            _glare(t),
+          ]),
+        ),
       );
+    });
+  }
 
   Widget _glare(Offset t) => Positioned.fill(
         child: IgnorePointer(
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.hero),
               gradient: LinearGradient(
                 begin: Alignment(-1.4 + t.dx * 1.6, -1.4 + t.dy * 1.6),
                 end: Alignment(0.6 + t.dx * 1.6, 0.6 + t.dy * 1.6),
-                colors: [Colors.transparent, Colors.white.withOpacity(0.05 + 0.2 * t.distance.clamp(0.0, 1.0)), Colors.transparent],
+                colors: [Colors.transparent, Colors.white.withValues(alpha: 0.05 + 0.25 * t.distance.clamp(0.0, 1.0)), Colors.transparent],
                 stops: const [0.25, 0.5, 0.75],
               ),
             ),
@@ -198,99 +257,141 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
         ),
       );
 
+  /// Sisi depan: foto anggota dalam cincin merah-zaitun, nama, nomor AHU, masa berlaku.
   Widget _frontFace(BuildContext context, Access a, Map m, Offset t) {
-    final ahuNo = '${m['ahu_registration_number'] ?? ''}';
+    final ahuNo = '${m['ahu_registration_number'] ?? ''}'.trim();
     final verified = m['ahu_verified'] == true;
-    return Container(
-      decoration: _shell(t, gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0B1A3F), AppColors.navy, Color(0xFF1B3F9A)])),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.hero),
-        child: Stack(children: [
-          Positioned(right: -70, bottom: -50, child: Icon(Icons.hexagon_outlined, size: 300, color: Colors.white.withOpacity(0.07))),
-          Positioned(left: 0, right: 0, top: 0, child: Container(height: 5, color: AppColors.red)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 26, 22, 20),
-            child: Column(children: [
-              const Row(children: [
-                PerkapiLogo(size: 42, onDark: true),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('PERKAPI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: AppType.title, letterSpacing: 2)),
-                    Text('Kartu Anggota Digital', style: TextStyle(color: Color(0xFFBCC7EA), fontSize: AppType.caption)),
-                  ]),
-                ),
-              ]),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.gold, AppColors.goldDeep])),
-                child: MemberAvatar(name: a.name, path: a.avatarPath, radius: 54),
+    final idLine = ahuNo.isNotEmpty ? ahuNo : 'No. Anggota ${m['member_number'] ?? '-'}';
+    return _card(t, 'images/kartu/kartu_depan.jpg', (w, h) {
+      final ring = w * 0.43;
+      return Stack(children: [
+        // foto
+        Positioned(
+          left: (w - ring) / 2,
+          top: h * 0.508 - ring / 2,
+          width: ring,
+          height: ring,
+          child: Container(
+            padding: EdgeInsets.all(w * 0.014),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: SweepGradient(
+                startAngle: 0,
+                endAngle: math.pi * 2,
+                colors: [_olive, _olive, _red, _red, _olive],
+                stops: [0, 0.32, 0.38, 0.85, 1],
+                transform: GradientRotation(-math.pi / 2),
               ),
-              const SizedBox(height: 16),
-              Text(a.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.h2, fontWeight: FontWeight.w900, height: 1.15)),
-              const SizedBox(height: 6),
-              Text('No. ${m['member_number'] ?? '-'}', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.2, fontSize: AppType.lead)),
-              const SizedBox(height: 10),
-              Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 6, children: [
-                _chip(a.roleLabel),
-                _chip('${m['status'] ?? '-'}'),
-              ]),
-              const Spacer(),
-              if (ahuNo.isNotEmpty)
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(verified ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.person_crop_rectangle, size: 16, color: AppColors.gold),
-                  const SizedBox(width: 6),
-                  Flexible(child: Text(verified ? 'Terverifikasi AHU' : 'AHU $ahuNo', style: const TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700, fontSize: AppType.small))),
-                ]),
-              const SizedBox(height: 8),
-              Text('Berlaku s/d ${m['valid_until'] ?? '-'}', style: const TextStyle(color: Color(0xFFBCC7EA), fontSize: AppType.caption)),
-            ]),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(w * 0.008),
+              decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+              child: ClipOval(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: MemberAvatar(name: a.name, path: a.avatarPath, radius: 120),
+                ),
+              ),
+            ),
           ),
-          _glare(t),
-        ]),
-      ),
-    );
+        ),
+        // nama + nomor
+        Positioned(
+          left: w * 0.07,
+          right: w * 0.07,
+          top: h * 0.685,
+          child: Column(children: [
+            Text(a.name.toUpperCase(),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: _font(w * 0.056, w: FontWeight.w800, h: 1.1)),
+            SizedBox(height: h * 0.008),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              if (verified) ...[
+                Icon(CupertinoIcons.checkmark_seal_fill, size: w * 0.042, color: _olive),
+                SizedBox(width: w * 0.012),
+              ],
+              Flexible(child: Text(idLine, maxLines: 1, overflow: TextOverflow.ellipsis, style: _font(w * 0.04, w: FontWeight.w500))),
+            ]),
+          ]),
+        ),
+        // masa berlaku
+        Positioned(
+          left: w * 0.1,
+          right: w * 0.1,
+          top: h * 0.86,
+          child: Text('Berlaku sampai dengan ${_validUntil(m['valid_until'])}',
+              textAlign: TextAlign.center, style: _font(w * 0.03, w: FontWeight.w600)),
+        ),
+      ]);
+    });
   }
 
-  Widget _chip(String s) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(AppRadius.chip), border: Border.all(color: Colors.white24)),
-        child: Text(s, style: const TextStyle(color: Colors.white, fontSize: AppType.caption, fontWeight: FontWeight.w700)),
-      );
-
+  /// Sisi belakang: penanda tangan, alamat sekretariat, keterangan, QR verifikasi.
   Widget _backFace(BuildContext context, Map m, Offset t) {
     final token = m['qr_token']?.toString();
-    final ahuNo = '${m['ahu_registration_number'] ?? ''}';
-    return Container(
-      decoration: _shell(t, gradient: const LinearGradient(colors: [Colors.white, Color(0xFFEDEFF4)], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.hero),
-        child: Stack(children: [
-          Positioned(left: 0, right: 0, top: 0, child: Container(height: 5, color: AppColors.red)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 30, 22, 20),
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text('Pindai untuk verifikasi', style: TextStyle(color: AppColors.navy, fontSize: AppType.title, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 16),
-              if (token == null)
-                const Text('QR belum tersedia', style: TextStyle(color: AppColors.navy))
-              else
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.button), border: Border.all(color: const Color(0xFFC9CFDF))),
-                  child: QrImageView(data: 'perkapi:member:$token', size: 200),
-                ),
-              if (ahuNo.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Text(ahuNo, style: const TextStyle(color: AppColors.navy, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
-                TextButton.icon(onPressed: () => openAhuOnline(context), icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 16), label: const Text('Buka AHU Online')),
-              ],
-            ]),
+    return _card(t, 'images/kartu/kartu_belakang.jpg', (w, h) {
+      Widget signer(String name, String title) => Column(children: [
+            Text(name, textAlign: TextAlign.center, maxLines: 2, style: _font(w * 0.026, w: FontWeight.w700)),
+            SizedBox(height: h * 0.002),
+            Text(title, textAlign: TextAlign.center, style: _font(w * 0.024, w: FontWeight.w500)),
+          ]);
+      final addr = _font(w * 0.031, w: FontWeight.w500, h: 1.35);
+      return Stack(children: [
+        Positioned(
+          left: w * 0.05,
+          right: w * 0.05,
+          top: h * 0.41,
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: signer(_ketua, 'Ketua Umum')),
+            SizedBox(width: w * 0.04),
+            Expanded(child: signer(_sekjen, 'Sekretaris Jenderal')),
+          ]),
+        ),
+        Positioned(
+          left: w * 0.06,
+          right: w * 0.06,
+          top: h * 0.505,
+          child: Column(children: [
+            Text('SEKRETARIAT PERKAPI',
+                style: _font(w * 0.037, w: FontWeight.w600).copyWith(decoration: TextDecoration.underline, decorationThickness: 1.4)),
+            SizedBox(height: h * 0.008),
+            Text('SINARMAS LAND PLAZA TOWER III LT. 10\nJalan M.H. Thamrin No.51\nGondangdia Menteng - Jakarta Pusat\nTelepon 021-39711824',
+                textAlign: TextAlign.center, style: addr),
+          ]),
+        ),
+        Positioned(
+          left: w * 0.065,
+          right: w * 0.065,
+          top: h * 0.69,
+          child: Text(
+            'Kartu ini adalah identitas digital resmi anggota Persatuan Kurator dan Pengurus Indonesia. '
+            'Pindai kode QR untuk memverifikasi keanggotaan. Bila ditemukan, mohon hubungi Sekretariat PERKAPI.',
+            textAlign: TextAlign.justify,
+            style: _font(w * 0.027, w: FontWeight.w500, h: 1.35),
           ),
-          _glare(t),
-        ]),
-      ),
-    );
+        ),
+        Positioned(
+          left: w * 0.065,
+          top: h * 0.79,
+          width: w * 0.21,
+          height: w * 0.21,
+          child: Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(w * 0.008),
+            child: token == null
+                ? Center(child: Text('QR belum tersedia', textAlign: TextAlign.center, style: _font(w * 0.022)))
+                : QrImageView(data: 'perkapi:member:$token', padding: EdgeInsets.zero, backgroundColor: Colors.white),
+          ),
+        ),
+        Positioned(
+          left: w * 0.3,
+          right: w * 0.32,
+          top: h * 0.855,
+          child: Text('Verifikasi keanggotaan:\nperkapi.or.id', style: _font(w * 0.028, w: FontWeight.w600, h: 1.25)),
+        ),
+      ]);
+    });
   }
 }

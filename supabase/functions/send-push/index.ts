@@ -93,8 +93,11 @@ Deno.serve(async (req) => {
         headers: { Authorization: `Bearer ${bearer}`, "content-type": "application/json" },
         body: JSON.stringify({ message }),
       });
+      const detail = r.ok ? "" : (await r.text()).slice(0, 500);
+      // catat hasil kirim untuk diagnosis (tabel push_log, hanya bisa dibaca service role)
+      await db.from("push_log").insert({ member_id: rec.member_id, platform: t.platform, kind: type, status: r.status, detail }).then(() => {}, () => {});
       if (r.status === 404 || r.status === 400) {
-        const e = await r.text();
+        const e = detail;
         // hanya token yang benar-benar sudah tidak berlaku yang dihapus
         if (e.includes("UNREGISTERED") || (r.status === 400 && e.includes("registration token"))) {
           await db.from("device_tokens").delete().eq("token", t.token);

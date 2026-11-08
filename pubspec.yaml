@@ -52,6 +52,7 @@ flutter:
   assets:
     - images/
     - images/foto/ # foto asli kegiatan PERKAPI + foto bertema hukum (lib/core/constants/app_photos.dart)
+    - images/kartu/ # latar ID card digital (dari desain resmi idcard_perkapi.pdf)
     - assets/models/
     - assets/sounds/ # nada dering & nada sambung telepon
   # Huruf aksen situs resmi: Instrument Serif (OFL, lihat fonts/OFL-InstrumentSerif.txt).

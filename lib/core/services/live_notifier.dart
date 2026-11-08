@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver, AppLifecycleState;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/alerts/alert_service.dart';
@@ -20,7 +21,7 @@ class LiveNotice {
 ///  2. Peringatan penting (urgent/warning) dari AlertService tampil sekali.
 ///  3. Saat aplikasi dibuka: ringkasan "N notifikasi belum dibaca".
 /// Catatan: ini BUKAN push saat aplikasi tertutup (itu butuh Firebase/FCM).
-class LiveNotifier {
+class LiveNotifier with WidgetsBindingObserver {
   LiveNotifier._();
   static final LiveNotifier instance = LiveNotifier._();
 
@@ -44,6 +45,7 @@ class LiveNotifier {
           filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'member_id', value: id),
           callback: (payload) {
             final r = payload.newRecord;
+            markChatDelivered(); // pesan/panggilan sudah sampai di HP ini → centang dua di pengirim
             if (r['type'] == 'call') return; // layar panggilan sudah tampil sendiri
             final nid = '${r['id']}';
             if (!_shown.add('n$nid')) return;
@@ -58,10 +60,29 @@ class LiveNotifier {
         )
         .subscribe();
     AlertService.instance.addListener(_onAlerts);
+    WidgetsBinding.instance.addObserver(this);
+    markChatDelivered();
     Future<void>.delayed(const Duration(milliseconds: 1600), _unreadSummary);
   }
 
+  DateTime? _lastDelivered;
+
+  /// Tandai semua chat saya "sudah sampai" (centang dua abu-abu di HP pengirim). Dibatasi sekali per 3 detik.
+  void markChatDelivered() {
+    if (_memberId == null) return;
+    final now = DateTime.now();
+    if (_lastDelivered != null && now.difference(_lastDelivered!) < const Duration(seconds: 3)) return;
+    _lastDelivered = now;
+    SupabaseService.client.rpc('chat_mark_delivered').catchError((_) {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) markChatDelivered();
+  }
+
   void stop() {
+    WidgetsBinding.instance.removeObserver(this);
     _channel?.unsubscribe();
     _channel = null;
     _memberId = null;

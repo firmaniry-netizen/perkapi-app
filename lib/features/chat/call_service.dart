@@ -410,8 +410,8 @@ class CallSession extends ChangeNotifier {
     final offer = await _pc!.createOffer({'offerToReceiveAudio': true, 'offerToReceiveVideo': video});
     await _pc!.setLocalDescription(offer);
     await service.send(this, 'offer', {'sdp': offer.sdp, 'type': offer.type});
-    // nada sambung "tuut… tuut…" (Android; di iPhone sesi audio dipegang WebRTC)
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android && !_answered && !_closed) _playTone('sounds/ringback.mp3');
+    // nada sambung "tuut… tuut…" lewat speaker telinga (Android & iPhone)
+    if (!kIsWeb && !_answered && !_closed) _playTone('sounds/ringback.mp3', earpiece: true);
     _ringTimeout = Timer(const Duration(seconds: 45), () {
       if (!_answered) hangup(reason: 'Tidak dijawab');
     });
@@ -423,8 +423,10 @@ class CallSession extends ChangeNotifier {
       accept();
       return;
     }
-    _playTone('sounds/ring.mp3');
-    _vibe = Timer.periodic(const Duration(milliseconds: 1400), (_) => HapticFeedback.heavyImpact());
+    // dering tetap berbunyi walau sakelar senyap iPhone aktif (seperti panggilan biasa)
+    _playTone('sounds/ring.mp3', loud: true);
+    HapticFeedback.vibrate();
+    _vibe = Timer.periodic(const Duration(milliseconds: 1200), (_) => HapticFeedback.vibrate());
     _ringTimeout = Timer(const Duration(seconds: 45), () {
       if (!_answered) _end('Panggilan tak terjawab', notifyPeer: false);
     });
@@ -532,11 +534,15 @@ class CallSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Nada dering/sambung berulang; mengikuti mode senyap HP.
-  Future<void> _playTone(String asset) async {
+  /// Nada dering/sambung berulang. [loud]: dering masuk lewat speaker, abaikan sakelar senyap.
+  /// [earpiece]: nada sambung pelan lewat speaker telinga (aman dipakai bersama mikrofon WebRTC).
+  Future<void> _playTone(String asset, {bool loud = false, bool earpiece = false}) async {
     try {
       final p = _tone ??= AudioPlayer();
-      await p.setAudioContext(AudioContextConfig(respectSilence: true).build());
+      await p.setAudioContext(AudioContextConfig(
+        route: earpiece ? AudioContextConfigRoute.earpiece : AudioContextConfigRoute.system,
+        respectSilence: !loud && !earpiece,
+      ).build());
       await p.setReleaseMode(ReleaseMode.loop);
       await p.play(AssetSource(asset), volume: 0.9);
       if (_answered || _closed) await _stopTone();
