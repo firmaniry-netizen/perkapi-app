@@ -1,6 +1,8 @@
 # PERKAPI
 Platform Digital Organisasi Kurator, Kepailitan & PKPU (Flutter + Supabase)
 
+**Dokumentasi proyek (case study):** [docs/case-study](docs/case-study/README.md) — fitur, arsitektur, CI/CD, keamanan.
+
 > PENTING: kode ini ditulis tanpa Flutter SDK dan tanpa akses ke database Anda, jadi BELUM dikompilasi
 > dan BELUM diuji. Jalankan `flutter analyze` dan kirim error yang muncul agar bisa diperbaiki.
 > Flutter yang dibutuhkan: stable 3.27 atau lebih baru.
