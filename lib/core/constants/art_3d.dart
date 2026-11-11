@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'phosphor_icons.dart';
 
 /// Gambar ikon 3D PERKAPI (images/3d/*.png, 384 px, latar transparan) — dirender khusus dengan warna merek
 /// (dongker, emas, merah marun). Dipakai otomatis oleh [SolidTile] / [QuickTile] / [IconBadge] dan ilustrasi
@@ -12,40 +12,40 @@ class Art3D {
 
   // IconData menimpa ==, jadi tidak bisa dipakai sebagai kunci peta `const`.
   static final Map<IconData, String> _byIcon = {
-    for (final i in [CupertinoIcons.news, CupertinoIcons.photo_on_rectangle]) i: 'berita',
-    for (final i in [CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar, CupertinoIcons.calendar_badge_plus]) i: 'kalender',
-    for (final i in [CupertinoIcons.hammer, CupertinoIcons.hammer_fill, CupertinoIcons.hammer]) i: 'hukum',
-    for (final i in [CupertinoIcons.chat_bubble_2, CupertinoIcons.chat_bubble_2_fill]) i: 'forum',
-    for (final i in [CupertinoIcons.chat_bubble, CupertinoIcons.chat_bubble_fill]) i: 'chat',
-    for (final i in [CupertinoIcons.sparkles, CupertinoIcons.sparkles, CupertinoIcons.sparkles]) i: 'ai',
-    for (final i in [CupertinoIcons.square_grid_2x2, CupertinoIcons.square_grid_2x2, CupertinoIcons.square_grid_2x2]) i: 'semua',
-    for (final i in [CupertinoIcons.person_crop_rectangle, CupertinoIcons.qrcode]) i: 'kartu',
-    CupertinoIcons.book: 'saku',
-    CupertinoIcons.rosette: 'medali',
-    for (final i in [CupertinoIcons.speaker_2, CupertinoIcons.speaker_2_fill]) i: 'pengumuman',
-    for (final i in [CupertinoIcons.building_2_fill, CupertinoIcons.building_2_fill, CupertinoIcons.building_2_fill]) i: 'gedung',
-    for (final i in [CupertinoIcons.list_bullet_indent, CupertinoIcons.list_bullet_indent]) i: 'struktur',
-    CupertinoIcons.person_3: 'anggota',
-    for (final i in [CupertinoIcons.shield, CupertinoIcons.checkmark_shield, CupertinoIcons.hand_raised]) i: 'perisai',
-    for (final i in [CupertinoIcons.location, CupertinoIcons.placemark, CupertinoIcons.location, CupertinoIcons.globe]) i: 'lokasi',
-    for (final i in [CupertinoIcons.chart_bar, CupertinoIcons.chart_bar_alt_fill]) i: 'laporan',
-    for (final i in [CupertinoIcons.doc_plaintext, CupertinoIcons.doc_text, CupertinoIcons.person_badge_plus, CupertinoIcons.folder]) i: 'dokumen',
-    CupertinoIcons.checkmark_seal: 'verifikasi',
-    CupertinoIcons.arrow_2_circlepath: 'perpanjang',
+    for (final i in [Ph.newspaper, Ph.images]) i: 'berita',
+    for (final i in [Ph.calendarBlank, Ph.calendarBlank, Ph.calendarBlank, Ph.calendarBlank, Ph.calendarBlank, Ph.calendarPlus]) i: 'kalender',
+    for (final i in [Ph.gavel, PhFill.gavel, Ph.gavel]) i: 'hukum',
+    for (final i in [Ph.chatsCircle, PhFill.chatsCircle]) i: 'forum',
+    for (final i in [Ph.chatCircle, PhFill.chatCircle]) i: 'chat',
+    for (final i in [Ph.sparkle, Ph.sparkle, Ph.sparkle]) i: 'ai',
+    for (final i in [Ph.squaresFour, Ph.squaresFour, Ph.squaresFour]) i: 'semua',
+    for (final i in [Ph.identificationCard, Ph.qrCode]) i: 'kartu',
+    Ph.bookOpen: 'saku',
+    Ph.medal: 'medali',
+    for (final i in [Ph.megaphone, PhFill.megaphone]) i: 'pengumuman',
+    for (final i in [Ph.buildings, Ph.buildings, Ph.buildings]) i: 'gedung',
+    for (final i in [Ph.treeStructure, Ph.treeStructure]) i: 'struktur',
+    Ph.usersThree: 'anggota',
+    for (final i in [Ph.shield, Ph.shieldCheck, Ph.hand]) i: 'perisai',
+    for (final i in [Ph.mapPin, Ph.mapPinLine, Ph.mapPin, Ph.globe]) i: 'lokasi',
+    for (final i in [Ph.chartBar, PhFill.chartBar]) i: 'laporan',
+    for (final i in [Ph.article, Ph.fileText, Ph.userPlus, Ph.folder]) i: 'dokumen',
+    Ph.sealCheck: 'verifikasi',
+    Ph.arrowsClockwise: 'perpanjang',
     for (final i in [
-      CupertinoIcons.bell,
-      CupertinoIcons.bell_fill,
-      CupertinoIcons.bell,
-      CupertinoIcons.bell,
-      CupertinoIcons.bell_fill,
-      CupertinoIcons.bell,
+      Ph.bell,
+      PhFill.bell,
+      Ph.bell,
+      Ph.bell,
+      PhFill.bell,
+      Ph.bell,
     ])
       i: 'lonceng',
-    CupertinoIcons.gear: 'pengaturan',
-    for (final i in [CupertinoIcons.person_crop_circle, CupertinoIcons.person]) i: 'profil',
-    for (final i in [CupertinoIcons.clock, CupertinoIcons.clock, CupertinoIcons.clock]) i: 'riwayat',
-    CupertinoIcons.globe: 'global',
-    CupertinoIcons.house: 'beranda',
+    Ph.gear: 'pengaturan',
+    for (final i in [Ph.userCircle, Ph.user]) i: 'profil',
+    for (final i in [Ph.clock, Ph.clock, Ph.clock]) i: 'riwayat',
+    Ph.globe: 'global',
+    Ph.house: 'beranda',
   };
 
   /// Jalur aset gambar 3D untuk [icon], atau null bila tidak ada padanannya.

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -24,11 +24,11 @@ class ProfessionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final sc = Theme.of(context).colorScheme;
     final entries = <(IconData, String, String, String, Color)>[
-      (CupertinoIcons.person_badge_plus, 'Pendaftaran AHU', 'Syarat dokumen, alur, dan masa berlaku surat bukti pendaftaran.', '/profession/registration', AppColors.teal),
-      (CupertinoIcons.arrow_2_circlepath, 'Perpanjangan AHU', 'Kapan boleh memperpanjang, dokumen yang disiapkan, dan hitung mundur masa berlaku.', '/profession/renewal', AppColors.amber),
-      (CupertinoIcons.doc_plaintext, 'Format Laporan ke AHU', 'Laporan pengangkatan, berkala 3 bulan, akhir, dan pindah alamat, lengkap dengan batas waktunya.', '/profession/reports', AppColors.violet),
-      (CupertinoIcons.hammer_fill, 'Peraturan & Hukum', 'UU Kepailitan, Permenkumham, dan putusan MK yang bisa diunduh dari sumber resmi.', '/regulations', AppColors.navy),
-      (CupertinoIcons.checkmark_seal, 'Data AHU Saya', 'Isi nomor dan tanggal surat bukti pendaftaran Anda, lalu minta verifikasi pengelola.', '/ahu', AppColors.navyAction),
+      (Ph.userPlus, 'Pendaftaran AHU', 'Syarat dokumen, alur, dan masa berlaku surat bukti pendaftaran.', '/profession/registration', AppColors.teal),
+      (Ph.arrowsClockwise, 'Perpanjangan AHU', 'Kapan boleh memperpanjang, dokumen yang disiapkan, dan hitung mundur masa berlaku.', '/profession/renewal', AppColors.amber),
+      (Ph.article, 'Format Laporan ke AHU', 'Laporan pengangkatan, berkala 3 bulan, akhir, dan pindah alamat, lengkap dengan batas waktunya.', '/profession/reports', AppColors.violet),
+      (PhFill.gavel, 'Peraturan & Hukum', 'UU Kepailitan, Permenkumham, dan putusan MK yang bisa diunduh dari sumber resmi.', '/regulations', AppColors.navy),
+      (Ph.sealCheck, 'Data AHU Saya', 'Isi nomor dan tanggal surat bukti pendaftaran Anda, lalu minta verifikasi pengelola.', '/ahu', AppColors.navyAction),
     ];
     return Scaffold(
       appBar: GlassAppBar(title: const Text('Profesi')),
@@ -48,7 +48,7 @@ class ProfessionPage extends StatelessWidget {
                   child: ScreenHero(
                     title: 'Profesi Kurator & Pengurus',
                     subtitle: 'Urusan pendaftaran, perpanjangan, dan pelaporan ke AHU',
-                    icon: CupertinoIcons.rosette,
+                    icon: Ph.medal,
                     accent: AppColors.teal,
                   ),
                 ),
@@ -89,7 +89,7 @@ class ProfessionPage extends StatelessWidget {
                             Text(entries[i].$3, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                           ]),
                         ),
-                        Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
+                        Icon(Ph.caretRight, color: sc.onSurfaceVariant),
                       ]),
                     ),
                   ),
@@ -138,7 +138,7 @@ class AhuRegistrationGuidePage extends StatelessWidget {
       hero: ScreenHero(
         title: 'Pendaftaran Kurator & Pengurus',
         subtitle: 'Syarat dokumen, alur pengajuan, dan masa berlaku',
-        icon: CupertinoIcons.person_badge_plus,
+        icon: Ph.userPlus,
         accent: AppColors.teal,
       ),
       children: [
@@ -155,7 +155,7 @@ class AhuRegistrationGuidePage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         const GuideCallout(
-          icon: CupertinoIcons.exclamationmark_triangle,
+          icon: Ph.warning,
           color: AppColors.amber,
           text: 'Jika kekurangan dokumen tidak dilengkapi dalam 14 hari kerja, permohonan ditolak dan biaya yang sudah dibayar tidak dikembalikan. Anda boleh mengajukan lagi setelah ditolak.',
         ),
@@ -176,11 +176,11 @@ class AhuRegistrationGuidePage extends StatelessWidget {
           ]),
         ),
         const SizedBox(height: 16),
-        PrimaryButton(label: 'Isi data AHU saya', icon: CupertinoIcons.square_pencil, onPressed: () => context.push('/ahu')),
+        PrimaryButton(label: 'Isi data AHU saya', icon: Ph.notePencil, onPressed: () => context.push('/ahu')),
         const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: () => openAhuOnline(context),
-          icon: const Icon(CupertinoIcons.arrow_up_right_square),
+          icon: const Icon(Ph.arrowSquareOut),
           label: const Text('Buka AHU Online'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
         ),
@@ -215,7 +215,7 @@ class AhuRenewalPage extends StatelessWidget {
       hero: ScreenHero(
         title: 'Perpanjangan Surat Bukti',
         subtitle: 'Berlaku 5 tahun, dapat diperpanjang tiap 5 tahun',
-        icon: CupertinoIcons.arrow_2_circlepath,
+        icon: Ph.arrowsClockwise,
         accent: AppColors.amber,
       ),
       children: [
@@ -241,7 +241,7 @@ class AhuRenewalPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () => context.push('/ahu'),
-                    icon: const Icon(CupertinoIcons.square_pencil),
+                    icon: const Icon(Ph.notePencil),
                     label: const Text('Isi data AHU saya'),
                   ),
                 ]),
@@ -252,10 +252,10 @@ class AhuRenewalPage extends StatelessWidget {
             final daysLeft = DateTime(until.year, until.month, until.day).difference(today).inDays;
             final opens = DateTime(until.year, until.month - 3, until.day);
             final (String head, String body, Color color, IconData icon) = daysLeft < 0
-                ? ('Masa berlaku sudah lewat', 'Sudah lewat ${-daysLeft} hari. Segera hubungi Organisasi Profesi Anda dan periksa status di AHU Online.', AppColors.red, CupertinoIcons.exclamationmark_circle)
+                ? ('Masa berlaku sudah lewat', 'Sudah lewat ${-daysLeft} hari. Segera hubungi Organisasi Profesi Anda dan periksa status di AHU Online.', AppColors.red, Ph.warningCircle)
                 : !today.isBefore(DateTime(opens.year, opens.month, opens.day))
-                    ? ('Sudah bisa diperpanjang', 'Sisa $daysLeft hari. Jendela pengajuan sudah dibuka sejak ${ahuDate(opens.toIso8601String())}.', AppColors.amber, CupertinoIcons.calendar_badge_plus)
-                    : ('Belum waktunya', 'Sisa $daysLeft hari. Pengajuan baru dapat dilakukan mulai ${ahuDate(opens.toIso8601String())}.', AppColors.emerald, CupertinoIcons.clock);
+                    ? ('Sudah bisa diperpanjang', 'Sisa $daysLeft hari. Jendela pengajuan sudah dibuka sejak ${ahuDate(opens.toIso8601String())}.', AppColors.amber, Ph.calendarPlus)
+                    : ('Belum waktunya', 'Sisa $daysLeft hari. Pengajuan baru dapat dilakukan mulai ${ahuDate(opens.toIso8601String())}.', AppColors.emerald, Ph.clock);
             return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               GuideCallout(icon: icon, color: color, text: '$head. $body'),
               const SizedBox(height: 10),
@@ -290,16 +290,16 @@ class AhuRenewalPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         const GuideCallout(
-          icon: CupertinoIcons.exclamationmark_triangle,
+          icon: Ph.warning,
           color: AppColors.amber,
           text: 'Kurator atau Pengurus yang sudah dihapus tetap dari daftar tidak dapat mengajukan perpanjangan.',
         ),
         const SizedBox(height: 16),
-        PrimaryButton(label: 'Perbarui data AHU saya', icon: CupertinoIcons.square_pencil, onPressed: () => context.push('/ahu')),
+        PrimaryButton(label: 'Perbarui data AHU saya', icon: Ph.notePencil, onPressed: () => context.push('/ahu')),
         const SizedBox(height: 10),
         OutlinedButton.icon(
           onPressed: () => openAhuOnline(context),
-          icon: const Icon(CupertinoIcons.arrow_up_right_square),
+          icon: const Icon(Ph.arrowSquareOut),
           label: const Text('Buka AHU Online'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
         ),
@@ -391,7 +391,7 @@ Tanggal efektif pindah : ...
       GuideCard(
         title: title,
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          GuideCallout(icon: CupertinoIcons.clock, color: color, text: 'Batas waktu: $deadline'),
+          GuideCallout(icon: Ph.clock, color: color, text: 'Batas waktu: $deadline'),
           const SizedBox(height: 12),
           Text('Disampaikan kepada: $to', style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35)),
           const SizedBox(height: 12),
@@ -413,7 +413,7 @@ Tanggal efektif pindah : ...
       hero: ScreenHero(
         title: 'Format Laporan ke AHU',
         subtitle: 'Empat laporan yang wajib disampaikan Kurator & Pengurus',
-        icon: CupertinoIcons.doc_plaintext,
+        icon: Ph.article,
         accent: AppColors.violet,
       ),
       children: [
@@ -480,7 +480,7 @@ Tanggal efektif pindah : ...
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: () => openAhuOnline(context),
-          icon: const Icon(CupertinoIcons.arrow_up_right_square),
+          icon: const Icon(Ph.arrowSquareOut),
           label: const Text('Buka AHU Online'),
           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
         ),

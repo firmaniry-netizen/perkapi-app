@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:go_router/go_router.dart';
 
@@ -91,7 +91,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Color _color(String kind) => const Color(0xFF1565C0);
 
-  IconData _icon(String kind) => CupertinoIcons.calendar;
+  IconData _icon(String kind) => Ph.calendarBlank;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 child: ScreenHero(
                   title: 'Kalender',
                   subtitle: 'Agenda dan kegiatan organisasi',
-                  icon: CupertinoIcons.calendar,
+                  icon: Ph.calendarBlank,
                   accent: AppColors.orange,
                 ),
               ),
@@ -130,13 +130,13 @@ class _CalendarPageState extends State<CalendarPage> {
 Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(children: [
-                  IconButton(onPressed: () => _shift(-1), icon: const Icon(CupertinoIcons.chevron_left), tooltip: 'Bulan sebelumnya'),
+                  IconButton(onPressed: () => _shift(-1), icon: const Icon(Ph.caretLeft), tooltip: 'Bulan sebelumnya'),
                   Expanded(
                     child: Text('${_months[_month.month - 1]} ${_month.year}',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
                   ),
-                  IconButton(onPressed: () => _shift(1), icon: const Icon(CupertinoIcons.chevron_right), tooltip: 'Bulan berikutnya'),
+                  IconButton(onPressed: () => _shift(1), icon: const Icon(Ph.caretRight), tooltip: 'Bulan berikutnya'),
                 ]),
               ),
               Padding(
@@ -251,7 +251,7 @@ Padding(
                                 style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ]),
                         ),
-                        Icon(CupertinoIcons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        Icon(Ph.caretRight, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ]),
                     ),
                   ),

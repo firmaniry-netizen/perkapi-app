@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -146,13 +146,13 @@ class _ChatImageState extends State<ChatImage> {
                     color: Colors.black12,
                     alignment: Alignment.center,
                     child: snap.connectionState == ConnectionState.done
-                        ? const Icon(CupertinoIcons.photo)
-                        : const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2)),
+                        ? const Icon(Ph.image)
+                        : const SizedBox(width: 22, height: 22, child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
                   )
                 : Image.network(u,
                     fit: BoxFit.cover,
                     cacheWidth: 900,
-                    errorBuilder: (_, __, ___) => const SizedBox(width: 220, height: 180, child: Icon(CupertinoIcons.photo))),
+                    errorBuilder: (_, __, ___) => const SizedBox(width: 220, height: 180, child: Icon(Ph.image))),
           ),
         );
         return GestureDetector(
@@ -182,11 +182,11 @@ class ChatFileTile extends StatelessWidget {
 
   IconData get _icon {
     final e = name.split('.').last.toLowerCase();
-    if (e == 'pdf') return CupertinoIcons.doc_richtext;
-    if (e.startsWith('doc')) return CupertinoIcons.doc_text_fill;
-    if (e.startsWith('xls')) return CupertinoIcons.table;
-    if (e.startsWith('ppt')) return CupertinoIcons.play_rectangle;
-    return CupertinoIcons.doc_fill;
+    if (e == 'pdf') return Ph.fileDoc;
+    if (e.startsWith('doc')) return PhFill.fileText;
+    if (e.startsWith('xls')) return Ph.table;
+    if (e.startsWith('ppt')) return Ph.monitorPlay;
+    return PhFill.file;
   }
 
   @override
@@ -215,7 +215,7 @@ class ChatFileTile extends StatelessWidget {
             ]),
           ),
           const SizedBox(width: 6),
-          Icon(CupertinoIcons.arrow_down_to_line, size: 20, color: fg.withValues(alpha: 0.8)),
+          Icon(Ph.downloadSimple, size: 20, color: fg.withValues(alpha: 0.8)),
         ]),
       ),
     );
@@ -305,8 +305,8 @@ class _ChatAudioBubbleState extends State<ChatAudioBubble> {
         IconButton(
           onPressed: _toggle,
           icon: _loading
-              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
-              : Icon(_playing ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill, color: fg, size: 30),
+              ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator.adaptive(strokeWidth: 2, backgroundColor: fg))
+              : Icon(_playing ? PhFill.pause : PhFill.play, color: fg, size: 30),
         ),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [

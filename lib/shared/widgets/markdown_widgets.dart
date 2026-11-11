@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 /// Penampil Markdown sederhana (tanpa paket tambahan).
 /// Didukung: # / ## / ### judul, **tebal**, *miring* / _miring_, `kode`,
@@ -72,7 +72,7 @@ class MarkdownView extends StatelessWidget {
       if (cb != null) {
         final done = cb.group(1)!.toLowerCase() == 'x';
         children.add(line(Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(done ? CupertinoIcons.checkmark_square_fill : CupertinoIcons.square, size: 18),
+          Icon(done ? PhFill.checkSquare : Ph.square, size: 18),
           const SizedBox(width: 6),
           Expanded(
               child: Text.rich(TextSpan(
@@ -198,14 +198,14 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(children: [
-            _btn(CupertinoIcons.textformat, 'Judul', () => _prefix((_) => '## ')),
-            _btn(CupertinoIcons.bold, 'Tebal', () => _wrap('**', '**')),
-            _btn(CupertinoIcons.italic, 'Miring', () => _wrap('_', '_')),
-            _btn(CupertinoIcons.list_bullet, 'Daftar', () => _prefix((_) => '- ')),
-            _btn(CupertinoIcons.list_number, 'Daftar nomor', () => _prefix((i) => '${i + 1}. ')),
-            _btn(CupertinoIcons.checkmark_square, 'Checklist', () => _prefix((_) => '- [ ] ')),
-            _btn(CupertinoIcons.quote_bubble, 'Kutipan', () => _prefix((_) => '> ')),
-            _btn(CupertinoIcons.chevron_left_slash_chevron_right, 'Kode', () => _wrap('`', '`')),
+            _btn(Ph.textAa, 'Judul', () => _prefix((_) => '## ')),
+            _btn(Ph.textB, 'Tebal', () => _wrap('**', '**')),
+            _btn(Ph.textItalic, 'Miring', () => _wrap('_', '_')),
+            _btn(Ph.listBullets, 'Daftar', () => _prefix((_) => '- ')),
+            _btn(Ph.listNumbers, 'Daftar nomor', () => _prefix((i) => '${i + 1}. ')),
+            _btn(Ph.checkSquare, 'Checklist', () => _prefix((_) => '- [ ] ')),
+            _btn(Ph.quotes, 'Kutipan', () => _prefix((_) => '> ')),
+            _btn(Ph.code, 'Kode', () => _wrap('`', '`')),
           ]),
         ),
       const SizedBox(height: 4),

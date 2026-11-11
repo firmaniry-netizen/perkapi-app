@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import 'alert_service.dart';
@@ -45,7 +45,7 @@ class AlertBanner extends StatelessWidget {
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: AppType.caption)),
                     ]),
                   ),
-                  Icon(CupertinoIcons.chevron_right, color: s.color),
+                  Icon(Ph.caretRight, color: s.color),
                 ]),
               ),
             ),

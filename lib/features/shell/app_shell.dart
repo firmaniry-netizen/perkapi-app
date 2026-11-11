@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
@@ -127,15 +127,15 @@ class _AppShellState extends State<AppShell> {
   Future<void> _quickActions() async {
     final a = Access.instance;
     final actions = <BurstAction>[
-      const BurstAction('Kartu & QR', CupertinoIcons.qrcode, '/member-card', color: AppColors.navy),
-      const BurstAction('SOS & Keamanan', CupertinoIcons.shield_fill, '/safety', color: AppColors.red),
-      const BurstAction('Tulis berita', CupertinoIcons.square_pencil, '/gallery?add=1', color: AppColors.goldDeep),
-      const BurstAction('Catatan baru', CupertinoIcons.doc_append, '/module/notes/new', color: AppColors.teal),
-      const BurstAction('Tanya AI', CupertinoIcons.sparkles, '/ai', color: AppColors.violet),
-      const BurstAction('Data AHU', CupertinoIcons.checkmark_seal_fill, '/ahu', color: AppColors.navyAction),
-      if (a.can('manage_event')) const BurstAction('Buat agenda', CupertinoIcons.calendar_badge_plus, '/module/events/new', color: AppColors.goldDeep),
-      if (a.can('manage_alert')) const BurstAction('Kirim peringatan', CupertinoIcons.speaker_2_fill, '/alerts/new', color: AppColors.red),
-      if (a.can('manage_member')) const BurstAction('Verifikasi QR', CupertinoIcons.checkmark_shield_fill, '/verify-member', color: AppColors.teal),
+      const BurstAction('Kartu & QR', Ph.qrCode, '/member-card', color: AppColors.navy),
+      const BurstAction('SOS & Keamanan', PhFill.shield, '/safety', color: AppColors.red),
+      const BurstAction('Tulis berita', Ph.notePencil, '/gallery?add=1', color: AppColors.goldDeep),
+      const BurstAction('Catatan baru', Ph.filePlus, '/module/notes/new', color: AppColors.teal),
+      const BurstAction('Tanya AI', Ph.sparkle, '/ai', color: AppColors.violet),
+      const BurstAction('Data AHU', PhFill.sealCheck, '/ahu', color: AppColors.navyAction),
+      if (a.can('manage_event')) const BurstAction('Buat agenda', Ph.calendarPlus, '/module/events/new', color: AppColors.goldDeep),
+      if (a.can('manage_alert')) const BurstAction('Kirim peringatan', PhFill.megaphone, '/alerts/new', color: AppColors.red),
+      if (a.can('manage_member')) const BurstAction('Verifikasi QR', PhFill.shieldCheck, '/verify-member', color: AppColors.teal),
     ];
     final box = _fabKey.currentContext?.findRenderObject() as RenderBox?;
     final size = MediaQuery.sizeOf(context);
@@ -149,7 +149,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final a = Access.instance;
-    if (!a.loaded) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (!a.loaded) return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
     if (a.error != null) {
       return Scaffold(
         body: Column(children: [
@@ -322,7 +322,16 @@ class _FloatNav extends StatelessWidget {
                 scale: on ? 1.12 : 1,
                 duration: Duration(milliseconds: still ? 0 : 240),
                 curve: const Cubic(0.23, 1, 0.32, 1),
-                child: Icon(items[i].icon, size: 24, color: on ? accent : muted),
+                // Ikon garis dan ikon terisi bertukar dengan cross-fade singkat saat tab dipilih.
+                child: AnimatedSwitcher(
+                  duration: Duration(milliseconds: still ? 0 : 160),
+                  child: Icon(
+                    on ? (items[i].activeIcon ?? items[i].icon) : items[i].icon,
+                    key: ValueKey(on),
+                    size: 24,
+                    color: on ? accent : muted,
+                  ),
+                ),
               ),
               AnimatedSize(
                 duration: Duration(milliseconds: still ? 0 : 220),
@@ -358,7 +367,7 @@ class _FloatNav extends StatelessWidget {
                 tint: AppColors.red.withValues(alpha: 0.86),
                 glow: AppColors.red,
                 onTap: onAction,
-                child: const Icon(CupertinoIcons.add, color: Colors.white, size: 28),
+                child: const Icon(Ph.plus, color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -481,7 +490,7 @@ class _LockView extends StatelessWidget {
                           minimumSize: const Size(220, 52),
                         ),
                         onPressed: onBiometric,
-                        icon: const Icon(CupertinoIcons.lock_shield),
+                        icon: const Icon(Ph.lockKey),
                         label: const Text('Buka dengan biometrik'),
                       ),
                     ],

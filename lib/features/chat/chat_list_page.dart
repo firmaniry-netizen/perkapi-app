@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -107,10 +107,10 @@ class _ChatListPageState extends State<ChatListPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Chat')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: _new, icon: const Icon(CupertinoIcons.pencil), label: const Text('Chat baru')),
+      floatingActionButton: FloatingActionButton.extended(onPressed: _new, icon: const Icon(Ph.pencilSimple), label: const Text('Chat baru')),
       body: PageGlow(
         accent: AppColors.violet,
-        child: RefreshIndicator(
+        child: RefreshIndicator.adaptive(
           edgeOffset: MediaQuery.paddingOf(context).top,
           onRefresh: _load,
           child: ListView(
@@ -125,7 +125,7 @@ class _ChatListPageState extends State<ChatListPage> {
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: 'Cari nama atau pesan',
-                  prefixIcon: const Icon(CupertinoIcons.search),
+                  prefixIcon: const Icon(Ph.magnifyingGlass),
                   isDense: true,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.chip), borderSide: BorderSide.none),
                   enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.chip), borderSide: BorderSide.none),
@@ -133,7 +133,7 @@ class _ChatListPageState extends State<ChatListPage> {
                       borderRadius: BorderRadius.circular(AppRadius.chip), borderSide: BorderSide(color: scheme.primary, width: 1.6)),
                   suffixIcon: _q.text.isEmpty
                       ? null
-                      : IconButton(tooltip: 'Hapus', icon: const Icon(CupertinoIcons.xmark), onPressed: () => setState(_q.clear)),
+                      : IconButton(tooltip: 'Hapus', icon: const Icon(Ph.x), onPressed: () => setState(_q.clear)),
                 ),
               ),
               const SizedBox(height: AppSpace.md),
@@ -167,7 +167,7 @@ class _ChatListPageState extends State<ChatListPage> {
         SizedBox(
           height: 360,
           child: EmptyState(
-            icon: CupertinoIcons.chat_bubble_2,
+            icon: Ph.chatsCircle,
             title: q.isEmpty ? 'Belum ada percakapan' : 'Tidak ditemukan',
             message: q.isEmpty ? 'Ketuk "Chat baru" untuk memulai.' : 'Tidak ada yang cocok dengan "${_q.text.trim()}".',
           ),
@@ -187,7 +187,7 @@ class _ChatListPageState extends State<ChatListPage> {
               leading: MemberAvatar(name: '${m['name']}', radius: 22),
               title: Text('${m['name']}', style: const TextStyle(fontWeight: FontWeight.w700)),
               subtitle: const Text('Ketuk untuk mulai chat'),
-              trailing: const Icon(CupertinoIcons.chat_bubble),
+              trailing: const Icon(Ph.chatCircle),
               onTap: () => _openDirect('${m['member_id']}'),
             ),
         ]),
@@ -205,7 +205,7 @@ class _ChatListPageState extends State<ChatListPage> {
           _load();
         },
         leading: r['kind'] == 'group'
-            ? const IconBadge(CupertinoIcons.person_3, size: 46)
+            ? const IconBadge(Ph.usersThree, size: 46)
             : MemberAvatar(name: '${r['title']}', radius: 23),
         title: Text('${r['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: unread > 0 ? FontWeight.w900 : FontWeight.w700)),
         subtitle: Text('${r['last_body'] ?? 'Belum ada pesan'}', maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -300,7 +300,7 @@ class _NewChatPageState extends State<NewChatPage> {
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: TextField(controller: _title, maxLength: 60, decoration: const InputDecoration(labelText: 'Nama grup'))),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: TextField(controller: _search, onChanged: (_) => setState(() {}), decoration: const InputDecoration(hintText: 'Cari anggota', prefixIcon: Icon(CupertinoIcons.search), isDense: true)),
+          child: TextField(controller: _search, onChanged: (_) => setState(() {}), decoration: const InputDecoration(hintText: 'Cari anggota', prefixIcon: Icon(Ph.magnifyingGlass), isDense: true)),
         ),
         Expanded(
           child: _loading
@@ -311,7 +311,7 @@ class _NewChatPageState extends State<NewChatPage> {
                     final m = list[i];
                     final id = '${m['member_id']}';
                     return _group
-                        ? CheckboxListTile(
+                        ? CheckboxListTile.adaptive(
                             value: _picked.contains(id),
                             title: Text('${m['name']}'),
                             onChanged: (v) => setState(() => v == true ? _picked.add(id) : _picked.remove(id)),

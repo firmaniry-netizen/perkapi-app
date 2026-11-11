@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -95,27 +95,27 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Verifikasi Kartu Anggota')),
       body: PageGlow(accent: AppColors.teal, child: ListView(padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 24 + MediaQuery.paddingOf(context).bottom)), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Verifikasi Kartu', subtitle: 'Pastikan keaslian kartu anggota lewat QR', icon: CupertinoIcons.checkmark_shield_fill, accent: AppColors.teal)),
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Verifikasi Kartu', subtitle: 'Pastikan keaslian kartu anggota lewat QR', icon: PhFill.shieldCheck, accent: AppColors.teal)),
         const SizedBox(height: 16),
         const Text('Tempel isi QR kartu anggota (contoh: perkapi:member:xxxxxxxx-...) lalu tekan Verifikasi.'),
         const SizedBox(height: 12),
         TextField(
           controller: _ctl,
-          decoration: const InputDecoration(labelText: 'Isi QR / token', prefixIcon: Icon(CupertinoIcons.qrcode)),
+          decoration: const InputDecoration(labelText: 'Isi QR / token', prefixIcon: Icon(Ph.qrCode)),
           onSubmitted: (_) => _verify(),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: _busy ? null : _scan,
-          icon: const Icon(CupertinoIcons.qrcode_viewfinder),
+          icon: const Icon(Ph.scan),
           label: const Text('Pindai dengan kamera'),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(
           onPressed: _busy ? null : _verify,
           icon: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(CupertinoIcons.checkmark_shield),
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
+              : const Icon(Ph.shieldCheck),
           label: const Text('Verifikasi'),
         ),
         const SizedBox(height: 16),
@@ -124,7 +124,7 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
           const Card(
             color: Color(0xFFFFEBEE),
             child: ListTile(
-              leading: Icon(CupertinoIcons.xmark_circle_fill, color: AppColors.red),
+              leading: Icon(PhFill.xCircle, color: AppColors.red),
               title: Text('Kartu tidak dikenali', style: TextStyle(color: Colors.black87)),
               subtitle: Text('Token tidak ditemukan.', style: TextStyle(color: Colors.black54)),
             ),
@@ -136,7 +136,7 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
               padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
-                  Icon(_valid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.exclamationmark_triangle,
+                  Icon(_valid ? PhFill.checkCircle : Ph.warning,
                       color: _valid ? AppColors.emerald : AppColors.amber),
                   const SizedBox(width: 8),
                   Text(_valid ? 'KARTU VALID' : 'KARTU TIDAK AKTIF / KEDALUWARSA',

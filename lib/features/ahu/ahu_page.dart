@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,10 +44,10 @@ class AhuBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final filled = number != null && number!.trim().isNotEmpty;
     final (label, color, icon) = !filled
-        ? ('Belum diisi', AppColors.muted, CupertinoIcons.question_circle)
+        ? ('Belum diisi', AppColors.muted, Ph.question)
         : verified
-            ? ('Terverifikasi AHU', AppColors.emerald, CupertinoIcons.checkmark_seal_fill)
-            : ('Menunggu verifikasi', AppColors.amber, CupertinoIcons.hourglass);
+            ? ('Terverifikasi AHU', AppColors.emerald, PhFill.sealCheck)
+            : ('Menunggu verifikasi', AppColors.amber, Ph.hourglass);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 12, vertical: compact ? 4 : 7),
       decoration: BoxDecoration(
@@ -106,7 +107,7 @@ class _AhuPageState extends State<AhuPage> {
 
   Future<void> _pick(bool isReg) async {
     final cur = DateTime.tryParse((isReg ? _regDate : _validUntil) ?? '') ?? DateTime.now();
-    final d = await showDatePicker(
+    final d = await showIosDatePicker(
       context: context,
       initialDate: cur,
       firstDate: DateTime(2000),
@@ -210,7 +211,7 @@ class _AhuPageState extends State<AhuPage> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                    child: Image.asset(AppAssets.logoAhu, height: 28, errorBuilder: (_, __, ___) => const Icon(CupertinoIcons.building_2_fill, color: AppColors.navy)),
+                    child: Image.asset(AppAssets.logoAhu, height: 28, errorBuilder: (_, __, ___) => const Icon(Ph.buildings, color: AppColors.navy)),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
@@ -239,7 +240,7 @@ class _AhuPageState extends State<AhuPage> {
                   decoration: const InputDecoration(
                     labelText: 'Nomor Surat Bukti Pendaftaran',
                     hintText: 'AHU-123.AH.04.03-2021',
-                    prefixIcon: Icon(CupertinoIcons.person_crop_rectangle),
+                    prefixIcon: Icon(Ph.identificationCard),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -257,11 +258,11 @@ class _AhuPageState extends State<AhuPage> {
                   Text(_error!, style: const TextStyle(color: AppColors.red)),
                 ],
                 const SizedBox(height: 16),
-                PrimaryButton(label: _saving ? 'Menyimpan...' : 'Simpan', icon: CupertinoIcons.tray_arrow_down, loading: _saving, onPressed: _saving ? null : _save),
+                PrimaryButton(label: _saving ? 'Menyimpan...' : 'Simpan', icon: Ph.trayArrowDown, loading: _saving, onPressed: _saving ? null : _save),
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: () => openAhuOnline(context),
-                  icon: const Icon(CupertinoIcons.arrow_up_right_square),
+                  icon: const Icon(Ph.arrowSquareOut),
                   label: const Text('Buka AHU Online'),
                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
                 ),
@@ -300,7 +301,7 @@ class _AhuPageState extends State<AhuPage> {
         borderRadius: BorderRadius.circular(AppRadius.button),
         onTap: onTap,
         child: InputDecorator(
-          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(CupertinoIcons.calendar_today)),
+          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(Ph.calendarDot)),
           child: Text(value == null ? 'Pilih tanggal' : ahuDate(value)),
         ),
       );

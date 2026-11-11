@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
@@ -8,12 +8,12 @@ import 'donation_data.dart';
 
 /// Warna & ikon per kategori kampanye.
 (Color, IconData) categoryStyle(String c) => switch (c) {
-      'Event' => (AppColors.goldDeep, CupertinoIcons.calendar),
-      'Sosial' => (AppColors.teal, CupertinoIcons.person_3),
-      'Bencana' => (AppColors.red, CupertinoIcons.drop),
-      'Pendidikan' => (AppColors.sky, CupertinoIcons.book_fill),
-      'Organisasi' => (AppColors.navyAction, CupertinoIcons.building_2_fill),
-      _ => (AppColors.violet, CupertinoIcons.heart_circle),
+      'Event' => (AppColors.goldDeep, Ph.calendarBlank),
+      'Sosial' => (AppColors.teal, Ph.usersThree),
+      'Bencana' => (AppColors.red, Ph.drop),
+      'Pendidikan' => (AppColors.sky, PhFill.bookOpen),
+      'Organisasi' => (AppColors.navyAction, Ph.buildings),
+      _ => (AppColors.violet, Ph.handHeart),
     };
 
 /// Gambar dari bucket privat lewat URL bertanda tangan; cadangan: gradasi + ikon kategori.
@@ -156,7 +156,7 @@ class CampaignCard extends StatelessWidget {
                 Positioned(
                   right: 12,
                   bottom: 12,
-                  child: Pill('${c.pending} menunggu verifikasi', color: AppColors.amber, icon: CupertinoIcons.hourglass, onDark: true),
+                  child: Pill('${c.pending} menunggu verifikasi', color: AppColors.amber, icon: Ph.hourglass, onDark: true),
                 ),
             ]),
           ),
@@ -199,7 +199,7 @@ class CampaignCard extends StatelessWidget {
 
 /// Warna & label status donasi.
 (Color, String, IconData) donationStatus(String s) => switch (s) {
-      'terverifikasi' => (AppColors.emerald, 'Diterima', CupertinoIcons.checkmark_seal_fill),
-      'ditolak' => (AppColors.red, 'Ditolak', CupertinoIcons.xmark_circle_fill),
-      _ => (AppColors.amber, 'Menunggu verifikasi', CupertinoIcons.hourglass),
+      'terverifikasi' => (AppColors.emerald, 'Diterima', PhFill.sealCheck),
+      'ditolak' => (AppColors.red, 'Ditolak', PhFill.xCircle),
+      _ => (AppColors.amber, 'Menunggu verifikasi', Ph.hourglass),
     };

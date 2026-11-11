@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -207,7 +207,7 @@ class _GalleryPageState extends State<GalleryPage> {
       floatingActionButton: NavClearance(
         child: FloatingActionButton.extended(
           onPressed: _compose,
-          icon: const Icon(CupertinoIcons.square_pencil),
+          icon: const Icon(Ph.notePencil),
           label: const Text('Tulis berita'),
         ),
       ),
@@ -217,9 +217,9 @@ class _GalleryPageState extends State<GalleryPage> {
           child: ScreenHero(
             title: 'Berita',
             subtitle: _isAdmin ? 'Kabar kegiatan dan perkara. Anda admin: dapat menghapus berita.' : 'Kabar kegiatan dan perkara, lengkap dengan foto',
-            icon: CupertinoIcons.news,
+            icon: Ph.newspaper,
             accent: AppColors.rose,
-            chips: [(CupertinoIcons.doc_text, '${_all.length} berita'), (CupertinoIcons.photo, '${_feed?.photoCount ?? 0} foto')],
+            chips: [(Ph.fileText, '${_all.length} berita'), (Ph.image, '${_feed?.photoCount ?? 0} foto')],
           ),
         ),
         if (_albums.length > 1)
@@ -255,16 +255,16 @@ class _GalleryPageState extends State<GalleryPage> {
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
     if (shown.isEmpty) {
       return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const EmptyState(message: 'Belum ada berita.\nTulis kabar kegiatan pertama, lengkap dengan foto.', icon: CupertinoIcons.news),
+        const EmptyState(message: 'Belum ada berita.\nTulis kabar kegiatan pertama, lengkap dengan foto.', icon: Ph.newspaper),
         const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: PrimaryButton(label: 'Tulis berita pertama', icon: CupertinoIcons.square_pencil, onPressed: _compose),
+          child: PrimaryButton(label: 'Tulis berita pertama', icon: Ph.notePencil, onPressed: _compose),
         ),
         const SizedBox(height: 96),
       ]);
     }
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _load,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 160),
@@ -325,7 +325,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 right: 12,
                 top: 12,
                 child: GlassCircleButton(
-                  icon: CupertinoIcons.trash,
+                  icon: Ph.trash,
                   tooltip: 'Hapus berita (admin)',
                   onTap: () => _confirmAndDelete(p),
                 ),
@@ -341,12 +341,12 @@ class _GalleryPageState extends State<GalleryPage> {
                     style: const TextStyle(color: Colors.white, fontSize: AppType.h2, fontWeight: FontWeight.w800, height: 1.25)),
                 const SizedBox(height: 8),
                 Row(children: [
-                  const Icon(CupertinoIcons.clock, size: 14, color: Color(0xCCFFFFFF)),
+                  const Icon(Ph.clock, size: 14, color: Color(0xCCFFFFFF)),
                   const SizedBox(width: 4),
                   Text(timeAgoId(p.date),
                       style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                   const SizedBox(width: 12),
-                  const Icon(CupertinoIcons.photo_on_rectangle, size: 14, color: Color(0xCCFFFFFF)),
+                  const Icon(Ph.images, size: 14, color: Color(0xCCFFFFFF)),
                   const SizedBox(width: 4),
                   Text('${p.rows.length}',
                       style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
@@ -424,7 +424,7 @@ class _GalleryPageState extends State<GalleryPage> {
           IconButton(
             tooltip: 'Hapus berita (admin)',
             visualDensity: VisualDensity.compact,
-            icon: const Icon(CupertinoIcons.trash, color: AppColors.red),
+            icon: const Icon(Ph.trash, color: AppColors.red),
             onPressed: () => _confirmAndDelete(p),
           ),
       ]),
@@ -532,7 +532,7 @@ class _ComposePageState extends State<_ComposePage> {
               border: Border.all(color: AppColors.navy.withValues(alpha: 0.12)),
             ),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Icon(CupertinoIcons.photo_on_rectangle, size: 32, color: sc.onSurfaceVariant),
+              Icon(Ph.images, size: 32, color: sc.onSurfaceVariant),
               const SizedBox(height: 6),
               Text('Belum ada foto', style: TextStyle(color: sc.onSurfaceVariant)),
             ]),
@@ -555,7 +555,7 @@ class _ComposePageState extends State<_ComposePage> {
                       width: 28,
                       height: 28,
                       decoration: const BoxDecoration(color: Color(0xB3000000), shape: BoxShape.circle),
-                      child: const Icon(CupertinoIcons.xmark, size: 16, color: Colors.white),
+                      child: const Icon(Ph.x, size: 16, color: Colors.white),
                     ),
                   ),
                 ),
@@ -569,7 +569,7 @@ class _ComposePageState extends State<_ComposePage> {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: _sending || _photos.length >= _maxPhotos ? null : () => _add(camera: false),
-              icon: const Icon(CupertinoIcons.photo_on_rectangle),
+              icon: const Icon(Ph.images),
               label: const Text('Galeri'),
               style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             ),
@@ -579,7 +579,7 @@ class _ComposePageState extends State<_ComposePage> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _sending || _photos.length >= _maxPhotos ? null : () => _add(camera: true),
-                icon: const Icon(CupertinoIcons.camera),
+                icon: const Icon(Ph.camera),
                 label: const Text('Kamera'),
                 style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -592,7 +592,7 @@ class _ComposePageState extends State<_ComposePage> {
           enabled: !_sending,
           maxLength: 120,
           textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(labelText: 'Judul berita', prefixIcon: Icon(CupertinoIcons.textformat)),
+          decoration: const InputDecoration(labelText: 'Judul berita', prefixIcon: Icon(Ph.textAa)),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -613,7 +613,7 @@ class _ComposePageState extends State<_ComposePage> {
         TextField(
           controller: _album,
           enabled: !_sending,
-          decoration: const InputDecoration(labelText: 'Album / kategori', prefixIcon: Icon(CupertinoIcons.folder)),
+          decoration: const InputDecoration(labelText: 'Album / kategori', prefixIcon: Icon(Ph.folder)),
         ),
         if (widget.albums.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -627,7 +627,7 @@ class _ComposePageState extends State<_ComposePage> {
             contentPadding: EdgeInsets.zero,
             value: _web,
             onChanged: _sending ? null : (v) => setState(() => _web = v),
-            secondary: const Icon(CupertinoIcons.globe),
+            secondary: const Icon(Ph.globe),
             title: const Text('Terbitkan juga di situs resmi', style: TextStyle(fontWeight: FontWeight.w700)),
             subtitle: const Text('Berita dan fotonya tampil untuk umum di halaman Berita situs PERKAPI.'),
           ),
@@ -638,7 +638,7 @@ class _ComposePageState extends State<_ComposePage> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: AppColors.red.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(AppRadius.control)),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Icon(CupertinoIcons.exclamationmark_circle, size: 20, color: AppColors.red),
+              const Icon(Ph.warningCircle, size: 20, color: AppColors.red),
               const SizedBox(width: 8),
               Expanded(child: Text(_error!, style: const TextStyle(fontSize: AppType.small, height: 1.35))),
             ]),
@@ -657,7 +657,7 @@ class _ComposePageState extends State<_ComposePage> {
             ],
             PrimaryButton(
               label: _sending ? 'Menerbitkan...' : 'Terbitkan berita',
-              icon: CupertinoIcons.paperplane_fill,
+              icon: PhFill.paperPlaneRight,
               loading: _sending,
               onPressed: _sending ? null : _send,
             ),

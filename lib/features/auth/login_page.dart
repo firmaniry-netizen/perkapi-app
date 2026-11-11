@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                           autofillHints: const [AutofillHints.username],
                           decoration: const InputDecoration(
                             labelText: 'Email atau nomor anggota',
-                            prefixIcon: Icon(CupertinoIcons.person),
+                            prefixIcon: Icon(Ph.user),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty) ? 'Isi email atau nomor anggota' : null,
                         ),
@@ -171,10 +171,10 @@ class _LoginPageState extends State<LoginPage> {
                           onFieldSubmitted: (_) => _submit(),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            prefixIcon: const Icon(CupertinoIcons.lock),
+                            prefixIcon: const Icon(Ph.lock),
                             suffixIcon: IconButton(
                               tooltip: _obscure ? 'Tampilkan password' : 'Sembunyikan password',
-                              icon: Icon(_obscure ? CupertinoIcons.eye : CupertinoIcons.eye_slash),
+                              icon: Icon(_obscure ? Ph.eye : Ph.eyeSlash),
                               onPressed: () => setState(() => _obscure = !_obscure),
                             ),
                           ),
@@ -195,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(children: [
-                                      Icon(CupertinoIcons.exclamationmark_circle, color: scheme.error, size: 18),
+                                      Icon(Ph.warningCircle, color: scheme.error, size: 18),
                                       const SizedBox(width: 8),
                                       Expanded(child: Text(_error!, style: TextStyle(color: scheme.error, fontSize: AppType.small, height: 1.35))),
                                     ]),
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                                     builder: (_) => OtpDialog(
                                         initialEmail: _idCtrl.text.contains('@') ? _idCtrl.text.trim() : ''),
                                   ),
-                          icon: const Icon(CupertinoIcons.envelope_open),
+                          icon: const Icon(Ph.envelopeOpen),
                           label: const Text('Masuk dengan kode email'),
                         ),
                         TextButton(

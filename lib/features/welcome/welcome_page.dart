@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/aurora_background.dart';
 import '../../core/widgets/liquid_glass.dart';
 import 'package:go_router/go_router.dart';
@@ -35,9 +35,9 @@ class _WelcomePageState extends State<WelcomePage> {
   int _i = 0;
 
   static const _slides = <(IconData, String, String)>[
-    (CupertinoIcons.hammer, 'Wadah profesi\nkurator dan pengurus', 'PERKAPI mempertemukan anggota, informasi, dan rujukan hukum dalam satu tempat.'),
-    (CupertinoIcons.square_grid_2x2, 'Semua kebutuhan\ndalam satu aplikasi', 'Agenda, berita, buku saku, forum, dan notifikasi organisasi ada di genggaman Anda.'),
-    (CupertinoIcons.person_crop_rectangle_fill, 'Kartu anggota\ndigital', 'Tunjukkan kartu berQR dan verifikasi anggota dengan cepat, kapan saja.'),
+    (Ph.gavel, 'Wadah profesi\nkurator dan pengurus', 'PERKAPI mempertemukan anggota, informasi, dan rujukan hukum dalam satu tempat.'),
+    (Ph.squaresFour, 'Semua kebutuhan\ndalam satu aplikasi', 'Agenda, berita, buku saku, forum, dan notifikasi organisasi ada di genggaman Anda.'),
+    (PhFill.identificationCard, 'Kartu anggota\ndigital', 'Tunjukkan kartu berQR dan verifikasi anggota dengan cepat, kapan saja.'),
   ];
 
   Future<void> _finish() async {

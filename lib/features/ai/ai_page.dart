@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -92,7 +92,7 @@ class _AiPageState extends State<AiPage> {
           ),
           padding: const EdgeInsets.all(12),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Icon(CupertinoIcons.info_circle, size: 18, color: dark ? const Color(0xFFFFB74D) : AppColors.goldDeep),
+            Icon(Ph.info, size: 18, color: dark ? const Color(0xFFFFB74D) : AppColors.goldDeep),
             const SizedBox(width: 8),
             Expanded(
               child: Text(AppConstants.aiDisclaimer,
@@ -109,7 +109,7 @@ class _AiPageState extends State<AiPage> {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(color: scheme.primary.withValues(alpha: 0.10), shape: BoxShape.circle),
-                      child: Icon(CupertinoIcons.sparkles, size: 34, color: scheme.primary),
+                      child: Icon(Ph.sparkle, size: 34, color: scheme.primary),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -174,7 +174,7 @@ class _AiPageState extends State<AiPage> {
                 tooltip: 'Kirim',
                 style: IconButton.styleFrom(backgroundColor: AppColors.red, foregroundColor: Colors.white, minimumSize: const Size(52, 52)),
                 onPressed: _busy ? null : _send,
-                icon: const Icon(CupertinoIcons.arrow_up),
+                icon: const Icon(Ph.arrowUp),
               ),
             ]),
           ),

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
@@ -198,7 +198,7 @@ class _ActionBurst extends StatelessWidget {
                       blur: 0,
                       tint: AppColors.red.withValues(alpha: 0.86),
                       glow: AppColors.red,
-                      child: const Center(child: Icon(CupertinoIcons.add, color: Colors.white, size: 28)),
+                      child: const Center(child: Icon(Ph.plus, color: Colors.white, size: 28)),
                     ),
                   ),
                 ),

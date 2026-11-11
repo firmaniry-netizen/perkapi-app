@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/ui_kit.dart';
@@ -74,7 +74,7 @@ class _AlertsPageState extends State<AlertsPage> {
           actions: [
             IconButton(
               tooltip: 'Tandai semua dibaca',
-              icon: const Icon(CupertinoIcons.checkmark_alt),
+              icon: const Icon(Ph.check),
               onPressed: AlertService.instance.markAllRead,
             ),
           ],
@@ -83,7 +83,7 @@ class _AlertsPageState extends State<AlertsPage> {
         floatingActionButton: admin
             ? FloatingActionButton.extended(
                 onPressed: _compose,
-                icon: const Icon(CupertinoIcons.speaker_2),
+                icon: const Icon(Ph.megaphone),
                 label: const Text('Kirim peringatan'),
               )
             : null,
@@ -179,7 +179,7 @@ class _InboxState extends State<_Inbox> {
           ? null
           : SwipeAction(
               label: 'Tandai dibaca',
-              icon: CupertinoIcons.checkmark,
+              icon: Ph.check,
               color: AppColors.emerald,
               onCommit: () => AlertService.instance.markRead(a),
             ),
@@ -222,7 +222,7 @@ class _InboxState extends State<_Inbox> {
               duration: const Duration(milliseconds: 220),
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, top: 4),
-                child: Icon(CupertinoIcons.circle_fill, size: 10, color: s.color),
+                child: Icon(PhFill.circle, size: 10, color: s.color),
               ),
             ),
           ),
@@ -242,7 +242,7 @@ class _InboxState extends State<_Inbox> {
         }
         if (svc.items.isEmpty) {
           return const EmptyState(
-              icon: CupertinoIcons.checkmark_shield,
+              icon: Ph.shieldCheck,
               title: 'Semua aman',
               message: 'Tidak ada peringatan untuk Anda. Peringatan penting dari pengurus akan muncul di sini.');
         }
@@ -261,13 +261,13 @@ class _InboxState extends State<_Inbox> {
             ]),
           ),
           Expanded(
-            child: RefreshIndicator(
+            child: RefreshIndicator.adaptive(
               onRefresh: widget.onRefresh,
               child: shown.isEmpty
                   ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: const [
                       SizedBox(height: 40),
                       EmptyState(
-                          icon: CupertinoIcons.checkmark_alt,
+                          icon: Ph.check,
                           title: 'Semua sudah dibaca',
                           message: 'Tidak ada peringatan baru. Lihat semua peringatan di saringan "Semua".'),
                     ])
@@ -375,7 +375,7 @@ class _SentListState extends State<_SentList> {
     if (_loading) return const SkeletonList();
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
     if (_rows.isEmpty) return const EmptyState(message: 'Belum ada peringatan terkirim');
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _load,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
@@ -395,7 +395,7 @@ class _SentListState extends State<_SentList> {
                 Switch.adaptive(value: active, onChanged: (v) => _toggle(r, v)),
                 IconButton(
                     tooltip: 'Hapus',
-                    icon: const Icon(CupertinoIcons.trash),
+                    icon: const Icon(Ph.trash),
                     onPressed: () => _delete(r)),
               ]),
             ),

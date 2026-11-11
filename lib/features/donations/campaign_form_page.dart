@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
@@ -111,7 +112,7 @@ class _CampaignFormPageState extends State<CampaignFormPage> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final d = await showDatePicker(
+    final d = await showIosDatePicker(
       context: context,
       initialDate: _ends ?? now.add(const Duration(days: 30)),
       firstDate: DateTime(now.year, now.month, now.day),
@@ -137,13 +138,13 @@ class _CampaignFormPageState extends State<CampaignFormPage> {
             height: 72,
             child: file != null
                 ? (kIsWeb || file.path == null
-                    ? const ColoredBox(color: AppColors.emerald, child: Icon(CupertinoIcons.photo_fill, color: Colors.white))
+                    ? const ColoredBox(color: AppColors.emerald, child: Icon(PhFill.image, color: Colors.white))
                     : Image.file(File(file.path!), cacheWidth: 300, fit: contain ? BoxFit.contain : BoxFit.cover))
                 : SignedImage(
                     bucket: 'donasi-publik',
                     path: path,
                     fit: contain ? BoxFit.contain : BoxFit.cover,
-                    fallback: ColoredBox(color: sc.surfaceContainerHighest, child: Icon(contain ? CupertinoIcons.qrcode : CupertinoIcons.photo, color: sc.onSurfaceVariant)),
+                    fallback: ColoredBox(color: sc.surfaceContainerHighest, child: Icon(contain ? Ph.qrCode : Ph.image, color: sc.onSurfaceVariant)),
                   ),
           ),
         ),
@@ -155,7 +156,7 @@ class _CampaignFormPageState extends State<CampaignFormPage> {
                 final f = await pickPhotos(multiple: false);
                 if (f.isNotEmpty) onPick(f.first);
               },
-              icon: const Icon(CupertinoIcons.photo_on_rectangle, size: 18),
+              icon: const Icon(Ph.images, size: 18),
               label: Text(has ? 'Ganti' : 'Pilih gambar'),
             ),
             if (has) TextButton(onPressed: onClear, child: const Text('Hapus')),
@@ -218,12 +219,12 @@ class _CampaignFormPageState extends State<CampaignFormPage> {
                   onTap: _pickDate,
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(CupertinoIcons.calendar_badge_plus),
+                    leading: const Icon(Ph.calendarPlus),
                     title: const Text('Batas akhir donasi'),
                     subtitle: Text(_ends == null ? 'Tanpa batas waktu' : FmtId.dayDate(_ends!)),
                     trailing: _ends == null
-                        ? const Icon(CupertinoIcons.chevron_right)
-                        : IconButton(tooltip: 'Hapus batas', icon: const Icon(CupertinoIcons.xmark), onPressed: () => setState(() => _ends = null)),
+                        ? const Icon(Ph.caretRight)
+                        : IconButton(tooltip: 'Hapus batas', icon: const Icon(Ph.x), onPressed: () => setState(() => _ends = null)),
                   ),
                 ),
                 const SizedBox(height: 16),

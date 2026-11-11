@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:geolocator/geolocator.dart';
@@ -60,7 +60,7 @@ class _GeofencePageState extends State<GeofencePage> {
               TextField(controller: rad, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Radius (meter, 50 sampai 50000)')),
               const SizedBox(height: 8),
               TextButton.icon(
-                icon: const Icon(CupertinoIcons.location_fill),
+                icon: const Icon(PhFill.mapPin),
                 label: const Text('Pakai lokasi saya sekarang'),
                 onPressed: () async {
                   try {
@@ -139,13 +139,13 @@ class _GeofencePageState extends State<GeofencePage> {
     if (!_allowed) return const AccessDenied();
     return Scaffold(
       appBar: GlassAppBar(title: const Text('Area (Geofence)')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.add), label: const Text('Tambah area')),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => _edit(), icon: const Icon(Ph.plus), label: const Text('Tambah area')),
       body: PageGlow(accent: AppColors.teal, child: _loading
           ? const SkeletonList()
           : _error != null
               ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(_error!, textAlign: TextAlign.center)))
               : _rows.isEmpty
-                  ? const EmptyState(icon: CupertinoIcons.map, title: 'Belum ada area', message: 'Tambahkan satu untuk mendapat notifikasi saat anggota yang dilacak keluar atau masuk area.')
+                  ? const EmptyState(icon: Ph.mapTrifold, title: 'Belum ada area', message: 'Tambahkan satu untuk mendapat notifikasi saat anggota yang dilacak keluar atau masuk area.')
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                       itemCount: _rows.length,
@@ -155,12 +155,12 @@ class _GeofencePageState extends State<GeofencePage> {
                         return Card(
                           child: ListTile(
                             onTap: () => _edit(g),
-                            leading: const IconBadge(CupertinoIcons.placemark, size: 44),
+                            leading: const IconBadge(Ph.mapPinLine, size: 44),
                             title: Text('${g['name']}', style: const TextStyle(fontWeight: FontWeight.w800)),
                             subtitle: Text('Radius ${g['radius_m']} m · ${(g['lat'] as num).toStringAsFixed(4)}, ${(g['lng'] as num).toStringAsFixed(4)}'),
                             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                               Switch.adaptive(value: g['active'] == true, onChanged: (v) => _toggle(g, v)),
-                              IconButton(icon: const Icon(CupertinoIcons.trash), onPressed: () => _delete(g)),
+                              IconButton(icon: const Icon(Ph.trash), onPressed: () => _delete(g)),
                             ]),
                           ),
                         );

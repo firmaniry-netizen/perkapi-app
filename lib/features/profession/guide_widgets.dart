@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -94,7 +94,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(_done[i] ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
+              Icon(_done[i] ? PhFill.checkCircle : Ph.circle,
                   size: 22, color: _done[i] ? AppColors.emerald : sc.onSurfaceVariant),
               const SizedBox(width: 10),
               Expanded(
@@ -112,7 +112,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
 
 /// Kotak penekanan (batas waktu, catatan penting).
 class GuideCallout extends StatelessWidget {
-  const GuideCallout({super.key, required this.text, this.icon = CupertinoIcons.info_circle, this.color = AppColors.sky});
+  const GuideCallout({super.key, required this.text, this.icon = Ph.info, this.color = AppColors.sky});
   final String text;
   final IconData icon;
   final Color color;
@@ -178,7 +178,7 @@ class CopyButton extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format disalin. Tempel di dokumen Anda.')));
         }
       },
-      icon: const Icon(CupertinoIcons.doc_on_doc),
+      icon: const Icon(Ph.copy),
       label: Text(label),
       style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
     );

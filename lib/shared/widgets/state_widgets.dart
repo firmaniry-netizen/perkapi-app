@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_tokens.dart';
 import '../../core/utils/format_id.dart';
@@ -24,7 +24,7 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     this.message = 'Belum ada data',
-    this.icon = CupertinoIcons.tray,
+    this.icon = Ph.tray,
     this.title,
     this.actionLabel,
     this.onAction,
@@ -56,7 +56,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 18),
             FilledButton.icon(
               onPressed: onAction,
-              icon: const Icon(CupertinoIcons.add),
+              icon: const Icon(Ph.plus),
               label: Text(actionLabel!),
               style: FilledButton.styleFrom(minimumSize: const Size(200, 48)),
             ),
@@ -113,14 +113,14 @@ class ErrorState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _stateIcon(context, CupertinoIcons.wifi_slash, scheme.error),
+          _stateIcon(context, Ph.wifiSlash, scheme.error),
           const SizedBox(height: 16),
           Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: AppType.body, height: 1.5)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
             FilledButton.tonalIcon(
               onPressed: onRetry,
-              icon: const Icon(CupertinoIcons.arrow_clockwise),
+              icon: const Icon(Ph.arrowClockwise),
               label: const Text('Coba lagi'),
               style: FilledButton.styleFrom(minimumSize: const Size(160, 48)),
             ),
@@ -136,7 +136,7 @@ class AccessDenied extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
         body: EmptyState(
-          icon: CupertinoIcons.lock,
+          icon: Ph.lock,
           message: 'Akses ditolak.\nRole Anda tidak memiliki izin untuk halaman ini.',
         ),
       );

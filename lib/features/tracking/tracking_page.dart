@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -109,8 +109,8 @@ class _TrackingPageState extends State<TrackingPage> {
     final located = _rows.where((r) => r.pos != null).toList();
     return Scaffold(
       appBar: GlassAppBar(title: const Text('Pelacakan GPS'), actions: [
-        IconButton(onPressed: () => context.push('/geofences'), icon: const Icon(CupertinoIcons.placemark), tooltip: 'Area (geofence)'),
-        IconButton(onPressed: _load, icon: const Icon(CupertinoIcons.arrow_clockwise), tooltip: 'Muat ulang'),
+        IconButton(onPressed: () => context.push('/geofences'), icon: const Icon(Ph.mapPinLine), tooltip: 'Area (geofence)'),
+        IconButton(onPressed: _load, icon: const Icon(Ph.arrowClockwise), tooltip: 'Muat ulang'),
       ]),
       body: Column(children: [
         SizedBox(
@@ -135,7 +135,7 @@ class _TrackingPageState extends State<TrackingPage> {
                         decoration: BoxDecoration(color: r.sos ? AppColors.red : AppColors.navy, borderRadius: BorderRadius.circular(10)),
                         child: Text(r.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
                       ),
-                      Icon(CupertinoIcons.location_solid, size: 36, color: r.sos ? AppColors.red : AppColors.navyAction),
+                      Icon(PhFill.mapPin, size: 36, color: r.sos ? AppColors.red : AppColors.navyAction),
                     ]),
                   ),
               ]),
@@ -149,7 +149,7 @@ class _TrackingPageState extends State<TrackingPage> {
               : _error != null
                   ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(_error!, textAlign: TextAlign.center)))
                   : _rows.isEmpty
-                      ? const EmptyState(icon: CupertinoIcons.location_slash, title: 'Belum ada lokasi', message: 'Belum ada anggota yang mengaktifkan izin lokasi atau SOS.')
+                      ? const EmptyState(icon: Ph.gpsSlash, title: 'Belum ada lokasi', message: 'Belum ada anggota yang mengaktifkan izin lokasi atau SOS.')
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: _rows.length,
@@ -163,7 +163,7 @@ class _TrackingPageState extends State<TrackingPage> {
                               ),
                               child: ListTile(
                                 onTap: r.pos == null ? null : () => _map.move(r.pos!, 16),
-                                leading: Icon(r.sos ? CupertinoIcons.exclamationmark_octagon : CupertinoIcons.person_crop_circle, color: r.sos ? AppColors.red : scheme.primary, size: 30),
+                                leading: Icon(r.sos ? Ph.warningOctagon : Ph.userCircle, color: r.sos ? AppColors.red : scheme.primary, size: 30),
                                 title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.w800)),
                                 subtitle: Text(r.sos
                                     ? 'SOS${r.note != null ? ': ${r.note}' : ''} · ${_ago(r.at)}'

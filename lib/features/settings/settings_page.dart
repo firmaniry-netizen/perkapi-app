@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -164,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: IconBadge(icon, size: 40),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: sub == null ? null : Text(sub),
-        trailing: trailing ?? (onTap == null ? null : Icon(CupertinoIcons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        trailing: trailing ?? (onTap == null ? null : Icon(Ph.caretRight, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         onTap: onTap,
       );
 
@@ -208,9 +208,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: SegmentedButton<ThemeMode>(
                     showSelectedIcon: false,
                     segments: const [
-                      ButtonSegment(value: ThemeMode.system, icon: Icon(CupertinoIcons.circle_lefthalf_fill), label: Text('Sistem')),
-                      ButtonSegment(value: ThemeMode.light, icon: Icon(CupertinoIcons.sun_max), label: Text('Terang')),
-                      ButtonSegment(value: ThemeMode.dark, icon: Icon(CupertinoIcons.moon), label: Text('Gelap')),
+                      ButtonSegment(value: ThemeMode.system, icon: Icon(Ph.circleHalf), label: Text('Sistem')),
+                      ButtonSegment(value: ThemeMode.light, icon: Icon(Ph.sun), label: Text('Terang')),
+                      ButtonSegment(value: ThemeMode.dark, icon: Icon(Ph.moon), label: Text('Gelap')),
                     ],
                     selected: {mode},
                     onSelectionChanged: (v) => ThemeController.mode.value = v.first,
@@ -220,37 +220,37 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ]),
           _group('Notifikasi', [
-            _tile(CupertinoIcons.bell, 'Notifikasi & pengingat',
+            _tile(Ph.bell, 'Notifikasi & pengingat',
                 sub: 'Cek push, izin, dan kirim notifikasi uji', onTap: () => context.push('/notification-status')),
           ]),
           _group('Keamanan', [
             SwitchListTile.adaptive(
-              secondary: const Icon(CupertinoIcons.lock_shield),
+              secondary: const Icon(Ph.lockKey),
               title: const Text('Kunci biometrik / layar', style: TextStyle(fontWeight: FontWeight.w700)),
               value: _bio,
               onChanged: _toggleBio,
             ),
             SwitchListTile.adaptive(
-              secondary: const Icon(CupertinoIcons.number),
+              secondary: const Icon(Ph.hash),
               title: const Text('PIN aplikasi (6 digit)', style: TextStyle(fontWeight: FontWeight.w700)),
               subtitle: const Text('Dihapus otomatis saat keluar akun'),
               value: _pin,
               onChanged: _togglePin,
             ),
-            _tile(CupertinoIcons.shield, 'Keamanan & SOS (izin lokasi)', onTap: () => context.push('/safety')),
-            _tile(CupertinoIcons.lock, 'Ganti password', onTap: _changePassword),
-            _tile(CupertinoIcons.device_phone_portrait, 'Keluar dari semua perangkat', onTap: () => AuthRepository().signOutAll()),
+            _tile(Ph.shield, 'Keamanan & SOS (izin lokasi)', onTap: () => context.push('/safety')),
+            _tile(Ph.lock, 'Ganti password', onTap: _changePassword),
+            _tile(Ph.deviceMobile, 'Keluar dari semua perangkat', onTap: () => AuthRepository().signOutAll()),
           ]),
           _group('Tentang', [
-            _tile(CupertinoIcons.info_circle, 'Tentang PERKAPI',
+            _tile(Ph.info, 'Tentang PERKAPI',
                 onTap: () => _info('Tentang', 'PERKAPI v0.1.0\nPlatform Digital Organisasi Kurator, Kepailitan & PKPU.\nBukan aplikasi resmi pemerintah.')),
-            _tile(CupertinoIcons.doc_text, 'Syarat & Ketentuan',
+            _tile(Ph.fileText, 'Syarat & Ketentuan',
                 onTap: () => _info('Syarat & Ketentuan', 'Isi dengan syarat & ketentuan organisasi Anda.')),
-            _tile(CupertinoIcons.hand_raised, 'Kebijakan Privasi',
+            _tile(Ph.hand, 'Kebijakan Privasi',
                 onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const PrivacyPolicyPage()))),
           ]),
           _group('Akun', [
-            _tile(CupertinoIcons.trash, 'Hapus akun',
+            _tile(Ph.trash, 'Hapus akun',
                 sub: 'Hapus akun dan data pribadi secara permanen', onTap: _deleteAccount),
           ]),
         ])),

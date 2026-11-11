@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -190,7 +190,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
               if ('${m['ahu_registration_number'] ?? ''}'.isNotEmpty)
                 TextButton.icon(
                   onPressed: () => openAhuOnline(context),
-                  icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 16),
+                  icon: const Icon(Ph.arrowSquareOut, size: 16),
                   label: const Text('Buka AHU Online'),
                 ),
               const SizedBox(height: 6),
@@ -309,7 +309,7 @@ class _MemberCardPageState extends State<MemberCardPage> with SingleTickerProvid
             SizedBox(height: h * 0.008),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               if (verified) ...[
-                Icon(CupertinoIcons.checkmark_seal_fill, size: w * 0.042, color: _olive),
+                Icon(PhFill.sealCheck, size: w * 0.042, color: _olive),
                 SizedBox(width: w * 0.012),
               ],
               Flexible(child: Text(idLine, maxLines: 1, overflow: TextOverflow.ellipsis, style: _font(w * 0.04, w: FontWeight.w500))),

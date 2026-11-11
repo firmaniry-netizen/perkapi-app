@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/widgets/liquid_glass.dart';
 
@@ -30,7 +30,7 @@ class NewsCover extends StatelessWidget {
       ),
       Image.asset(AppAssets.newsPlaceholder, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
       if (url == null)
-        const Center(child: Icon(CupertinoIcons.news, size: 40, color: Color(0x33FFFFFF))),
+        const Center(child: Icon(Ph.newspaper, size: 40, color: Color(0x33FFFFFF))),
       if (url != null)
         Image.network(
           url!,
@@ -39,7 +39,7 @@ class NewsCover extends StatelessWidget {
           filterQuality: FilterQuality.low,
           frameBuilder: (ctx, child, frame, sync) =>
               sync ? child : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 320), child: child),
-          errorBuilder: (_, __, ___) => const Center(child: Icon(CupertinoIcons.photo, color: Colors.white54)),
+          errorBuilder: (_, __, ___) => const Center(child: Icon(Ph.image, color: Colors.white54)),
         ),
     ]);
   }
@@ -106,7 +106,7 @@ Future<bool> confirmDeleteNews(BuildContext context, NewsPost p) async {
         width: 52,
         height: 52,
         decoration: BoxDecoration(color: AppColors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
-        child: const Icon(CupertinoIcons.trash_fill, color: AppColors.red, size: 28),
+        child: const Icon(PhFill.trash, color: AppColors.red, size: 28),
       ),
       title: const Text('Hapus berita ini?'),
       content: Text(
@@ -245,7 +245,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
               right: 10,
               top: 10,
               child: GlassCircleButton(
-                icon: CupertinoIcons.trash,
+                icon: Ph.trash,
                 tooltip: 'Hapus berita (admin)',
                 onTap: () => widget.onDelete!(p),
               ),
@@ -261,17 +261,17 @@ class _NewsCarouselState extends State<NewsCarousel> {
                   style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w800, height: 1.25)),
               const SizedBox(height: 8),
               Row(children: [
-                const Icon(CupertinoIcons.clock, size: 14, color: Color(0xCCFFFFFF)),
+                const Icon(Ph.clock, size: 14, color: Color(0xCCFFFFFF)),
                 const SizedBox(width: 4),
                 Text(timeAgoId(p.date),
                     style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                 const SizedBox(width: 12),
-                const Icon(CupertinoIcons.photo_on_rectangle, size: 14, color: Color(0xCCFFFFFF)),
+                const Icon(Ph.images, size: 14, color: Color(0xCCFFFFFF)),
                 const SizedBox(width: 4),
                 Text('${p.rows.length}',
                     style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
                 const Spacer(),
-                const Icon(CupertinoIcons.arrow_right, size: 18, color: Colors.white),
+                const Icon(Ph.arrowRight, size: 18, color: Colors.white),
               ]),
             ]),
           ),

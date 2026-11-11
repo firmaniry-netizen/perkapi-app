@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 
 import '../../core/services/access_service.dart';
@@ -38,7 +38,7 @@ class ReportsPage extends StatelessWidget {
         const ScreenHero(
           title: 'Laporan & Ekspor',
           subtitle: 'Rekap data organisasi, siap diunduh',
-          icon: CupertinoIcons.chart_bar_alt_fill,
+          icon: PhFill.chartBar,
           accent: AppColors.red,
         ),
         const SizedBox(height: 22),
@@ -47,8 +47,8 @@ class ReportsPage extends StatelessWidget {
         Text('File CSV bisa dibuka di Excel. Hanya data yang boleh Anda lihat yang ikut terekspor.', style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.small)),
         const SizedBox(height: 10),
         for (final e in <(String, IconData, String)>[
-          ('Daftar anggota', CupertinoIcons.person_crop_rectangle, 'members'),
-          ('Agenda & event', CupertinoIcons.calendar, 'events'),
+          ('Daftar anggota', Ph.identificationCard, 'members'),
+          ('Agenda & event', Ph.calendarBlank, 'events'),
         ])
           Card(
             child: ListTile(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/services/pin_service.dart';
@@ -96,7 +96,7 @@ class _PinPadState extends State<PinPad> {
       Row(mainAxisSize: MainAxisSize.min, children: [
         _key(''),
         _key('0', onTap: () => _tap('0')),
-        _key('', icon: CupertinoIcons.delete_left, onTap: _back),
+        _key('', icon: Ph.backspace, onTap: _back),
       ]),
     ]);
   }

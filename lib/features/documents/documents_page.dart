@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -179,9 +179,9 @@ class _DocumentsPageState extends State<DocumentsPage> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            tile(CupertinoIcons.doc_on_clipboard, 'Upload dokumen', 'PDF, Word, Excel, atau gambar (maks 20 MB)', 'file'),
-            tile(CupertinoIcons.photo_on_rectangle, 'Foto dari galeri', 'Pilih foto yang sudah ada di HP', 'gallery'),
-            tile(CupertinoIcons.camera, 'Ambil foto', 'Foto dokumen langsung dengan kamera', 'camera'),
+            tile(Ph.clipboardText, 'Upload dokumen', 'PDF, Word, Excel, atau gambar (maks 20 MB)', 'file'),
+            tile(Ph.images, 'Foto dari galeri', 'Pilih foto yang sudah ada di HP', 'gallery'),
+            tile(Ph.camera, 'Ambil foto', 'Foto dokumen langsung dengan kamera', 'camera'),
           ]),
         ),
       ),
@@ -278,7 +278,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     showSmoothDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: CircularProgressIndicator.adaptive()),
     );
     String? summary;
     String? err;
@@ -376,7 +376,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
         if (canWrite)
           IconButton(
             onPressed: _busy ? null : _reindexAll,
-            icon: const Icon(CupertinoIcons.search),
+            icon: const Icon(Ph.magnifyingGlass),
             tooltip: 'Indeks isi PDF (agar bisa dicari)',
           ),
       ]),
@@ -385,8 +385,8 @@ class _DocumentsPageState extends State<DocumentsPage> {
         child: FloatingActionButton.extended(
           onPressed: _busy ? null : _addSheet,
           icon: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(CupertinoIcons.doc_on_clipboard),
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
+              : const Icon(Ph.clipboardText),
           label: Text(_busy ? 'Mengunggah...' : 'Upload'),
         ),
       ),
@@ -398,15 +398,15 @@ class _DocumentsPageState extends State<DocumentsPage> {
           child: ScreenHero(
             title: 'Dokumen',
             subtitle: 'Arsip, versi, dan tanda tangan digital',
-            icon: CupertinoIcons.folder,
+            icon: Ph.folder,
             accent: AppColors.sky,
-            chips: [(CupertinoIcons.doc_text, '${_rows.length} dokumen')],
+            chips: [(Ph.fileText, '${_rows.length} dokumen')],
           ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
           child: TextField(
-            decoration: const InputDecoration(hintText: 'Cari judul atau isi dokumen', prefixIcon: Icon(CupertinoIcons.search), isDense: true),
+            decoration: const InputDecoration(hintText: 'Cari judul atau isi dokumen', prefixIcon: Icon(Ph.magnifyingGlass), isDense: true),
             onSubmitted: (v) {
               _q = v;
               _load();
@@ -428,7 +428,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                 child: FilledButton.icon(
                                   style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                                   onPressed: _busy ? null : () => _upload(kind: 'file'),
-                                  icon: const Icon(CupertinoIcons.doc_on_clipboard),
+                                  icon: const Icon(Ph.clipboardText),
                                   label: const Text('Dokumen'),
                                 ),
                               ),
@@ -437,7 +437,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                 child: OutlinedButton.icon(
                                   style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
                                   onPressed: _busy ? null : _addSheet,
-                                  icon: const Icon(CupertinoIcons.camera),
+                                  icon: const Icon(Ph.camera),
                                   label: const Text('Foto'),
                                 ),
                               ),
@@ -457,7 +457,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                               padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
                               onTap: () => _details(d, canWrite),
                               child: Row(children: [
-                                const IconBadge(CupertinoIcons.doc_text),
+                                const IconBadge(Ph.fileText),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -473,10 +473,10 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                 if (canWrite)
                                   IconButton(
                                       tooltip: 'Hapus',
-                                      icon: const Icon(CupertinoIcons.trash),
+                                      icon: const Icon(Ph.trash),
                                       onPressed: () => _delete(d))
                                 else
-                                  Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
+                                  Icon(Ph.caretRight, color: sc.onSurfaceVariant),
                               ]),
                             );
                           },
@@ -550,18 +550,18 @@ class _DocSheetState extends State<_DocSheet> {
           Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton.icon(
               onPressed: () => widget.onOpen(bucket, d['file_path'] as String, '${d['id']}'),
-              icon: const Icon(CupertinoIcons.arrow_up_right_square),
+              icon: const Icon(Ph.arrowSquareOut),
               label: const Text('Buka'),
             ),
             OutlinedButton.icon(
               onPressed: widget.onSummarize,
-              icon: const Icon(CupertinoIcons.sparkles),
+              icon: const Icon(Ph.sparkle),
               label: const Text('Ringkas dengan AI'),
             ),
             if (widget.canWrite)
               OutlinedButton.icon(
                 onPressed: widget.onNewVersion,
-                icon: const Icon(CupertinoIcons.doc_on_clipboard),
+                icon: const Icon(Ph.clipboardText),
                 label: const Text('Upload versi baru'),
               ),
           ]),
@@ -573,7 +573,7 @@ class _DocSheetState extends State<_DocSheet> {
           Text('Riwayat versi', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           if (_loading)
-            const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()))
+            const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator.adaptive()))
           else if (_versions.isEmpty)
             const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('Belum ada versi sebelumnya.'))
           else
@@ -581,7 +581,7 @@ class _DocSheetState extends State<_DocSheet> {
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(CupertinoIcons.clock),
+                leading: const Icon(Ph.clock),
                 title: Text('Versi ${v['version']}'),
                 subtitle: Text('${fmtValue(v['created_at'])} • ${_size(v['size_bytes'])}'),
                 onTap: () => widget.onOpen(

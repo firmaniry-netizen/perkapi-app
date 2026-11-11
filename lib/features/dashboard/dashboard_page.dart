@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -73,10 +73,10 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: AppSpace.xs),
           Text('Tampilan PERKAPI diperbarui.', style: TextStyle(color: scheme.onSurfaceVariant)),
           const SizedBox(height: AppSpace.xl),
-          row(Icons.blur_on_rounded, AppColors.navyAction, 'Tampilan kaca', 'Menu, tombol, lembar, dan dialog kini berbahan kaca seperti iOS terbaru.'),
-          row(CupertinoIcons.star_fill, AppColors.goldDeep, 'Menu favorit', 'Di "Semua menu", tahan sebuah menu untuk menyematkannya ke Favorit.'),
-          row(CupertinoIcons.search, AppColors.teal, 'Cari menu', 'Ketik nama menu di "Semua menu" untuk langsung menemukannya.'),
-          row(CupertinoIcons.textformat, AppColors.violet, 'Lebih rapi', 'Ukuran huruf, warna, dan sudut kini seragam di semua halaman.'),
+          row(Ph.drop, AppColors.navyAction, 'Tampilan kaca', 'Menu, tombol, lembar, dan dialog kini berbahan kaca seperti iOS terbaru.'),
+          row(PhFill.star, AppColors.goldDeep, 'Menu favorit', 'Di "Semua menu", tahan sebuah menu untuk menyematkannya ke Favorit.'),
+          row(Ph.magnifyingGlass, AppColors.teal, 'Cari menu', 'Ketik nama menu di "Semua menu" untuk langsung menemukannya.'),
+          row(Ph.textAa, AppColors.violet, 'Lebih rapi', 'Ukuran huruf, warna, dan sudut kini seragam di semua halaman.'),
           const SizedBox(height: AppSpace.sm),
           FilledButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Mengerti')),
         ]),
@@ -152,7 +152,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           onRetry: () => setState(() => _f = _load())));
                 }
                 final d = snap.data!;
-                return RefreshIndicator(
+                return RefreshIndicator.adaptive(
                   edgeOffset: 64,
                   onRefresh: () async {
                     AlertService.instance.refresh();
@@ -183,7 +183,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                           onTap: () => context.push('/search'),
                           child: Row(children: [
-                            Icon(CupertinoIcons.search, color: scheme.onSurfaceVariant),
+                            Icon(Ph.magnifyingGlass, color: scheme.onSurfaceVariant),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text('Cari anggota, catatan, peraturan',
@@ -238,13 +238,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: AppType.accent(24, color: Theme.of(context).brightness == Brightness.dark ? AppColors.gold : AppColors.goldDeep, height: 1.05)),
             ]),
           ),
-          AppIconButton(icon: CupertinoIcons.square_grid_2x2, tooltip: 'Semua menu', onTap: () => context.push('/more')),
+          AppIconButton(icon: Ph.squaresFour, tooltip: 'Semua menu', onTap: () => context.push('/more')),
           const SizedBox(width: 8),
           // SATU lonceng: kotak masuk berisi Peringatan + Notifikasi (lencana = jumlah keduanya).
           ListenableBuilder(
             listenable: AlertService.instance,
             builder: (context, _) => AppIconButton(
-              icon: CupertinoIcons.bell,
+              icon: Ph.bell,
               tooltip: 'Kotak masuk',
               badge: AlertService.instance.unread + _notifUnread,
               pulse: true,
@@ -263,16 +263,16 @@ class _DashboardPageState extends State<DashboardPage> {
   /// Yang sudah ada di navigasi bawah (Buku Saku, Profesi, Informasi) tidak diulang.
   Widget _quickGrid(BuildContext context) {
     final photos = <(String, String, String, IconData, Color)>[
-      ('Berita', '/gallery', AppPhotos.koran, CupertinoIcons.news, AppColors.iosOrange),
-      ('Agenda', '/events', AppPhotos.konferensi, CupertinoIcons.calendar, AppColors.iosRed),
-      ('Peraturan', '/regulations', AppPhotos.bukuHukum, CupertinoIcons.hammer_fill, AppColors.iosIndigo),
-      ('Forum', '/forum', AppPhotos.rapatBisnis, CupertinoIcons.chat_bubble_2_fill, AppColors.iosGreen),
+      ('Berita', '/gallery', AppPhotos.koran, Ph.newspaper, AppColors.iosOrange),
+      ('Agenda', '/events', AppPhotos.konferensi, Ph.calendarBlank, AppColors.iosRed),
+      ('Peraturan', '/regulations', AppPhotos.bukuHukum, PhFill.gavel, AppColors.iosIndigo),
+      ('Forum', '/forum', AppPhotos.rapatBisnis, PhFill.chatsCircle, AppColors.iosGreen),
     ];
     final tiles = <(IconData, String, String)>[
-      (CupertinoIcons.chat_bubble_fill, 'Chat', '/chat'),
-      (CupertinoIcons.sparkles, 'Tanya AI', '/ai'),
-      (CupertinoIcons.heart_circle, 'Donasi', '/donations'),
-      (CupertinoIcons.square_grid_2x2, 'Semua', '/more'),
+      (PhFill.chatCircle, 'Chat', '/chat'),
+      (Ph.sparkle, 'Tanya AI', '/ai'),
+      (Ph.handHeart, 'Donasi', '/donations'),
+      (Ph.squaresFour, 'Semua', '/more'),
     ];
     return Column(children: [
       GridView(
@@ -331,7 +331,7 @@ class _DashboardPageState extends State<DashboardPage> {
         padding: const EdgeInsets.all(16),
         onTap: () => context.push('/gallery?add=1'),
         child: Row(children: [
-          const SolidTile(icon: CupertinoIcons.news, color: AppColors.goldDeep, size: 52, radius: 18),
+          const SolidTile(icon: Ph.newspaper, color: AppColors.goldDeep, size: 52, radius: 18),
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -341,7 +341,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   style: TextStyle(fontSize: AppType.small, height: 1.35, color: scheme.onSurfaceVariant)),
             ]),
           ),
-          const Icon(CupertinoIcons.add_circled_solid, color: AppColors.red, size: 30),
+          const Icon(PhFill.plusCircle, color: AppColors.red, size: 30),
         ]),
       );
     }
@@ -382,10 +382,10 @@ class _DashboardPageState extends State<DashboardPage> {
         onTap: () => context.push('/module/announcements/${n['id']}'),
         minTileHeight: 64,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        leading: const SolidTile(icon: CupertinoIcons.speaker_2_fill, color: AppColors.goldDeep, size: 44, radius: 14),
+        leading: const SolidTile(icon: PhFill.megaphone, color: AppColors.goldDeep, size: 44, radius: 14),
         title: Text('${n['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: Text('${n['category'] ?? 'Pengumuman'} • ${fmtValue(n['created_at'])}', maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: Icon(CupertinoIcons.chevron_right, color: scheme.onSurfaceVariant),
+        trailing: Icon(Ph.caretRight, color: scheme.onSurfaceVariant),
       ));
       if (i < rows.length - 1) children.add(const Divider(indent: 76));
     }
@@ -412,7 +412,7 @@ class _AgendaStrip extends StatelessWidget {
       return AppCard(
         onTap: Access.instance.can('manage_event') ? () => context.push('/module/events/new') : null,
         child: Row(children: [
-          const SolidTile(icon: CupertinoIcons.calendar_badge_plus, color: AppColors.goldDeep, size: 48, radius: 16),
+          const SolidTile(icon: Ph.calendarPlus, color: AppColors.goldDeep, size: 48, radius: 16),
           const SizedBox(width: 14),
           Expanded(
             child: Text(

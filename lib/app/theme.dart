@@ -77,6 +77,8 @@ class AppTheme {
       canvasColor: bg,
       // Perilaku iOS di semua HP: transisi geser + usap dari tepi kiri untuk kembali, sakelar & seleksi teks gaya iOS.
       platform: TargetPlatform.iOS,
+      // Tanpa riak Material: saat ditekan permukaan hanya meredup sesaat, seperti di iOS.
+      splashFactory: NoSplash.splashFactory,
       pageTransitionsTheme: const PageTransitionsTheme(builders: {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),

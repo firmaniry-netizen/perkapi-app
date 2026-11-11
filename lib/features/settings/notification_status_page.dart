@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 import '../../core/constants/app_colors.dart';
@@ -79,7 +79,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
       appBar: GlassAppBar(title: const Text('Notifikasi & Pengingat')),
       body: PageGlow(
         accent: AppColors.amber,
-        child: RefreshIndicator(
+        child: RefreshIndicator.adaptive(
           onRefresh: () async {
             _reload();
             await _f;
@@ -158,7 +158,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                     child: ScreenHero(
                       title: 'Notifikasi & Pengingat',
                       subtitle: 'Pastikan tenggat sampai ke HP Anda',
-                      icon: CupertinoIcons.bell_fill,
+                      icon: PhFill.bell,
                       accent: AppColors.amber,
                     ),
                   ),
@@ -179,7 +179,7 @@ class _NotificationStatusPageState extends State<NotificationStatusPage> {
                   const SizedBox(height: 16),
                   PrimaryButton(
                     label: 'Kirim notifikasi uji',
-                    icon: CupertinoIcons.paperplane_fill,
+                    icon: PhFill.paperPlaneRight,
                     loading: _sending,
                     onPressed: _sending ? null : _sendTest,
                   ),
@@ -221,7 +221,7 @@ class _CheckRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final color = ok == true ? AppColors.emerald : (ok == false ? AppColors.red : AppColors.amber);
-    final icon = ok == true ? CupertinoIcons.checkmark : (ok == false ? CupertinoIcons.xmark : CupertinoIcons.ellipsis);
+    final icon = ok == true ? Ph.check : (ok == false ? Ph.x : Ph.dotsThree);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

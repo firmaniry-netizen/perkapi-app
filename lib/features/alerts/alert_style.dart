@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/constants/app_colors.dart';
 
 class AlertStyle {
@@ -12,13 +12,13 @@ class AlertStyle {
     switch (severity) {
       case 'urgent':
         return const AlertStyle(
-            AppColors.red, Color(0xFFFFEBEE), CupertinoIcons.exclamationmark_circle, 'Penting');
+            AppColors.red, Color(0xFFFFEBEE), Ph.warningCircle, 'Penting');
       case 'warning':
         return const AlertStyle(
-            AppColors.amber, Color(0xFFFFF3E0), CupertinoIcons.exclamationmark_triangle, 'Peringatan');
+            AppColors.amber, Color(0xFFFFF3E0), Ph.warning, 'Peringatan');
       default:
         return const AlertStyle(
-            AppColors.navyAction, Color(0xFFE3EAF8), CupertinoIcons.info_circle, 'Info');
+            AppColors.navyAction, Color(0xFFE3EAF8), Ph.info, 'Info');
     }
   }
 }

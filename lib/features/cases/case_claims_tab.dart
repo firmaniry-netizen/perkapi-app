@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/services/access_service.dart';
@@ -270,7 +270,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
     final sc = Theme.of(context).colorScheme;
     final shown = _filter == null ? _rows : _rows.where((r) => r['status'] == _filter).toList();
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _load,
       child: ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 120 + MediaQuery.paddingOf(context).bottom), children: [
         _summary(context),
@@ -280,7 +280,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _edit(),
-                icon: const Icon(CupertinoIcons.add),
+                icon: const Icon(Ph.plus),
                 label: const Text('Tambah'),
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -289,7 +289,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
           ],
           PopupMenuButton<String>(
             tooltip: 'Menu',
-            icon: const Icon(CupertinoIcons.ellipsis_vertical),
+            icon: const Icon(Ph.dotsThreeVertical),
             onSelected: (v) {
               if (v == 'csv') _export(false);
               if (v == 'pdf') _export(true);
@@ -322,7 +322,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
         ),
         const SizedBox(height: 8),
         if (shown.isEmpty)
-          const EmptyState(message: 'Belum ada tagihan.\nTambah satu per satu atau impor dari daftar kreditur.', icon: CupertinoIcons.money_dollar_circle),
+          const EmptyState(message: 'Belum ada tagihan.\nTambah satu per satu atau impor dari daftar kreditur.', icon: Ph.currencyCircleDollar),
         for (var i = 0; i < shown.length; i++)
           Reveal(
             index: i % 8,

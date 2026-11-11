@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/widgets/motion.dart';
@@ -88,7 +88,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
             padding: const EdgeInsets.only(left: 16),
             child: Center(
               child: GlassCircleButton(
-                icon: CupertinoIcons.arrow_left,
+                icon: Ph.arrowLeft,
                 tooltip: 'Kembali',
                 onTap: () => Navigator.maybePop(context),
               ),
@@ -100,9 +100,9 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 padding: const EdgeInsets.only(right: 16),
                 child: Center(
                   child: _deleting
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
+                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator.adaptive(strokeWidth: 2.4, backgroundColor: Colors.white))
                       : GlassCircleButton(
-                          icon: CupertinoIcons.trash,
+                          icon: Ph.trash,
                           tooltip: 'Hapus berita (admin)',
                           color: const Color(0x99C8202F),
                           onTap: _delete,
@@ -202,12 +202,12 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 index: 2,
                 dy: 10,
                 child: Row(children: [
-                  Icon(CupertinoIcons.calendar_today, size: 15, color: sc.onSurfaceVariant),
+                  Icon(Ph.calendarDot, size: 15, color: sc.onSurfaceVariant),
                   const SizedBox(width: 6),
                   Text(formatTanggal(p.date),
                       style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
                   const SizedBox(width: 14),
-                  Icon(CupertinoIcons.photo_on_rectangle, size: 15, color: sc.onSurfaceVariant),
+                  Icon(Ph.images, size: 15, color: sc.onSurfaceVariant),
                   const SizedBox(width: 6),
                   Text('${p.rows.length} foto',
                       style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w600, color: sc.onSurfaceVariant)),
@@ -295,7 +295,7 @@ class _NewsPhotoViewerState extends State<NewsPhotoViewer> {
             maxScale: 5,
             child: Center(
               child: url == null
-                  ? const CircularProgressIndicator(color: Colors.white54)
+                  ? const CircularProgressIndicator.adaptive(backgroundColor: Colors.white54)
                   : Image.network(url, fit: BoxFit.contain, cacheWidth: 1600),
             ),
           );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 /// [date] = tanggal saja (yyyy-MM-dd). [datetime] = tanggal + jam, disimpan UTC (ISO 8601) dan ditampilkan waktu lokal.
 enum FieldType { text, multiline, markdown, number, date, datetime, select, boolean, lookup, tags }
@@ -60,7 +60,7 @@ final Map<String, ModuleDef> modules = {
   for (final m in [
     ModuleDef(
       offlineCache: true, id: 'notes', title: 'Buku Saku Saya', table: 'personal_notes',
-      icon: CupertinoIcons.book, titleKey: 'title',
+      icon: Ph.bookOpen, titleKey: 'title',
       subtitleKeys: ['content'], searchKeys: ['title', 'content'],
       ownerKey: 'member_id', ownOnly: true, statusKey: null,
       fields: [
@@ -76,7 +76,7 @@ final Map<String, ModuleDef> modules = {
     ),
     ModuleDef(
       offlineCache: true, id: 'org_book', title: 'Buku Saku Organisasi', table: 'pocket_book_contents',
-      icon: CupertinoIcons.building_2_fill, titleKey: 'title',
+      icon: Ph.buildings, titleKey: 'title',
       subtitleKeys: ['category'], searchKeys: ['title', 'content', 'category'],
       writePerm: 'manage_announcement',
       fields: [
@@ -89,7 +89,7 @@ final Map<String, ModuleDef> modules = {
     ),
     ModuleDef(
       offlineCache: true, id: 'announcements', title: 'Pengumuman', table: 'announcements',
-      icon: CupertinoIcons.speaker_2, titleKey: 'title',
+      icon: Ph.megaphone, titleKey: 'title',
       subtitleKeys: ['category'], searchKeys: ['title', 'body'],
       writePerm: 'manage_announcement', ownerKey: 'created_by',
       fields: [
@@ -101,7 +101,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      offlineCache: true, id: 'events', title: 'Agenda & Event', table: 'events', icon: CupertinoIcons.calendar,
+      offlineCache: true, id: 'events', title: 'Agenda & Event', table: 'events', icon: Ph.calendarBlank,
       titleKey: 'title', subtitleKeys: ['starts_at', 'location'],
       searchKeys: ['title', 'location'], orderBy: 'starts_at', writePerm: 'manage_event',
       fields: [
@@ -117,7 +117,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      id: 'forum', title: 'Forum Internal', table: 'forum_posts', icon: CupertinoIcons.chat_bubble_2,
+      id: 'forum', title: 'Forum Internal', table: 'forum_posts', icon: Ph.chatsCircle,
       titleKey: 'title', subtitleKeys: ['category'], searchKeys: ['title', 'body'],
       ownerKey: 'author_id',
       fields: [
@@ -129,7 +129,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      id: 'members', title: 'Anggota', table: 'members', icon: CupertinoIcons.person_crop_rectangle,
+      id: 'members', title: 'Anggota', table: 'members', icon: Ph.identificationCard,
       titleKey: 'full_name', subtitleKeys: ['member_number', 'status'],
       searchKeys: ['full_name', 'member_number', 'email'], statusKey: 'status',
       orderBy: 'full_name', readPerm: 'view_member', writePerm: 'manage_member',
@@ -144,7 +144,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      id: 'branches', title: 'Cabang', table: 'branches', icon: CupertinoIcons.building_2_fill,
+      id: 'branches', title: 'Cabang', table: 'branches', icon: Ph.buildings,
       titleKey: 'name', subtitleKeys: ['city'], searchKeys: ['name', 'city'],
       orderBy: 'name', writePerm: 'manage_user',
       fields: [
@@ -154,7 +154,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      id: 'notifications', title: 'Notifikasi', table: 'notifications', icon: CupertinoIcons.bell,
+      id: 'notifications', title: 'Notifikasi', table: 'notifications', icon: Ph.bell,
       titleKey: 'title', subtitleKeys: ['body'], searchKeys: ['title', 'body'],
       ownerKey: 'member_id', ownOnly: true, readOnly: true, markAllRead: true, fields: [
         FieldDef('title', 'Judul'),
@@ -162,7 +162,7 @@ final Map<String, ModuleDef> modules = {
       ],
     ),
     ModuleDef(
-      id: 'audit', title: 'Audit Log', table: 'audit_logs', icon: CupertinoIcons.clock,
+      id: 'audit', title: 'Audit Log', table: 'audit_logs', icon: Ph.clock,
       titleKey: 'action', subtitleKeys: ['module', 'record_id'],
       searchKeys: ['action', 'module'], readPerm: 'view_audit_log', readOnly: true,
       fields: [FieldDef('action', 'Aksi'), FieldDef('module', 'Modul'), FieldDef('record_id', 'ID data')],

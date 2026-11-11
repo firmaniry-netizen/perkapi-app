@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -51,13 +51,13 @@ class _DonationsPageState extends State<DonationsPage> {
       floatingActionButton: _manager
           ? FloatingActionButton.extended(
               onPressed: () => _open('/donations/new'),
-              icon: const Icon(CupertinoIcons.add),
+              icon: const Icon(Ph.plus),
               label: const Text('Buat kampanye'),
             )
           : null,
       body: PageGlow(
         accent: AppColors.emerald,
-        child: RefreshIndicator(
+        child: RefreshIndicator.adaptive(
           onRefresh: _reload,
           child: ListView(
             padding: barPad(context, EdgeInsets.fromLTRB(16, 16, 16, 96 + bottom)),
@@ -68,15 +68,15 @@ class _DonationsPageState extends State<DonationsPage> {
                 child: ScreenHero(
                   title: 'Donasi PERKAPI',
                   subtitle: 'Dukung event organisasi, kegiatan sosial, dan bantuan bencana bersama sesama anggota.',
-                  icon: CupertinoIcons.heart_circle,
+                  icon: Ph.handHeart,
                   accent: AppColors.emerald,
                 ),
               ),
               const SizedBox(height: 14),
               SegmentedButton<int>(
                 segments: const [
-                  ButtonSegment(value: 0, label: Text('Kampanye'), icon: Icon(CupertinoIcons.speaker_2_fill)),
-                  ButtonSegment(value: 1, label: Text('Donasi saya'), icon: Icon(CupertinoIcons.doc_text)),
+                  ButtonSegment(value: 0, label: Text('Kampanye'), icon: Icon(PhFill.megaphone)),
+                  ButtonSegment(value: 1, label: Text('Donasi saya'), icon: Icon(Ph.fileText)),
                 ],
                 selected: {_tab},
                 showSelectedIcon: false,
@@ -126,7 +126,7 @@ class _DonationsPageState extends State<DonationsPage> {
               return Padding(
                 padding: const EdgeInsets.only(top: 24),
                 child: EmptyState(
-                  icon: CupertinoIcons.heart_circle,
+                  icon: Ph.handHeart,
                   title: 'Belum ada kampanye',
                   message: _manager
                       ? 'Buat kampanye donasi pertama, misalnya untuk event atau kegiatan sosial.'
@@ -160,7 +160,7 @@ class _DonationsPageState extends State<DonationsPage> {
         if (rows.isEmpty) {
           return const Padding(
             padding: EdgeInsets.only(top: 24),
-            child: EmptyState(icon: CupertinoIcons.doc_text, title: 'Belum ada donasi', message: 'Donasi yang Anda kirim akan tercatat di sini beserta statusnya.'),
+            child: EmptyState(icon: Ph.fileText, title: 'Belum ada donasi', message: 'Donasi yang Anda kirim akan tercatat di sini beserta statusnya.'),
           );
         }
         final total = rows.where((r) => r['status'] == 'terverifikasi').fold<int>(0, (a, r) => a + ((r['amount'] as num?)?.toInt() ?? 0));
@@ -168,7 +168,7 @@ class _DonationsPageState extends State<DonationsPage> {
           AppCard(
             wash: AppColors.emerald,
             child: Row(children: [
-              const SolidTile(icon: CupertinoIcons.heart_fill, color: AppColors.emerald, size: 44, radius: 14),
+              const SolidTile(icon: PhFill.heart, color: AppColors.emerald, size: 44, radius: 14),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

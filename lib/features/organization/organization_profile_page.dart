@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,7 +41,7 @@ class OrganizationProfilePage extends StatelessWidget {
             Text(value, style: const TextStyle(height: 1.35)),
           ]),
         ),
-        if (uri != null) Icon(CupertinoIcons.arrow_up_right_square, size: 18, color: sc.onSurfaceVariant),
+        if (uri != null) Icon(Ph.arrowSquareOut, size: 18, color: sc.onSurfaceVariant),
       ]),
     );
     if (uri == null) return row;
@@ -75,7 +75,7 @@ class OrganizationProfilePage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.button), border: Border.all(color: AppColors.line)),
-                    child: Image.asset(AppAssets.logoPerkapi, height: 48, width: 48, errorBuilder: (_, __, ___) => const Icon(CupertinoIcons.building_2_fill, size: 40, color: AppColors.navy)),
+                    child: Image.asset(AppAssets.logoPerkapi, height: 48, width: 48, errorBuilder: (_, __, ___) => const Icon(Ph.buildings, size: 40, color: AppColors.navy)),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -98,7 +98,7 @@ class OrganizationProfilePage extends StatelessWidget {
             AppCard(
               onTap: () => context.push('/organization-structure'),
               child: Row(children: [
-                const SolidTile(icon: CupertinoIcons.list_bullet_indent, color: AppColors.navy, size: 44, radius: 14),
+                const SolidTile(icon: Ph.treeStructure, color: AppColors.navy, size: 44, radius: 14),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -107,7 +107,7 @@ class OrganizationProfilePage extends StatelessWidget {
                     Text('Susunan pengurus lengkap dengan foto', style: TextStyle(fontSize: AppType.small)),
                   ]),
                 ),
-                Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
+                Icon(Ph.caretRight, color: sc.onSurfaceVariant),
               ]),
             ),
             if (nothingFilled) ...[
@@ -123,11 +123,11 @@ class OrganizationProfilePage extends StatelessWidget {
               GuideCard(
                 title: 'Kontak sekretariat',
                 child: Column(children: [
-                  if (OrgProfile.address.isNotEmpty) _contactRow(context, CupertinoIcons.location, 'Alamat', OrgProfile.address, null),
+                  if (OrgProfile.address.isNotEmpty) _contactRow(context, Ph.mapPin, 'Alamat', OrgProfile.address, null),
                   if (OrgProfile.phone.isNotEmpty)
-                    _contactRow(context, CupertinoIcons.phone, 'Telepon', OrgProfile.phone, Uri(scheme: 'tel', path: OrgProfile.phone.replaceAll(' ', ''))),
-                  if (OrgProfile.email.isNotEmpty) _contactRow(context, CupertinoIcons.mail, 'Email', OrgProfile.email, Uri(scheme: 'mailto', path: OrgProfile.email)),
-                  if (OrgProfile.website.isNotEmpty) _contactRow(context, CupertinoIcons.globe, 'Situs web', OrgProfile.website, Uri.tryParse(OrgProfile.website)),
+                    _contactRow(context, Ph.phone, 'Telepon', OrgProfile.phone, Uri(scheme: 'tel', path: OrgProfile.phone.replaceAll(' ', ''))),
+                  if (OrgProfile.email.isNotEmpty) _contactRow(context, Ph.envelope, 'Email', OrgProfile.email, Uri(scheme: 'mailto', path: OrgProfile.email)),
+                  if (OrgProfile.website.isNotEmpty) _contactRow(context, Ph.globe, 'Situs web', OrgProfile.website, Uri.tryParse(OrgProfile.website)),
                 ]),
               ),
           ],

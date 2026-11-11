@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/services/supabase_service.dart';
@@ -91,7 +91,7 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
       Text('Tanda tangan elektronik', style: Theme.of(context).textTheme.titleMedium),
       const SizedBox(height: 4),
       if (_loading)
-        const Padding(padding: EdgeInsets.all(12), child: Center(child: CircularProgressIndicator()))
+        const Padding(padding: EdgeInsets.all(12), child: Center(child: CircularProgressIndicator.adaptive()))
       else if (_error != null)
         Text(_error!, style: TextStyle(color: scheme.error, fontSize: AppType.small))
       else ...[
@@ -100,7 +100,7 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
           ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(r['is_current'] == true ? CupertinoIcons.checkmark_seal : CupertinoIcons.clock, color: r['is_current'] == true ? scheme.primary : scheme.onSurfaceVariant),
+            leading: Icon(r['is_current'] == true ? Ph.sealCheck : Ph.clock, color: r['is_current'] == true ? scheme.primary : scheme.onSurfaceVariant),
             title: Text('${r['signer_name']}'),
             subtitle: Text('${fmtValue(r['signed_at'])} · ${r['is_current'] == true ? 'versi saat ini' : 'versi sebelumnya'}'),
             onTap: () => _view('${r['signature_path']}'),
@@ -108,7 +108,7 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
         const SizedBox(height: 6),
         OutlinedButton.icon(
           onPressed: _busy || _signedCurrent ? null : _sign,
-          icon: _busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(CupertinoIcons.signature),
+          icon: _busy ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator.adaptive(strokeWidth: 2)) : const Icon(Ph.signature),
           label: Text(_signedCurrent ? 'Sudah Anda tandatangani' : 'Tandatangani dokumen ini'),
         ),
         const SizedBox(height: 4),

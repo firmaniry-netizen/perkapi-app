@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../constants/app_colors.dart';
@@ -69,12 +69,12 @@ class _Card extends StatelessWidget {
             ? const Color(0xFFE59A1F)
             : AppColors.navyAction;
     final icon = n.urgent
-        ? CupertinoIcons.exclamationmark_octagon
+        ? Ph.warningOctagon
         : n.type == 'tracking'
-            ? CupertinoIcons.location_fill
+            ? PhFill.mapPin
             : n.type == 'warning'
-                ? CupertinoIcons.exclamationmark_triangle
-                : CupertinoIcons.bell_fill;
+                ? Ph.warning
+                : PhFill.bell;
     return Material(
       color: Colors.transparent,
       child: Dismissible(
@@ -123,7 +123,7 @@ class _Card extends StatelessWidget {
               IconButton(
                 tooltip: 'Tutup',
                 onPressed: LiveNotifier.instance.dismiss,
-                icon: Icon(CupertinoIcons.xmark, color: Colors.white.withValues(alpha: 0.7), size: 20),
+                icon: Icon(Ph.x, color: Colors.white.withValues(alpha: 0.7), size: 20),
               ),
             ]),
           ),

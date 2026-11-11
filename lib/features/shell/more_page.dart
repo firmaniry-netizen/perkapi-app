@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,8 +106,8 @@ class _MorePageState extends State<MorePage> {
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: 'Cari menu',
-            prefixIcon: const Icon(CupertinoIcons.search),
-            suffixIcon: q.isEmpty ? null : IconButton(icon: const Icon(CupertinoIcons.xmark), tooltip: 'Hapus', onPressed: _q.clear),
+            prefixIcon: const Icon(Ph.magnifyingGlass),
+            suffixIcon: q.isEmpty ? null : IconButton(icon: const Icon(Ph.x), tooltip: 'Hapus', onPressed: _q.clear),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.chip), borderSide: BorderSide.none),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.chip), borderSide: BorderSide.none),
             focusedBorder: OutlineInputBorder(

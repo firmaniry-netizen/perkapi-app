@@ -1,7 +1,7 @@
 import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -168,19 +168,19 @@ class _CallPageState extends State<CallPage> {
     if (s.phase == CallPhase.ended) return const SizedBox(height: 72);
     if (s.phase == CallPhase.ringing) {
       return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        _RoundBtn(icon: CupertinoIcons.phone_down_fill, label: 'Tolak', color: AppColors.red, onTap: s.decline, big: true),
-        _RoundBtn(icon: s.video ? CupertinoIcons.videocam_fill : CupertinoIcons.phone_fill, label: 'Jawab', color: AppColors.emerald, onTap: s.accept, big: true),
+        _RoundBtn(icon: PhFill.phoneDisconnect, label: 'Tolak', color: AppColors.red, onTap: s.decline, big: true),
+        _RoundBtn(icon: s.video ? PhFill.videoCamera : PhFill.phone, label: 'Jawab', color: AppColors.emerald, onTap: s.accept, big: true),
       ]);
     }
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        _RoundBtn(icon: s.muted ? CupertinoIcons.mic_slash_fill : CupertinoIcons.mic_fill, label: s.muted ? 'Bisu' : 'Mikrofon', on: s.muted, onTap: s.toggleMute),
-        _RoundBtn(icon: s.speaker ? CupertinoIcons.speaker_2_fill : CupertinoIcons.ear, label: 'Speaker', on: s.speaker, onTap: s.toggleSpeaker),
-        if (s.video) _RoundBtn(icon: s.cameraOff ? CupertinoIcons.video_camera : CupertinoIcons.videocam_fill, label: 'Kamera', on: s.cameraOff, onTap: s.toggleCamera),
-        if (s.video) _RoundBtn(icon: CupertinoIcons.camera_rotate, label: 'Balik', onTap: s.switchCamera),
+        _RoundBtn(icon: s.muted ? PhFill.microphoneSlash : PhFill.microphone, label: s.muted ? 'Bisu' : 'Mikrofon', on: s.muted, onTap: s.toggleMute),
+        _RoundBtn(icon: s.speaker ? PhFill.speakerHigh : Ph.ear, label: 'Speaker', on: s.speaker, onTap: s.toggleSpeaker),
+        if (s.video) _RoundBtn(icon: s.cameraOff ? Ph.videoCamera : PhFill.videoCamera, label: 'Kamera', on: s.cameraOff, onTap: s.toggleCamera),
+        if (s.video) _RoundBtn(icon: Ph.cameraRotate, label: 'Balik', onTap: s.switchCamera),
       ]),
       const SizedBox(height: 22),
-      _RoundBtn(icon: CupertinoIcons.phone_down_fill, label: 'Akhiri', color: AppColors.red, onTap: () => s.hangup(), big: true),
+      _RoundBtn(icon: PhFill.phoneDisconnect, label: 'Akhiri', color: AppColors.red, onTap: () => s.hangup(), big: true),
     ]);
   }
 }

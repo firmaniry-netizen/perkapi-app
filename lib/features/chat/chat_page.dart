@@ -4,7 +4,7 @@ import 'dart:ui' show FontFeature;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -333,15 +333,15 @@ class _ChatPageState extends State<ChatPage> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _AttachOpt(icon: CupertinoIcons.camera_fill, label: 'Kamera', color: AppColors.red, onTap: () {
+            _AttachOpt(icon: PhFill.camera, label: 'Kamera', color: AppColors.red, onTap: () {
               Navigator.pop(ctx);
               _pickImage(ImageSource.camera);
             }),
-            _AttachOpt(icon: CupertinoIcons.photo_on_rectangle, label: 'Galeri', color: AppColors.violet, onTap: () {
+            _AttachOpt(icon: Ph.images, label: 'Galeri', color: AppColors.violet, onTap: () {
               Navigator.pop(ctx);
               _pickImage(ImageSource.gallery);
             }),
-            _AttachOpt(icon: CupertinoIcons.doc_text_fill, label: 'Dokumen', color: AppColors.navyAction, onTap: () {
+            _AttachOpt(icon: PhFill.fileText, label: 'Dokumen', color: AppColors.navyAction, onTap: () {
               Navigator.pop(ctx);
               _pickFile();
             }),
@@ -395,18 +395,18 @@ class _ChatPageState extends State<ChatPage> {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           if (!deleted && kind != 'call')
-            ListTile(leading: const Icon(CupertinoIcons.arrowshape_turn_up_left), title: const Text('Balas'), onTap: () {
+            ListTile(leading: const Icon(Ph.arrowBendUpLeft), title: const Text('Balas'), onTap: () {
               Navigator.pop(ctx);
               _startReply(m);
             }),
           if (!deleted && '${m['body'] ?? ''}'.isNotEmpty)
-            ListTile(leading: const Icon(CupertinoIcons.doc_on_doc), title: const Text('Salin teks'), onTap: () {
+            ListTile(leading: const Icon(Ph.copy), title: const Text('Salin teks'), onTap: () {
               Navigator.pop(ctx);
               Clipboard.setData(ClipboardData(text: '${m['body']}'));
               _snack('Teks disalin.');
             }),
           if (canEdit)
-            ListTile(leading: const Icon(CupertinoIcons.pencil), title: Text(kind == 'text' ? 'Edit' : 'Edit keterangan'), onTap: () {
+            ListTile(leading: const Icon(Ph.pencilSimple), title: Text(kind == 'text' ? 'Edit' : 'Edit keterangan'), onTap: () {
               Navigator.pop(ctx);
               setState(() {
                 _editing = m;
@@ -417,7 +417,7 @@ class _ChatPageState extends State<ChatPage> {
             }),
           if (mine && !deleted && kind != 'call')
             ListTile(
-              leading: const Icon(CupertinoIcons.trash, color: AppColors.red),
+              leading: const Icon(Ph.trash, color: AppColors.red),
               title: const Text('Hapus untuk semua', style: TextStyle(color: AppColors.red)),
               onTap: () {
                 Navigator.pop(ctx);
@@ -513,13 +513,13 @@ class _ChatPageState extends State<ChatPage> {
     final read = _readByAll(m);
     final two = read || _deliveredToAll(m);
     final c = read ? const Color(0xFF53BDEB) : sub;
-    if (!two) return Icon(CupertinoIcons.checkmark_alt, size: 15, color: c);
+    if (!two) return Icon(Ph.check, size: 15, color: c);
     return SizedBox(
       width: 21,
       height: 15,
       child: Stack(clipBehavior: Clip.none, children: [
-        Positioned(left: 0, top: 0, child: Icon(CupertinoIcons.checkmark_alt, size: 15, color: c)),
-        Positioned(left: 6, top: 0, child: Icon(CupertinoIcons.checkmark_alt, size: 15, color: c)),
+        Positioned(left: 0, top: 0, child: Icon(Ph.check, size: 15, color: c)),
+        Positioned(left: 6, top: 0, child: Icon(Ph.check, size: 15, color: c)),
       ]),
     );
   }
@@ -589,7 +589,7 @@ class _ChatPageState extends State<ChatPage> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(children: [
               _group
-                  ? const CircleAvatar(radius: 18, backgroundColor: AppColors.navyAction, child: Icon(CupertinoIcons.person_3_fill, size: 20, color: Colors.white))
+                  ? const CircleAvatar(radius: 18, backgroundColor: AppColors.navyAction, child: Icon(PhFill.usersThree, size: 20, color: Colors.white))
                   : MemberAvatar(name: _title, path: _peerAvatar, radius: 18),
               const SizedBox(width: 10),
               Expanded(
@@ -612,12 +612,12 @@ class _ChatPageState extends State<ChatPage> {
           if (!_group && peer != null && peer.isNotEmpty) ...[
             IconButton(
               tooltip: 'Video call',
-              icon: const Icon(CupertinoIcons.videocam_fill),
+              icon: const Icon(PhFill.videoCamera),
               onPressed: () => CallService.instance.call(context, threadId: widget.threadId, peerId: peer, peerName: _title, video: true),
             ),
             IconButton(
               tooltip: 'Telepon',
-              icon: const Icon(CupertinoIcons.phone_fill),
+              icon: const Icon(PhFill.phone),
               onPressed: () => CallService.instance.call(context, threadId: widget.threadId, peerId: peer, peerName: _title, video: false),
             ),
           ],
@@ -632,7 +632,7 @@ class _ChatPageState extends State<ChatPage> {
                 : _error != null
                     ? Center(child: Text(_error!))
                     : _msgs.isEmpty
-                        ? const EmptyState(icon: CupertinoIcons.chat_bubble, title: 'Belum ada pesan', message: 'Sapa duluan!')
+                        ? const EmptyState(icon: Ph.chatCircle, title: 'Belum ada pesan', message: 'Sapa duluan!')
                         : ListView.builder(
                             reverse: true,
                             padding: const EdgeInsets.fromLTRB(10, 12, 10, 8),
@@ -644,7 +644,7 @@ class _ChatPageState extends State<ChatPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
               child: Row(children: [
-                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator.adaptive(strokeWidth: 2)),
                 const SizedBox(width: 10),
                 Expanded(child: Text(_uploading!, style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant), overflow: TextOverflow.ellipsis)),
               ]),
@@ -720,7 +720,7 @@ class _ChatPageState extends State<ChatPage> {
     Widget content;
     if (deleted) {
       content = Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(CupertinoIcons.nosign, size: 16, color: sub),
+        Icon(Ph.prohibit, size: 16, color: sub),
         const SizedBox(width: 6),
         Text('Pesan ini telah dihapus', style: TextStyle(fontStyle: FontStyle.italic, color: sub)),
       ]);
@@ -812,7 +812,7 @@ class _ChatPageState extends State<ChatPage> {
                 border: Border(left: BorderSide(color: scheme.primary, width: 3)),
               ),
               child: Row(children: [
-                Icon(_editing != null ? CupertinoIcons.pencil : CupertinoIcons.arrowshape_turn_up_left, size: 18, color: scheme.primary),
+                Icon(_editing != null ? Ph.pencilSimple : Ph.arrowBendUpLeft, size: 18, color: scheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
@@ -825,7 +825,7 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 IconButton(
                   tooltip: 'Batal',
-                  icon: const Icon(CupertinoIcons.xmark, size: 20),
+                  icon: const Icon(Ph.x, size: 20),
                   onPressed: () => setState(() {
                     if (_editing != null) _input.clear();
                     _editing = null;
@@ -840,20 +840,20 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(26)),
               child: Row(children: [
-                IconButton(tooltip: 'Buang', icon: const Icon(CupertinoIcons.trash, color: AppColors.red), onPressed: () => _recFinish(send: false)),
+                IconButton(tooltip: 'Buang', icon: const Icon(Ph.trash, color: AppColors.red), onPressed: () => _recFinish(send: false)),
                 const _RecDot(),
                 const SizedBox(width: 8),
                 Text(durationLabel(DateTime.now().difference(_recStart ?? DateTime.now())),
                     style: const TextStyle(fontWeight: FontWeight.w700, fontFeatures: [FontFeature.tabularFigures()])),
                 const SizedBox(width: 8),
                 Expanded(child: Text('Merekam…', style: TextStyle(color: scheme.onSurfaceVariant))),
-                IconButton.filled(tooltip: 'Kirim pesan suara', onPressed: () => _recFinish(send: true), icon: const Icon(CupertinoIcons.paperplane_fill)),
+                IconButton.filled(tooltip: 'Kirim pesan suara', onPressed: () => _recFinish(send: true), icon: const Icon(PhFill.paperPlaneRight)),
               ]),
             )
           else
             Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
               if (_editing == null)
-                IconButton(tooltip: 'Lampirkan', onPressed: _uploading != null ? null : _attachSheet, icon: const Icon(CupertinoIcons.paperclip)),
+                IconButton(tooltip: 'Lampirkan', onPressed: _uploading != null ? null : _attachSheet, icon: const Icon(Ph.paperclip)),
               Expanded(
                 child: TextField(
                   controller: _input,
@@ -875,18 +875,18 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ),
               if (_editing == null && !hasText)
-                IconButton(tooltip: 'Kamera', onPressed: _uploading != null ? null : () => _pickImage(ImageSource.camera), icon: const Icon(CupertinoIcons.camera)),
+                IconButton(tooltip: 'Kamera', onPressed: _uploading != null ? null : () => _pickImage(ImageSource.camera), icon: const Icon(Ph.camera)),
               const SizedBox(width: 4),
               hasText || _editing != null
                   ? IconButton.filled(
                       tooltip: _editing != null ? 'Simpan' : 'Kirim',
                       onPressed: _sending ? null : _send,
-                      icon: Icon(_editing != null ? CupertinoIcons.checkmark : CupertinoIcons.paperplane_fill),
+                      icon: Icon(_editing != null ? Ph.check : PhFill.paperPlaneRight),
                     )
                   : IconButton.filled(
                       tooltip: 'Rekam pesan suara',
                       onPressed: _uploading != null ? null : _recStartTap,
-                      icon: const Icon(CupertinoIcons.mic_fill),
+                      icon: const Icon(PhFill.microphone),
                     ),
             ]),
         ]),
@@ -952,7 +952,7 @@ class _SwipeToReplyState extends State<_SwipeToReply> with SingleTickerProviderS
           opacity: p,
           child: Padding(
             padding: const EdgeInsets.only(left: 6),
-            child: Transform.scale(scale: 0.6 + 0.4 * p, child: Icon(CupertinoIcons.arrowshape_turn_up_left, color: Theme.of(context).colorScheme.primary)),
+            child: Transform.scale(scale: 0.6 + 0.4 * p, child: Icon(Ph.arrowBendUpLeft, color: Theme.of(context).colorScheme.primary)),
           ),
         ),
         Transform.translate(offset: Offset(_dx, 0), child: widget.child),
@@ -977,8 +977,8 @@ class _RecDotState extends State<_RecDot> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (reduceMotion(context)) return const Icon(CupertinoIcons.circle_fill, color: AppColors.red, size: 14);
-    return FadeTransition(opacity: Tween(begin: 0.3, end: 1.0).animate(_c), child: const Icon(CupertinoIcons.circle_fill, color: AppColors.red, size: 14));
+    if (reduceMotion(context)) return const Icon(PhFill.circle, color: AppColors.red, size: 14);
+    return FadeTransition(opacity: Tween(begin: 0.3, end: 1.0).animate(_c), child: const Icon(PhFill.circle, color: AppColors.red, size: 14));
   }
 }
 

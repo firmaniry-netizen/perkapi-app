@@ -1,57 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 class NavItem {
-  const NavItem(this.label, this.icon, this.route, {this.perm});
+  const NavItem(this.label, this.icon, this.route, {this.perm, this.activeIcon});
   final String label;
   final IconData icon;
+
+  /// Ikon versi terisi untuk keadaan terpilih (navigasi bawah). Null = pakai [icon].
+  final IconData? activeIcon;
   final String route;
   final String? perm;
 }
 
 /// 4 menu utama + tombol aksi tengah = 5 elemen (batas aman bottom nav). Profil lewat avatar di Beranda.
 const bottomItems = [
-  NavItem('Beranda', CupertinoIcons.house, '/dashboard'),
-  NavItem('Buku Saku', CupertinoIcons.book, '/pocket-book'),
-  NavItem('Profesi', CupertinoIcons.rosette, '/profession'),
-  NavItem('Informasi', CupertinoIcons.speaker_2, '/organization-info'),
+  NavItem('Beranda', Ph.house, '/dashboard', activeIcon: PhFill.house),
+  NavItem('Buku Saku', Ph.bookOpen, '/pocket-book', activeIcon: PhFill.bookOpen),
+  NavItem('Profesi', Ph.medal, '/profession', activeIcon: PhFill.medal),
+  NavItem('Informasi', Ph.megaphone, '/organization-info', activeIcon: PhFill.megaphone),
 ];
 
 /// Semua menu (sidebar web / halaman Menu).
 const allItems = [
-  NavItem('Dashboard', CupertinoIcons.square_grid_2x2, '/dashboard'),
-  NavItem('Anggota', CupertinoIcons.person_crop_rectangle, '/members', perm: 'view_member'),
+  NavItem('Dashboard', Ph.squaresFour, '/dashboard'),
+  NavItem('Anggota', Ph.identificationCard, '/members', perm: 'view_member'),
   // Tidak ada role_permissions bernama approve_registration -> hanya admin utama (SUPER_ADMIN) yang melihat menu ini.
-  NavItem('Pendaftaran', CupertinoIcons.person_badge_plus, '/registrations', perm: 'approve_registration'),
-  NavItem('Cabang', CupertinoIcons.building_2_fill, '/module/branches', perm: 'manage_user'),
-  NavItem('Buku Saku', CupertinoIcons.book, '/pocket-book'),
-  NavItem('Profil Organisasi', CupertinoIcons.building_2_fill, '/organization-profile'),
-  NavItem('Struktur Organisasi', CupertinoIcons.list_bullet_indent, '/organization-structure'),
-  NavItem('Berita & Dokumentasi', CupertinoIcons.photo_on_rectangle, '/gallery'),
-  NavItem('Informasi', CupertinoIcons.speaker_2, '/organization-info'),
-  NavItem('Event', CupertinoIcons.calendar, '/events'),
-  NavItem('Donasi', CupertinoIcons.heart_circle, '/donations'),
-  NavItem('Forum', CupertinoIcons.chat_bubble_2, '/forum'),
-  NavItem('Kalender', CupertinoIcons.calendar, '/calendar'),
-  NavItem('Kotak masuk', CupertinoIcons.bell, '/inbox'),
-  NavItem('AI PERKAPI', CupertinoIcons.sparkles, '/ai'),
-  NavItem('Chat', CupertinoIcons.chat_bubble, '/chat'),
-  NavItem('Keamanan & SOS', CupertinoIcons.shield, '/safety'),
+  NavItem('Pendaftaran', Ph.userPlus, '/registrations', perm: 'approve_registration'),
+  NavItem('Cabang', Ph.buildings, '/module/branches', perm: 'manage_user'),
+  NavItem('Buku Saku', Ph.bookOpen, '/pocket-book'),
+  NavItem('Profil Organisasi', Ph.buildings, '/organization-profile'),
+  NavItem('Struktur Organisasi', Ph.treeStructure, '/organization-structure'),
+  NavItem('Berita & Dokumentasi', Ph.images, '/gallery'),
+  NavItem('Informasi', Ph.megaphone, '/organization-info'),
+  NavItem('Event', Ph.calendarBlank, '/events'),
+  NavItem('Donasi', Ph.handHeart, '/donations'),
+  NavItem('Forum', Ph.chatsCircle, '/forum'),
+  NavItem('Kalender', Ph.calendarBlank, '/calendar'),
+  NavItem('Kotak masuk', Ph.bell, '/inbox'),
+  NavItem('AI PERKAPI', Ph.sparkle, '/ai'),
+  NavItem('Chat', Ph.chatCircle, '/chat'),
+  NavItem('Keamanan & SOS', Ph.shield, '/safety'),
   // Tidak ada role_permissions bernama view_location -> hanya admin utama (SUPER_ADMIN).
-  NavItem('Pelacakan GPS', CupertinoIcons.location, '/tracking', perm: 'view_location'),
-  NavItem('Area (Geofence)', CupertinoIcons.placemark, '/geofences', perm: 'view_location'),
-  NavItem('Pengumuman Massal', CupertinoIcons.speaker_2, '/broadcast', perm: 'broadcast'),
-  NavItem('Laporan & Ekspor', CupertinoIcons.chart_bar, '/reports', perm: 'view_reports'),
-  NavItem('Audit Log', CupertinoIcons.clock, '/module/audit', perm: 'view_audit_log'),
-  NavItem('Kartu Anggota', CupertinoIcons.qrcode, '/member-card'),
-  NavItem('Peraturan & Hukum', CupertinoIcons.hammer, '/regulations'),
-  NavItem('Pendaftaran AHU', CupertinoIcons.person_badge_plus, '/profession/registration'),
-  NavItem('Perpanjangan AHU', CupertinoIcons.arrow_2_circlepath, '/profession/renewal'),
-  NavItem('Format Laporan AHU', CupertinoIcons.doc_plaintext, '/profession/reports'),
-  NavItem('Data AHU Saya', CupertinoIcons.checkmark_seal, '/ahu'),
-  NavItem('Verifikasi QR', CupertinoIcons.checkmark_shield, '/verify-member', perm: 'manage_member'),
-  NavItem('Pengaturan', CupertinoIcons.gear, '/settings'),
-  NavItem('Profil', CupertinoIcons.person_crop_circle, '/profile'),
+  NavItem('Pelacakan GPS', Ph.mapPin, '/tracking', perm: 'view_location'),
+  NavItem('Area (Geofence)', Ph.mapPinLine, '/geofences', perm: 'view_location'),
+  NavItem('Pengumuman Massal', Ph.megaphone, '/broadcast', perm: 'broadcast'),
+  NavItem('Laporan & Ekspor', Ph.chartBar, '/reports', perm: 'view_reports'),
+  NavItem('Audit Log', Ph.clock, '/module/audit', perm: 'view_audit_log'),
+  NavItem('Kartu Anggota', Ph.qrCode, '/member-card'),
+  NavItem('Peraturan & Hukum', Ph.gavel, '/regulations'),
+  NavItem('Pendaftaran AHU', Ph.userPlus, '/profession/registration'),
+  NavItem('Perpanjangan AHU', Ph.arrowsClockwise, '/profession/renewal'),
+  NavItem('Format Laporan AHU', Ph.article, '/profession/reports'),
+  NavItem('Data AHU Saya', Ph.sealCheck, '/ahu'),
+  NavItem('Verifikasi QR', Ph.shieldCheck, '/verify-member', perm: 'manage_member'),
+  NavItem('Pengaturan', Ph.gear, '/settings'),
+  NavItem('Profil', Ph.userCircle, '/profile'),
 ];
 
 int bottomIndexFor(String loc) {

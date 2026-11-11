@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
@@ -102,8 +102,8 @@ class _PendingApprovalViewState extends State<PendingApprovalView> {
                       style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.navy),
                       onPressed: _checking ? null : _check,
                       icon: _checking
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2))
-                          : const Icon(CupertinoIcons.arrow_clockwise),
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2.2))
+                          : const Icon(Ph.arrowClockwise),
                       label: Text(_checking ? 'Memeriksa...' : 'Periksa status'),
                     ),
                   const SizedBox(height: 8),
@@ -143,11 +143,11 @@ class _Step extends StatelessWidget {
         border: Border.all(color: done || now ? Colors.transparent : Colors.white.withValues(alpha: 0.35), width: 1.5),
       ),
       child: done
-          ? const Icon(CupertinoIcons.checkmark, size: 16, color: AppColors.navyDeep)
+          ? const Icon(Ph.check, size: 16, color: AppColors.navyDeep)
           : now
               ? const Padding(
                   padding: EdgeInsets.all(6),
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.navy),
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2, backgroundColor: AppColors.navy),
                 )
               : null,
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/access_service.dart';
@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
           minTileHeight: 56,
           leading: SolidTile(icon: icon, color: AppColors.forKey(route), size: 40, radius: 14),
           title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-          trailing: Icon(CupertinoIcons.chevron_right, color: scheme.onSurfaceVariant),
+          trailing: Icon(Ph.caretRight, color: scheme.onSurfaceVariant),
           onTap: () => context.push(route),
         );
     return Scaffold(
@@ -109,19 +109,19 @@ class _ProfilePageState extends State<ProfilePage> {
         AppCard(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(children: [
-            menu(CupertinoIcons.qrcode, 'Kartu anggota', '/member-card'),
-            menu(CupertinoIcons.checkmark_seal, 'Pendaftaran AHU', '/ahu'),
-            menu(CupertinoIcons.bell, 'Peringatan anggota', '/alerts'),
-            menu(CupertinoIcons.shield, 'Keamanan & SOS', '/safety'),
-            if (a.can('view_location')) menu(CupertinoIcons.location, 'Pelacakan GPS', '/tracking'),
-            menu(CupertinoIcons.gear, 'Pengaturan & keamanan', '/settings'),
-            menu(CupertinoIcons.square_grid_2x2, 'Semua menu', '/more'),
+            menu(Ph.qrCode, 'Kartu anggota', '/member-card'),
+            menu(Ph.sealCheck, 'Pendaftaran AHU', '/ahu'),
+            menu(Ph.bell, 'Peringatan anggota', '/alerts'),
+            menu(Ph.shield, 'Keamanan & SOS', '/safety'),
+            if (a.can('view_location')) menu(Ph.mapPin, 'Pelacakan GPS', '/tracking'),
+            menu(Ph.gear, 'Pengaturan & keamanan', '/settings'),
+            menu(Ph.squaresFour, 'Semua menu', '/more'),
           ]),
         ),
         const SizedBox(height: 20),
         OutlinedButton.icon(
           onPressed: () => AuthRepository().signOut(),
-          icon: const Icon(CupertinoIcons.square_arrow_right),
+          icon: const Icon(Ph.signOut),
           label: const Text('Keluar'),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(52),
@@ -182,7 +182,7 @@ class _DirectoryToggleState extends State<_DirectoryToggle> {
     return SwitchListTile.adaptive(
       value: on,
       onChanged: _busy || !approved ? null : _set,
-      secondary: const Icon(CupertinoIcons.globe),
+      secondary: const Icon(Ph.globe),
       title: const Text('Tampilkan saya di direktori publik', style: TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text(approved
           ? 'Masyarakat dapat memastikan Anda anggota PERKAPI lewat situs resmi. Email dan nomor HP tidak ditampilkan.'

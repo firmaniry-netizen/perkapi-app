@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/services/supabase_service.dart';
@@ -187,8 +187,8 @@ class _AvatarEditorState extends State<AvatarEditor> {
                     child: _busy
                         ? const Padding(
                             padding: EdgeInsets.all(9),
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Icon(CupertinoIcons.camera, size: 18, color: scheme.onPrimary),
+                            child: CircularProgressIndicator.adaptive(strokeWidth: 2, backgroundColor: Colors.white))
+                        : Icon(Ph.camera, size: 18, color: scheme.onPrimary),
                   ),
                 ),
               ),

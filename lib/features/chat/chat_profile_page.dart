@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -102,7 +102,7 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
               const SizedBox(height: 16),
               Center(
                 child: widget.isGroup
-                    ? CircleAvatar(radius: 56, backgroundColor: AppColors.navyAction, child: const Icon(CupertinoIcons.person_3_fill, size: 56, color: Colors.white))
+                    ? CircleAvatar(radius: 56, backgroundColor: AppColors.navyAction, child: const Icon(PhFill.usersThree, size: 56, color: Colors.white))
                     : GestureDetector(
                         onTap: () => _showPhoto(name, _p?['avatar_path'] as String?),
                         child: MemberAvatar(name: name, path: _p?['avatar_path'] as String?, radius: 56),
@@ -121,15 +121,15 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
               ),
               const SizedBox(height: 18),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                _Action(icon: CupertinoIcons.chat_bubble_fill, label: 'Pesan', onTap: () => Navigator.of(context).maybePop()),
+                _Action(icon: PhFill.chatCircle, label: 'Pesan', onTap: () => Navigator.of(context).maybePop()),
                 if (canCall) ...[
                   _Action(
-                    icon: CupertinoIcons.phone_fill,
+                    icon: PhFill.phone,
                     label: 'Telepon',
                     onTap: () => CallService.instance.call(context, threadId: widget.threadId!, peerId: widget.memberId!, peerName: name, video: false),
                   ),
                   _Action(
-                    icon: CupertinoIcons.videocam_fill,
+                    icon: PhFill.videoCamera,
                     label: 'Video',
                     onTap: () => CallService.instance.call(context, threadId: widget.threadId!, peerId: widget.memberId!, peerName: name, video: true),
                   ),
@@ -149,14 +149,14 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
     final joined = DateTime.tryParse('${p['joined_at']}')?.toLocal();
     const bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     final tiles = <Widget>[
-      if (s(p['member_number']) != null) _tile(CupertinoIcons.person_crop_rectangle, 'Nomor anggota', s(p['member_number'])!),
-      if (s(p['branch']) != null) _tile(CupertinoIcons.building_2_fill, 'Cabang', s(p['branch'])!),
+      if (s(p['member_number']) != null) _tile(Ph.identificationCard, 'Nomor anggota', s(p['member_number'])!),
+      if (s(p['branch']) != null) _tile(Ph.buildings, 'Cabang', s(p['branch'])!),
       if (p['ahu_verified'] == true)
-        _tile(CupertinoIcons.checkmark_seal_fill, 'Terdaftar di AHU', s(p['ahu_registration_number']) ?? 'Terverifikasi', color: AppColors.emerald),
-      if (joined != null) _tile(CupertinoIcons.calendar_badge_plus, 'Anggota sejak', '${joined.day} ${bln[joined.month - 1]} ${joined.year}'),
+        _tile(PhFill.sealCheck, 'Terdaftar di AHU', s(p['ahu_registration_number']) ?? 'Terverifikasi', color: AppColors.emerald),
+      if (joined != null) _tile(Ph.calendarPlus, 'Anggota sejak', '${joined.day} ${bln[joined.month - 1]} ${joined.year}'),
       if (s(p['phone']) != null)
-        _tile(CupertinoIcons.phone, 'Telepon', s(p['phone'])!, onTap: () => _launch('tel:${s(p['phone'])!.replaceAll(RegExp(r'[^0-9+]'), '')}')),
-      if (s(p['email']) != null) _tile(CupertinoIcons.mail, 'Email', s(p['email'])!, onTap: () => _launch('mailto:${s(p['email'])}')),
+        _tile(Ph.phone, 'Telepon', s(p['phone'])!, onTap: () => _launch('tel:${s(p['phone'])!.replaceAll(RegExp(r'[^0-9+]'), '')}')),
+      if (s(p['email']) != null) _tile(Ph.envelope, 'Email', s(p['email'])!, onTap: () => _launch('mailto:${s(p['email'])}')),
     ];
     if (tiles.isEmpty) return const SizedBox.shrink();
     return _section(scheme, 'Info', Column(children: tiles));
@@ -228,7 +228,7 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
       title: Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text(label),
       onTap: onTap,
-      trailing: onTap == null ? null : const Icon(CupertinoIcons.chevron_right),
+      trailing: onTap == null ? null : const Icon(Ph.caretRight),
     );
   }
 
@@ -241,7 +241,7 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
         body: FutureBuilder<String?>(
           future: AvatarService.url(path),
           builder: (_, s) => Center(
-            child: s.data == null ? const CircularProgressIndicator() : InteractiveViewer(child: Image.network(s.data!)),
+            child: s.data == null ? const CircularProgressIndicator.adaptive() : InteractiveViewer(child: Image.network(s.data!)),
           ),
         ),
       ),

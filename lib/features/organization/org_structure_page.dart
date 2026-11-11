@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -159,7 +159,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
         if (_canEdit)
           Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 24 + MediaQuery.paddingOf(context).bottom + 70),
-            child: FilledButton.icon(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus), label: const Text('Tambah pengurus')),
+            child: FilledButton.icon(onPressed: () => _edit(), icon: const Icon(Ph.userPlus), label: const Text('Tambah pengurus')),
           ),
       ]);
     } else {
@@ -178,7 +178,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
           ),
           if (_canEdit) ...[
             const SizedBox(height: 12),
-            FilledButton.icon(onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus), label: const Text('Tambah pengurus')),
+            FilledButton.icon(onPressed: () => _edit(), icon: const Icon(Ph.userPlus), label: const Text('Tambah pengurus')),
           ],
           if (leaders.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -216,7 +216,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
                           if (!m.isActive) const Text('Nonaktif', style: TextStyle(fontSize: AppType.caption, color: AppColors.amber, fontWeight: FontWeight.w700)),
                         ]),
                       ),
-                      if (_canEdit) Icon(CupertinoIcons.pencil, size: 18, color: sc.onSurfaceVariant),
+                      if (_canEdit) Icon(Ph.pencilSimple, size: 18, color: sc.onSurfaceVariant),
                     ]),
                   ),
                 ),
@@ -229,7 +229,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
       appBar: GlassAppBar(
         title: const Text('Struktur Organisasi'),
         actions: [
-          if (_canEdit && _error == null) IconButton(tooltip: 'Tambah pengurus', onPressed: () => _edit(), icon: const Icon(CupertinoIcons.person_badge_plus)),
+          if (_canEdit && _error == null) IconButton(tooltip: 'Tambah pengurus', onPressed: () => _edit(), icon: const Icon(Ph.userPlus)),
         ],
       ),
       body: PageGlow(accent: AppColors.navyAction, child: body),
@@ -475,7 +475,7 @@ class _EditSheetState extends State<_EditSheet> {
                 ? ClipOval(child: Image.memory(_bytes!, width: 72, height: 72, fit: BoxFit.cover))
                 : OrgPhoto(name: _name.text, path: item?.photoPath, size: 72),
             const SizedBox(width: 14),
-            OutlinedButton.icon(onPressed: _busy ? null : _pick, icon: const Icon(CupertinoIcons.camera, size: 18), label: Text(_bytes != null || (item?.photoPath ?? '').isNotEmpty ? 'Ganti foto' : 'Pilih foto')),
+            OutlinedButton.icon(onPressed: _busy ? null : _pick, icon: const Icon(Ph.camera, size: 18), label: Text(_bytes != null || (item?.photoPath ?? '').isNotEmpty ? 'Ganti foto' : 'Pilih foto')),
           ]),
           const SizedBox(height: 4),
           const Text('Foto pengurus tampil juga di situs publik. JPG/PNG, maksimal 2 MB.', style: TextStyle(fontSize: AppType.caption)),

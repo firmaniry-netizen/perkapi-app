@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -228,7 +229,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
     Future<void> pick(FormFieldState<Object> state) async {
       final cur = FmtId.parse(_v[f.key]) ?? (f.key == 'ends_at' ? FmtId.parse(_v['starts_at']) : null);
       final now = DateTime.now();
-      final d = await showDatePicker(
+      final d = await showIosDatePicker(
         context: context,
         initialDate: cur ?? now,
         firstDate: DateTime(2000),
@@ -243,13 +244,12 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
         state.didChange(_v[f.key]);
         return;
       }
-      final t = await showTimePicker(
+      final t = await showIosTimePicker(
         context: context,
         initialTime: cur != null && FmtId.hasTime(_v[f.key]) ? TimeOfDay.fromDateTime(cur) : const TimeOfDay(hour: 9, minute: 0),
         helpText: 'Pilih jam',
         cancelText: 'Batal',
         confirmText: 'Pilih',
-        builder: (c, child) => MediaQuery(data: MediaQuery.of(c).copyWith(alwaysUse24HourFormat: true), child: child!),
       );
       if (t == null || !mounted) return;
       setState(() => _v[f.key] = DateTime(d.year, d.month, d.day, t.hour, t.minute).toUtc().toIso8601String());
@@ -275,13 +275,13 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
               suffixIcon: (!empty && enabled && !f.required)
                   ? IconButton(
                       tooltip: 'Kosongkan',
-                      icon: const Icon(CupertinoIcons.xmark),
+                      icon: const Icon(Ph.x),
                       onPressed: () {
                         setState(() => _v[f.key] = null);
                         state.didChange(null);
                       },
                     )
-                  : Icon(withTime ? CupertinoIcons.calendar : CupertinoIcons.calendar_today),
+                  : Icon(withTime ? Ph.calendarBlank : Ph.calendarDot),
             ),
             child: Text(empty ? '' : text),
           ),
@@ -327,7 +327,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
           if (!_isNew && canWrite)
             IconButton(
                 tooltip: 'Hapus',
-                icon: const Icon(CupertinoIcons.trash),
+                icon: const Icon(Ph.trash),
                 onPressed: () => _delete(mod)),
         ],
       ),
@@ -356,7 +356,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
                       if (canWrite)
                         PrimaryButton(
                           label: 'Simpan',
-                          icon: CupertinoIcons.checkmark,
+                          icon: Ph.check,
                           loading: _saving,
                           onPressed: _saving ? null : () => _save(mod),
                         ),

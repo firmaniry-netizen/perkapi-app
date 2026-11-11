@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -50,9 +51,9 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
             appBar: GlassAppBar(
               title: Text(c.number.isEmpty ? 'Ruang kerja perkara' : c.number, overflow: TextOverflow.ellipsis),
               bottom: const TabBar(tabs: [
-                Tab(icon: Icon(CupertinoIcons.chart_bar), text: 'Linimasa'),
-                Tab(icon: Icon(CupertinoIcons.money_dollar_circle), text: 'Tagihan'),
-                Tab(icon: Icon(CupertinoIcons.doc_text), text: 'Surat'),
+                Tab(icon: Icon(Ph.chartBar), text: 'Linimasa'),
+                Tab(icon: Icon(Ph.currencyCircleDollar), text: 'Tagihan'),
+                Tab(icon: Icon(Ph.fileText), text: 'Surat'),
               ]),
             ),
             body: PageGlow(accent: AppColors.navyAction, child: Column(children: [
@@ -80,7 +81,7 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-          child: const Icon(CupertinoIcons.hammer_fill, color: AppColors.navy, size: 22),
+          child: const Icon(PhFill.gavel, color: AppColors.navy, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -227,14 +228,14 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
               InkWell(
                 borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
-                  final d = await showDatePicker(context: ctx, initialDate: due ?? today(), firstDate: DateTime(2000), lastDate: DateTime(2100));
+                  final d = await showIosDatePicker(context: ctx, initialDate: due ?? today(), firstDate: DateTime(2000), lastDate: DateTime(2100));
                   if (d != null) setD(() => due = d);
                 },
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Tanggal / batas waktu',
-                    prefixIcon: const Icon(CupertinoIcons.calendar),
-                    suffixIcon: due == null ? null : IconButton(icon: const Icon(CupertinoIcons.xmark), onPressed: () => setD(() => due = null)),
+                    prefixIcon: const Icon(Ph.calendarBlank),
+                    suffixIcon: due == null ? null : IconButton(icon: const Icon(Ph.x), onPressed: () => setD(() => due = null)),
                   ),
                   child: Text(due == null ? 'Belum ditentukan' : dmy(isoDate(due!))),
                 ),
@@ -297,11 +298,11 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
               InkWell(
                 borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
-                  final d = await showDatePicker(context: ctx, initialDate: base, firstDate: DateTime(2000), lastDate: DateTime(2100));
+                  final d = await showIosDatePicker(context: ctx, initialDate: base, firstDate: DateTime(2000), lastDate: DateTime(2100));
                   if (d != null) setD(() => base = d);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Tanggal putusan', prefixIcon: Icon(CupertinoIcons.calendar)),
+                  decoration: const InputDecoration(labelText: 'Tanggal putusan', prefixIcon: Icon(Ph.calendarBlank)),
                   child: Text(dmy(isoDate(base))),
                 ),
               ),
@@ -343,14 +344,14 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
 
   /// (label, warna, ikon) menurut status tahapan.
   (String, Color, IconData) _status(Map<String, dynamic> r) {
-    if (r['done_at'] != null) return ('Selesai ${dmy(r['done_at'])}', AppColors.emerald, CupertinoIcons.checkmark_circle_fill);
+    if (r['done_at'] != null) return ('Selesai ${dmy(r['done_at'])}', AppColors.emerald, PhFill.checkCircle);
     final due = parseDate(r['due_date']);
-    if (due == null) return ('Tanggal belum ditentukan', AppColors.muted, CupertinoIcons.circle);
+    if (due == null) return ('Tanggal belum ditentukan', AppColors.muted, Ph.circle);
     final diff = due.difference(today()).inDays;
-    if (diff < 0) return ('Terlambat ${-diff} hari', AppColors.red, CupertinoIcons.exclamationmark_circle_fill);
-    if (diff == 0) return ('Hari ini', AppColors.orange, CupertinoIcons.bell_fill);
-    if (diff <= 3) return ('H-$diff', AppColors.amber, CupertinoIcons.clock);
-    return ('$diff hari lagi', AppColors.navyAction, CupertinoIcons.circle);
+    if (diff < 0) return ('Terlambat ${-diff} hari', AppColors.red, PhFill.warningCircle);
+    if (diff == 0) return ('Hari ini', AppColors.orange, PhFill.bell);
+    if (diff <= 3) return ('H-$diff', AppColors.amber, Ph.clock);
+    return ('$diff hari lagi', AppColors.navyAction, Ph.circle);
   }
 
   @override
@@ -360,7 +361,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
     final sc = Theme.of(context).colorScheme;
     final done = _rows.where((r) => r['done_at'] != null).length;
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       onRefresh: _load,
       child: ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 120 + MediaQuery.paddingOf(context).bottom), children: [
         if (_rows.isNotEmpty) ...[
@@ -381,7 +382,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _fromTemplate,
-                icon: const Icon(CupertinoIcons.wand_stars),
+                icon: const Icon(Ph.magicWand),
                 label: const Text('Dari template'),
                 style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -390,7 +391,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _edit(),
-                icon: const Icon(CupertinoIcons.add),
+                icon: const Icon(Ph.plus),
                 label: const Text('Tambah'),
                 style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               ),
@@ -398,7 +399,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
           ]),
         const SizedBox(height: 14),
         if (_rows.isEmpty)
-          const EmptyState(message: 'Belum ada tahapan.\nGunakan template Kepailitan/PKPU atau tambah sendiri.', icon: CupertinoIcons.chart_bar),
+          const EmptyState(message: 'Belum ada tahapan.\nGunakan template Kepailitan/PKPU atau tambah sendiri.', icon: Ph.chartBar),
         for (var i = 0; i < _rows.length; i++)
           Reveal(
             index: i % 8,
@@ -479,9 +480,9 @@ class _LettersTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final sc = Theme.of(context).colorScheme;
     const items = <(LetterKind, IconData, String)>[
-      (LetterKind.undangan, CupertinoIcons.person_3_fill, 'Undangan Rapat Kreditur'),
-      (LetterKind.pemberitahuan, CupertinoIcons.speaker_2_fill, 'Pemberitahuan dan Permintaan Pengajuan Tagihan'),
-      (LetterKind.beritaAcara, CupertinoIcons.checkmark_rectangle, 'Berita Acara Rapat Kreditur'),
+      (LetterKind.undangan, PhFill.usersThree, 'Undangan Rapat Kreditur'),
+      (LetterKind.pemberitahuan, PhFill.megaphone, 'Pemberitahuan dan Permintaan Pengajuan Tagihan'),
+      (LetterKind.beritaAcara, Ph.checkSquareOffset, 'Berita Acara Rapat Kreditur'),
     ];
     return ListView(padding: EdgeInsets.fromLTRB(20, 8, 20, 120 + MediaQuery.paddingOf(context).bottom), children: [
       Text(
@@ -505,7 +506,7 @@ class _LettersTab extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               Expanded(child: Text(it.$3, style: const TextStyle(fontWeight: FontWeight.w800, height: 1.3))),
-              Icon(CupertinoIcons.chevron_right, color: sc.onSurfaceVariant),
+              Icon(Ph.caretRight, color: sc.onSurfaceVariant),
             ]),
           ),
         ),

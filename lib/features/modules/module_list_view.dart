@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import 'package:go_router/go_router.dart';
 
@@ -121,7 +121,7 @@ class _ModuleListViewState extends State<ModuleListView> {
     // Satu gulir untuk semua: kepala (cari, mode offline) ikut bergulir sehingga di halaman dengan
     // extendBodyBehindAppBar isi lewat DI BELAKANG bar kaca. Di halaman biasa padding atas = 0.
     final top = MediaQuery.paddingOf(context).top;
-    return RefreshIndicator(
+    return RefreshIndicator.adaptive(
       edgeOffset: top,
       onRefresh: _refresh,
       child: CustomScrollView(
@@ -143,7 +143,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(children: [
-                    const Icon(CupertinoIcons.wifi_slash, size: 18, color: AppColors.amber),
+                    const Icon(Ph.wifiSlash, size: 18, color: AppColors.amber),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text('Mode offline • menampilkan data tersimpan terakhir. Tarik ke bawah untuk menyegarkan.',
@@ -163,7 +163,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                 onChanged: _onSearch,
                 decoration: InputDecoration(
                   hintText: 'Cari ${m.title.toLowerCase()}',
-                  prefixIcon: const Icon(CupertinoIcons.search),
+                  prefixIcon: const Icon(Ph.magnifyingGlass),
                   isDense: true,
                 ),
               ),
@@ -171,7 +171,7 @@ class _ModuleListViewState extends State<ModuleListView> {
             if (m.markAllRead)
               IconButton(
                 tooltip: 'Tandai semua dibaca',
-                icon: const Icon(CupertinoIcons.checkmark_alt),
+                icon: const Icon(Ph.check),
                 onPressed: () async {
                   try {
                     await DataRepository.markAllNotificationsRead();
@@ -186,7 +186,7 @@ class _ModuleListViewState extends State<ModuleListView> {
             if (widget.showAdd && _canWrite)
               GradientIconButton(
                 tooltip: 'Tambah',
-                icon: CupertinoIcons.add,
+                icon: Ph.plus,
                 onTap: () => _open(null),
               ),
           ]),
@@ -201,7 +201,7 @@ class _ModuleListViewState extends State<ModuleListView> {
   /// Keadaan kosong per modul + satu tombol aksi bila pengguna boleh menambah data.
   Widget _empty() {
     if (_q.isNotEmpty) {
-      return const EmptyState(icon: CupertinoIcons.search, title: 'Tidak ditemukan', message: 'Coba kata kunci lain atau periksa ejaan.');
+      return const EmptyState(icon: Ph.magnifyingGlass, title: 'Tidak ditemukan', message: 'Coba kata kunci lain atau periksa ejaan.');
     }
     final (title, msg, cta) = switch (m.id) {
       'events' => ('Belum ada agenda', 'Rapat, pelatihan, dan kegiatan organisasi akan tampil di sini.', 'Buat agenda'),
@@ -238,7 +238,7 @@ class _ModuleListViewState extends State<ModuleListView> {
           if (i >= _items.length) {
             return const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator.adaptive()),
             );
           }
           final row = _items[i];
@@ -293,7 +293,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(color: AppColors.soft(tone, dark: dark), shape: BoxShape.circle),
-                child: Icon(CupertinoIcons.arrow_right, size: 16, color: AppColors.onSoft(tone, dark: dark)),
+                child: Icon(Ph.arrowRight, size: 16, color: AppColors.onSoft(tone, dark: dark)),
               ),
                 ]),
               ),
@@ -341,7 +341,7 @@ class _EventCard extends StatelessWidget {
     final chips = <Widget>[
       if (today) const _MiniChip('Hari ini', AppColors.red),
       if (past) const _MiniChip('Selesai', Color(0xFF6B7591)),
-      if (row['is_public'] == true) const _MiniChip('Di situs', AppColors.teal, icon: CupertinoIcons.globe),
+      if (row['is_public'] == true) const _MiniChip('Di situs', AppColors.teal, icon: Ph.globe),
     ];
     return Opacity(
       opacity: past ? 0.62 : 1,
@@ -370,7 +370,7 @@ class _EventCard extends StatelessWidget {
                   maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
               const SizedBox(height: 4),
               Row(children: [
-                Icon(CupertinoIcons.clock, size: 14, color: scheme.onSurfaceVariant),
+                Icon(Ph.clock, size: 14, color: scheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
@@ -384,7 +384,7 @@ class _EventCard extends StatelessWidget {
               if ('${row['location'] ?? ''}'.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Row(children: [
-                  Icon(CupertinoIcons.placemark, size: 14, color: scheme.onSurfaceVariant),
+                  Icon(Ph.mapPinLine, size: 14, color: scheme.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text('${row['location']}',
@@ -427,7 +427,7 @@ class _ThreadCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       onTap: onTap,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SolidTile(icon: CupertinoIcons.chat_bubble_2_fill, color: tone, size: 44, radius: 22),
+        SolidTile(icon: PhFill.chatsCircle, color: tone, size: 44, radius: 22),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -465,7 +465,7 @@ class _NotifCard extends StatelessWidget {
       color: unread ? Color.alphaBlend(AppColors.navyAction.withValues(alpha: 0.07), scheme.surface) : null,
       onTap: onTap,
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const SolidTile(icon: CupertinoIcons.bell_fill, color: AppColors.navyAction, size: 40, radius: 14),
+        const SolidTile(icon: PhFill.bell, color: AppColors.navyAction, size: 40, radius: 14),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

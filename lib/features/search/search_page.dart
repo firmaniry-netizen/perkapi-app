@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -90,7 +90,7 @@ class _SearchPageState extends State<SearchPage> {
             child: TextField(
               autofocus: true,
               onChanged: _onChanged,
-              decoration: const InputDecoration(hintText: 'Cari di semua modul', prefixIcon: Icon(CupertinoIcons.search), isDense: true),
+              decoration: const InputDecoration(hintText: 'Cari di semua modul', prefixIcon: Icon(Ph.magnifyingGlass), isDense: true),
             ),
           ),
           SizedBox(
@@ -122,7 +122,7 @@ class _SearchPageState extends State<SearchPage> {
           if (_loading) const LinearProgressIndicator(),
           Expanded(
             child: _hits.isEmpty
-                ? EmptyState(message: _q.length < 2 ? 'Ketik minimal 2 huruf' : 'Tidak ada hasil', icon: CupertinoIcons.search)
+                ? EmptyState(message: _q.length < 2 ? 'Ketik minimal 2 huruf' : 'Tidak ada hasil', icon: Ph.magnifyingGlass)
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(20, 4, 20, 24 + MediaQuery.paddingOf(context).bottom),
                     itemCount: _hits.length,
@@ -135,10 +135,10 @@ class _SearchPageState extends State<SearchPage> {
                           padding: EdgeInsets.zero,
                           child: ListTile(
                             minTileHeight: 64,
-                            leading: Icon(modules[h.module]?.icon ?? CupertinoIcons.search, color: Theme.of(context).colorScheme.primary),
+                            leading: Icon(modules[h.module]?.icon ?? Ph.magnifyingGlass, color: Theme.of(context).colorScheme.primary),
                             title: Text(h.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                             subtitle: Text(modules[h.module]?.title ?? h.module),
-                            trailing: const Icon(CupertinoIcons.chevron_right),
+                            trailing: const Icon(Ph.caretRight),
                             onTap: () => context.push('/module/${h.module}/${h.id}'),
                           ),
                         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -76,7 +76,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
               child: ScreenHero(
                 title: 'Peraturan & Hukum',
                 subtitle: 'Dasar hukum kurator, pengurus, kepailitan, dan PKPU. Unduh langsung dari sumber resmi.',
-                icon: CupertinoIcons.hammer_fill,
+                icon: PhFill.gavel,
                 accent: AppColors.navyAction,
               ),
             ),
@@ -85,7 +85,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
               onChanged: (v) => setState(() => _q = v),
               textInputAction: TextInputAction.search,
               decoration: const InputDecoration(
-                prefixIcon: Icon(CupertinoIcons.search),
+                prefixIcon: Icon(Ph.magnifyingGlass),
                 hintText: 'Cari peraturan (mis. imbalan jasa, pendaftaran)',
               ),
             ),
@@ -124,7 +124,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
                 child: AppCard(
                   onTap: () => _open(p.$3),
                   child: Row(children: [
-                    const SolidTile(icon: CupertinoIcons.globe, color: AppColors.sky, size: 40, radius: 12),
+                    const SolidTile(icon: Ph.globe, color: AppColors.sky, size: 40, radius: 12),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -133,7 +133,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
                         Text(p.$2, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                       ]),
                     ),
-                    Icon(CupertinoIcons.arrow_up_right_square, size: 18, color: sc.onSurfaceVariant),
+                    Icon(Ph.arrowSquareOut, size: 18, color: sc.onSurfaceVariant),
                   ]),
                 ),
               ),
@@ -164,9 +164,9 @@ class _RegulationsPageState extends State<RegulationsPage> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SolidTile(icon: switch (r.kind) {
-            RegulationKind.putusan => CupertinoIcons.hammer,
-            RegulationKind.rancangan => CupertinoIcons.square_pencil,
-            _ => CupertinoIcons.doc_text,
+            RegulationKind.putusan => Ph.gavel,
+            RegulationKind.rancangan => Ph.notePencil,
+            _ => Ph.fileText,
           }, color: color, size: 44, radius: 14),
           const SizedBox(width: 12),
           Expanded(
@@ -185,16 +185,16 @@ class _RegulationsPageState extends State<RegulationsPage> {
         Text(r.summary, style: const TextStyle(height: 1.4, fontSize: AppType.body)),
         if (r.note != null) ...[
           const SizedBox(height: 10),
-          GuideCallout(text: r.note!, icon: CupertinoIcons.info_circle, color: AppColors.amber),
+          GuideCallout(text: r.note!, icon: Ph.info, color: AppColors.amber),
         ],
         const SizedBox(height: 12),
         Wrap(spacing: 8, runSpacing: 8, children: [
           if (r.pdfUrl != null)
-            FilledButton.icon(onPressed: () => _open(r.pdfUrl!), icon: const Icon(CupertinoIcons.arrow_down_to_line, size: 18), label: const Text('Unduh PDF')),
+            FilledButton.icon(onPressed: () => _open(r.pdfUrl!), icon: const Icon(Ph.downloadSimple, size: 18), label: const Text('Unduh PDF')),
           if (r.pageUrl != null)
-            OutlinedButton.icon(onPressed: () => _open(r.pageUrl!), icon: const Icon(CupertinoIcons.arrow_up_right_square, size: 18), label: Text(r.pageLabel)),
+            OutlinedButton.icon(onPressed: () => _open(r.pageUrl!), icon: const Icon(Ph.arrowSquareOut, size: 18), label: Text(r.pageLabel)),
           if (main != null)
-            TextButton.icon(onPressed: () => _copy(main), icon: const Icon(CupertinoIcons.link, size: 18), label: const Text('Salin tautan')),
+            TextButton.icon(onPressed: () => _copy(main), icon: const Icon(Ph.link, size: 18), label: const Text('Salin tautan')),
         ]),
       ]),
     );

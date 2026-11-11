@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show FontFeature;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
@@ -181,7 +181,7 @@ class _CardFace extends StatelessWidget {
                   _Pill(text: status, dot: active ? const Color(0xFF5CE08A) : const Color(0xFFFFB74D)),
                   const SizedBox(width: 6),
                   if (verified) ...[
-                    const _Pill(text: 'AHU', icon: CupertinoIcons.checkmark_seal_fill),
+                    const _Pill(text: 'AHU', icon: PhFill.sealCheck),
                     const SizedBox(width: 6),
                   ],
                   Flexible(child: _Pill(text: a.roleLabel)),
@@ -345,6 +345,6 @@ class _QrBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(13),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))],
         ),
-        child: const Icon(CupertinoIcons.qrcode, color: AppColors.navy, size: 24),
+        child: const Icon(Ph.qrCode, color: AppColors.navy, size: 24),
       );
 }

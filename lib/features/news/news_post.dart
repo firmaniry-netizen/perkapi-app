@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -196,10 +196,10 @@ Color newsAlbumColor(String album) {
 IconData newsAlbumIcon(String album) {
   final k = album.toLowerCase();
   bool has(List<String> w) => w.any(k.contains);
-  if (has(['perkara', 'sidang', 'putusan', 'pengadilan'])) return CupertinoIcons.hammer_fill;
-  if (has(['rapat', 'musyawarah', 'rakor'])) return CupertinoIcons.person_3_fill;
-  if (has(['pelatihan', 'diklat', 'seminar', 'workshop'])) return CupertinoIcons.book_fill;
-  if (has(['sosial', 'bakti'])) return CupertinoIcons.heart_circle;
-  if (has(['pengumuman', 'info'])) return CupertinoIcons.speaker_2_fill;
-  return CupertinoIcons.photo_on_rectangle;
+  if (has(['perkara', 'sidang', 'putusan', 'pengadilan'])) return PhFill.gavel;
+  if (has(['rapat', 'musyawarah', 'rakor'])) return PhFill.usersThree;
+  if (has(['pelatihan', 'diklat', 'seminar', 'workshop'])) return PhFill.bookOpen;
+  if (has(['sosial', 'bakti'])) return Ph.handHeart;
+  if (has(['pengumuman', 'info'])) return PhFill.megaphone;
+  return Ph.images;
 }

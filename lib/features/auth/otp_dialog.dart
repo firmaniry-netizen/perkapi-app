@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 
 import 'auth_repository.dart';
@@ -84,7 +84,7 @@ class _OtpDialogState extends State<OtpDialog> {
             controller: _email,
             enabled: !_sent && !_busy,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email akun', prefixIcon: Icon(CupertinoIcons.mail)),
+            decoration: const InputDecoration(labelText: 'Email akun', prefixIcon: Icon(Ph.envelope)),
           ),
           if (_sent) ...[
             const SizedBox(height: 12),
@@ -112,7 +112,7 @@ class _OtpDialogState extends State<OtpDialog> {
           style: FilledButton.styleFrom(minimumSize: const Size(100, 44)),
           onPressed: _busy ? null : (_sent ? _verify : _send),
           child: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
               : Text(_sent ? 'Verifikasi' : 'Kirim kode'),
         ),
       ],

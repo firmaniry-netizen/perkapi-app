@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -103,13 +103,13 @@ class _AttendancePageState extends State<AttendancePage> {
             : _error != null
                 ? ErrorState(message: _error!, onRetry: _load)
                 : ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 120), children: [
-                    Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Absensi & Check-in', subtitle: 'Catat kehadiran dengan lokasi yang aman', icon: CupertinoIcons.location_solid, accent: AppColors.teal)),
+                    Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Absensi & Check-in', subtitle: 'Catat kehadiran dengan lokasi yang aman', icon: PhFill.mapPin, accent: AppColors.teal)),
                     const SizedBox(height: 16),
                     AppCard(
                       padding: const EdgeInsets.all(20),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Row(children: [
-                          const IconBadge(CupertinoIcons.location),
+                          const IconBadge(Ph.mapPin),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text('Lokasi hanya dibaca saat Anda menekan tombol Check-in.',
@@ -130,7 +130,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         const SizedBox(height: 16),
                         PrimaryButton(
                           label: 'Check-in sekarang',
-                          icon: CupertinoIcons.checkmark,
+                          icon: Ph.check,
                           loading: _busy,
                           onPressed: _busy ? null : _checkIn,
                         ),
@@ -146,7 +146,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           radius: 20,
                           padding: const EdgeInsets.all(14),
                           child: Row(children: [
-                            const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.emerald),
+                            const Icon(PhFill.checkCircle, color: AppColors.emerald),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

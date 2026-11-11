@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/services/access_service.dart';
@@ -56,7 +57,7 @@ class _AlertComposePageState extends State<AlertComposePage> {
   }
 
   Future<void> _pickExpiry() async {
-    final d = await showDatePicker(
+    final d = await showIosDatePicker(
       context: context,
       initialDate: _expires ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now(),
@@ -127,10 +128,10 @@ class _AlertComposePageState extends State<AlertComposePage> {
           const SizedBox(height: 8),
           SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'info', label: Text('Info'), icon: Icon(CupertinoIcons.info_circle)),
+              ButtonSegment(value: 'info', label: Text('Info'), icon: Icon(Ph.info)),
               ButtonSegment(
-                  value: 'warning', label: Text('Peringatan'), icon: Icon(CupertinoIcons.exclamationmark_triangle)),
-              ButtonSegment(value: 'urgent', label: Text('Penting'), icon: Icon(CupertinoIcons.exclamationmark_circle)),
+                  value: 'warning', label: Text('Peringatan'), icon: Icon(Ph.warning)),
+              ButtonSegment(value: 'urgent', label: Text('Penting'), icon: Icon(Ph.warningCircle)),
             ],
             selected: {_severity},
             onSelectionChanged: (s) => setState(() => _severity = s.first),
@@ -172,9 +173,9 @@ class _AlertComposePageState extends State<AlertComposePage> {
               decoration: InputDecoration(
                 labelText: 'Berlaku sampai (opsional)',
                 suffixIcon: _expires == null
-                    ? const Icon(CupertinoIcons.calendar_today)
+                    ? const Icon(Ph.calendarDot)
                     : IconButton(
-                        icon: const Icon(CupertinoIcons.xmark),
+                        icon: const Icon(Ph.x),
                         onPressed: () => setState(() => _expires = null)),
               ),
               child: Text(_expires == null ? 'Tanpa batas waktu' : _expires!.toIso8601String().substring(0, 10)),
@@ -184,8 +185,8 @@ class _AlertComposePageState extends State<AlertComposePage> {
           FilledButton.icon(
             onPressed: _saving ? null : _send,
             icon: _saving
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(CupertinoIcons.paperplane_fill),
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
+                : const Icon(PhFill.paperPlaneRight),
             label: const Text('Kirim'),
           ),
           const SizedBox(height: 8),

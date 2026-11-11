@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/widgets/ios_pickers.dart';
+import '../../core/constants/phosphor_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -69,7 +70,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
   }
 
   Future<DateTime?> _pickDate(DateTime initial) =>
-      showDatePicker(context: context, initialDate: initial, firstDate: DateTime(2000), lastDate: DateTime(2100));
+      showIosDatePicker(context: context, initialDate: initial, firstDate: DateTime(2000), lastDate: DateTime(2100));
 
   DateTime? get _meetingAt {
     if (_meetDate == null) return null;
@@ -153,7 +154,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
           if (d != null) onPick(d);
         },
         child: InputDecorator(
-          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(CupertinoIcons.calendar_today)),
+          decoration: InputDecoration(labelText: label, prefixIcon: const Icon(Ph.calendarDot)),
           child: Text(v == null ? 'Pilih tanggal' : hariTgl(v)),
         ),
       );
@@ -184,15 +185,15 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
         AppCard(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            TextField(controller: _number, decoration: const InputDecoration(labelText: 'Nomor surat', prefixIcon: Icon(CupertinoIcons.tag))),
+            TextField(controller: _number, decoration: const InputDecoration(labelText: 'Nomor surat', prefixIcon: Icon(Ph.tag))),
             gap(),
-            TextField(controller: _city, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Kota penandatanganan', hintText: 'mis. Jakarta', prefixIcon: Icon(CupertinoIcons.building_2_fill))),
+            TextField(controller: _city, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Kota penandatanganan', hintText: 'mis. Jakarta', prefixIcon: Icon(Ph.buildings))),
             gap(),
             _dateField('Tanggal surat', _letterDate, (d) => setState(() => _letterDate = d)),
             gap(),
-            TextField(controller: _officer, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() {}), decoration: InputDecoration(labelText: 'Nama $role', prefixIcon: const Icon(CupertinoIcons.person))),
+            TextField(controller: _officer, textCapitalization: TextCapitalization.words, onChanged: (_) => setState(() {}), decoration: InputDecoration(labelText: 'Nama $role', prefixIcon: const Icon(Ph.user))),
             gap(),
-            TextField(controller: _address, maxLines: 2, decoration: const InputDecoration(labelText: 'Alamat kantor (kop surat)', prefixIcon: Icon(CupertinoIcons.house))),
+            TextField(controller: _address, maxLines: 2, decoration: const InputDecoration(labelText: 'Alamat kantor (kop surat)', prefixIcon: Icon(Ph.house))),
           ]),
         ),
         const SizedBox(height: 14),
@@ -205,11 +206,11 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
               InkWell(
                 borderRadius: BorderRadius.circular(AppRadius.button),
                 onTap: () async {
-                  final t = await showTimePicker(context: context, initialTime: _meetTime ?? const TimeOfDay(hour: 10, minute: 0));
+                  final t = await showIosTimePicker(context: context, initialTime: _meetTime ?? const TimeOfDay(hour: 10, minute: 0));
                   if (t != null) setState(() => _meetTime = t);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Jam rapat', prefixIcon: Icon(CupertinoIcons.clock)),
+                  decoration: const InputDecoration(labelText: 'Jam rapat', prefixIcon: Icon(Ph.clock)),
                   child: Text(_meetTime == null ? '10.00 (bawaan)' : '${_meetTime!.hour.toString().padLeft(2, '0')}.${_meetTime!.minute.toString().padLeft(2, '0')} WIB'),
                 ),
               ),
@@ -224,18 +225,18 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: kind == LetterKind.pemberitahuan ? 'Tempat/alamat pengajuan tagihan' : 'Tempat rapat',
-                prefixIcon: const Icon(CupertinoIcons.placemark),
+                prefixIcon: const Icon(Ph.mapPinLine),
               ),
             ),
             if (kind != LetterKind.pemberitahuan) ...[
               gap(),
-              TextField(controller: _agenda, maxLines: 3, decoration: const InputDecoration(labelText: 'Acara rapat', prefixIcon: Icon(CupertinoIcons.list_bullet))),
+              TextField(controller: _agenda, maxLines: 3, decoration: const InputDecoration(labelText: 'Acara rapat', prefixIcon: Icon(Ph.listBullets))),
             ],
             if (kind == LetterKind.beritaAcara) ...[
               gap(),
-              TextField(controller: _judge, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Nama Hakim Pengawas (opsional)', prefixIcon: Icon(CupertinoIcons.hammer))),
+              TextField(controller: _judge, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Nama Hakim Pengawas (opsional)', prefixIcon: Icon(Ph.gavel))),
               gap(),
-              TextField(controller: _attendees, maxLines: 2, decoration: const InputDecoration(labelText: 'Yang hadir (opsional)', hintText: 'mis. 12 kreditur dan debitur', prefixIcon: Icon(CupertinoIcons.person_3))),
+              TextField(controller: _attendees, maxLines: 2, decoration: const InputDecoration(labelText: 'Yang hadir (opsional)', hintText: 'mis. 12 kreditur dan debitur', prefixIcon: Icon(Ph.usersThree))),
               gap(),
               TextField(controller: _outcome, maxLines: 6, decoration: const InputDecoration(labelText: 'Jalannya rapat dan hasil/keputusan', alignLabelWithHint: true)),
             ],
@@ -272,7 +273,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
           Text(_error!, style: const TextStyle(color: AppColors.red, fontWeight: FontWeight.w600)),
         ],
         const SizedBox(height: 18),
-        PrimaryButton(label: _busy ? 'Membuat PDF...' : 'Buat PDF', icon: CupertinoIcons.doc_richtext, loading: _busy, onPressed: _busy ? null : _make),
+        PrimaryButton(label: _busy ? 'Membuat PDF...' : 'Buat PDF', icon: Ph.fileDoc, loading: _busy, onPressed: _busy ? null : _make),
         const SizedBox(height: 10),
         Text('Isi surat adalah draf umum. Periksa dan sesuaikan sebelum dikirim.', textAlign: TextAlign.center, style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
       ]),

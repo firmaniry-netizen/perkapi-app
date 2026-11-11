@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -91,7 +91,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Pengumuman Massal')),
       body: PageGlow(accent: AppColors.violet, child: ListView(padding: barPad(context, const EdgeInsets.all(20)), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Pengumuman Massal', subtitle: 'Kirim pesan ke seluruh anggota atau satu cabang', icon: CupertinoIcons.speaker_2_fill, accent: AppColors.violet)),
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Pengumuman Massal', subtitle: 'Kirim pesan ke seluruh anggota atau satu cabang', icon: PhFill.megaphone, accent: AppColors.violet)),
         const SizedBox(height: 16),
         DropdownButtonFormField<String?>(
           initialValue: _branch,
@@ -109,7 +109,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: _sending ? null : _send,
-          icon: _sending ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(CupertinoIcons.speaker_2),
+          icon: _sending ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2)) : const Icon(Ph.megaphone),
           label: const Text('Kirim'),
         ),
       ])),

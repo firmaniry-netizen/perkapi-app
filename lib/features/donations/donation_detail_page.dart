@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,10 +97,10 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
       bottomNavigationBar: c.open
           ? SafeArea(
               minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: PrimaryButton(label: 'Donasi sekarang', icon: CupertinoIcons.heart_circle, onPressed: _donate),
+              child: PrimaryButton(label: 'Donasi sekarang', icon: Ph.handHeart, onPressed: _donate),
             )
           : null,
-      body: RefreshIndicator(
+      body: RefreshIndicator.adaptive(
         onRefresh: _load,
         child: CustomScrollView(slivers: [
           SliverAppBar(
@@ -178,8 +178,8 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Wrap(spacing: 8, runSpacing: 6, children: [
         Pill(c.category, color: color, icon: icon),
-        if (!c.active) const Pill('Ditutup', color: AppColors.muted, icon: CupertinoIcons.lock_fill),
-        if (c.active && c.ended) const Pill('Selesai', color: AppColors.muted, icon: CupertinoIcons.flag_fill),
+        if (!c.active) const Pill('Ditutup', color: AppColors.muted, icon: PhFill.lock),
+        if (c.active && c.ended) const Pill('Selesai', color: AppColors.muted, icon: PhFill.flag),
       ]),
       const SizedBox(height: 10),
       Text(c.title, style: const TextStyle(fontSize: AppType.h2, fontWeight: FontWeight.w900, height: 1.2)),
@@ -225,7 +225,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
       if (hasBank)
         AppCard(
           child: Row(children: [
-            const SolidTile(icon: CupertinoIcons.building_2_fill, color: AppColors.navyAction, size: 44, radius: 14),
+            const SolidTile(icon: Ph.buildings, color: AppColors.navyAction, size: 44, radius: 14),
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -236,7 +236,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
             ),
             IconButton.filledTonal(
               tooltip: 'Salin nomor rekening',
-              icon: const Icon(CupertinoIcons.doc_on_doc),
+              icon: const Icon(Ph.copy),
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: c.accountNumber!.replaceAll(RegExp(r'[^0-9]'), '')));
                 _snack('Nomor rekening disalin.');
@@ -254,7 +254,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
               child: SizedBox(
                 width: 72,
                 height: 72,
-                child: SignedImage(bucket: 'donasi-publik', path: c.qrisPath, fit: BoxFit.contain, fallback: const Icon(CupertinoIcons.qrcode, size: 40)),
+                child: SignedImage(bucket: 'donasi-publik', path: c.qrisPath, fit: BoxFit.contain, fallback: const Icon(Ph.qrCode, size: 40)),
               ),
             ),
             const SizedBox(width: 12),
@@ -273,7 +273,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         AppCard(child: Text('Info rekening belum diisi pengurus. Hubungi sekretariat untuk cara berdonasi.', style: TextStyle(color: sc.onSurfaceVariant))),
       const SizedBox(height: 10),
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Icon(CupertinoIcons.info_circle, size: 18, color: sc.onSurfaceVariant),
+        Icon(Ph.info, size: 18, color: sc.onSurfaceVariant),
         const SizedBox(width: 8),
         Expanded(
           child: Text('Transfer dulu, lalu tekan "Donasi sekarang" dan unggah bukti transfer. Pengurus akan memverifikasi, dan Anda mendapat notifikasi setelah donasi diterima.',
@@ -303,7 +303,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: () => _cancel(r),
-              icon: const Icon(CupertinoIcons.xmark, size: 18),
+              icon: const Icon(Ph.x, size: 18),
               label: const Text('Batalkan'),
             ),
           ),
@@ -357,14 +357,14 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         Wrap(spacing: 8, runSpacing: 6, children: [
           OutlinedButton.icon(
             onPressed: r['proof_path'] == null ? null : () => _showImage('donasi-bukti', '${r['proof_path']}', 'Bukti transfer'),
-            icon: const Icon(CupertinoIcons.doc_text, size: 18),
+            icon: const Icon(Ph.fileText, size: 18),
             label: Text(r['proof_path'] == null ? 'Tanpa bukti' : 'Lihat bukti'),
           ),
           if (pending) ...[
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: AppColors.emerald),
               onPressed: () => _verify(r, true),
-              icon: const Icon(CupertinoIcons.checkmark, size: 18),
+              icon: const Icon(Ph.check, size: 18),
               label: const Text('Terima'),
             ),
             TextButton(onPressed: () => _verify(r, false), child: const Text('Tolak')),
@@ -453,7 +453,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-            trailing: IconButton(icon: const Icon(CupertinoIcons.xmark), onPressed: () => Navigator.pop(d)),
+            trailing: IconButton(icon: const Icon(Ph.x), onPressed: () => Navigator.pop(d)),
           ),
           Flexible(
             child: InteractiveViewer(
@@ -462,7 +462,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
                 bucket: bucket,
                 path: path,
                 fit: BoxFit.contain,
-                fallback: const SizedBox(height: 240, child: Center(child: CircularProgressIndicator())),
+                fallback: const SizedBox(height: 240, child: Center(child: CircularProgressIndicator.adaptive())),
               ),
             ),
           ),
@@ -507,9 +507,9 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
           }
         },
         itemBuilder: (_) => [
-          const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(CupertinoIcons.pencil), title: Text('Ubah kampanye'))),
-          PopupMenuItem(value: 'toggle', child: ListTile(leading: Icon(c.active ? CupertinoIcons.lock_fill : CupertinoIcons.lock_open), title: Text(c.active ? 'Tutup kampanye' : 'Buka kembali'))),
-          const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(CupertinoIcons.trash), title: Text('Hapus'))),
+          const PopupMenuItem(value: 'edit', child: ListTile(leading: Icon(Ph.pencilSimple), title: Text('Ubah kampanye'))),
+          PopupMenuItem(value: 'toggle', child: ListTile(leading: Icon(c.active ? PhFill.lock : Ph.lockOpen), title: Text(c.active ? 'Tutup kampanye' : 'Buka kembali'))),
+          const PopupMenuItem(value: 'delete', child: ListTile(leading: Icon(Ph.trash), title: Text('Hapus'))),
         ],
       );
 }
@@ -627,7 +627,7 @@ class _DonateSheetState extends State<_DonateSheet> {
             AppCard(
               padding: const EdgeInsets.all(10),
               child: Row(children: [
-                const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.emerald),
+                const Icon(PhFill.checkCircle, color: AppColors.emerald),
                 const SizedBox(width: 10),
                 Expanded(child: Text(_proof!.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 TextButton(onPressed: () => setState(() => _proof = null), child: const Text('Ganti')),
@@ -635,9 +635,9 @@ class _DonateSheetState extends State<_DonateSheet> {
             )
           else
             Row(children: [
-              Expanded(child: OutlinedButton.icon(onPressed: () => _pick(false), icon: const Icon(CupertinoIcons.photo_on_rectangle), label: const Text('Galeri'))),
+              Expanded(child: OutlinedButton.icon(onPressed: () => _pick(false), icon: const Icon(Ph.images), label: const Text('Galeri'))),
               const SizedBox(width: 10),
-              Expanded(child: OutlinedButton.icon(onPressed: () => _pick(true), icon: const Icon(CupertinoIcons.camera_fill), label: const Text('Kamera'))),
+              Expanded(child: OutlinedButton.icon(onPressed: () => _pick(true), icon: const Icon(PhFill.camera), label: const Text('Kamera'))),
             ]),
           if (_err != null) ...[
             const SizedBox(height: 10),

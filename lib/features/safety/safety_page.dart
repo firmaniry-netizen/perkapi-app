@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/widgets/page_glow.dart';
@@ -83,7 +83,7 @@ class _SafetyPageState extends State<SafetyPage> {
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Keamanan & SOS')),
       body: PageGlow(accent: AppColors.red, child: ListView(padding: barPad(context, const EdgeInsets.all(20)), children: [
-        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Keamanan & SOS', subtitle: 'Atur izin pelacakan dan tombol darurat', icon: CupertinoIcons.shield_fill, accent: AppColors.red)),
+        Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Keamanan & SOS', subtitle: 'Atur izin pelacakan dan tombol darurat', icon: PhFill.shield, accent: AppColors.red)),
         const SizedBox(height: 16),
         if (_svc.error != null)
           Padding(
@@ -111,7 +111,7 @@ class _SafetyPageState extends State<SafetyPage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
                   child: Row(children: [
-                    const Icon(CupertinoIcons.circle_fill, size: 10, color: AppColors.red),
+                    const Icon(PhFill.circle, size: 10, color: AppColors.red),
                     const SizedBox(width: 8),
                     Text('Lokasi Anda sedang dibagikan ke admin', style: TextStyle(fontWeight: FontWeight.w700, color: scheme.onSurface)),
                   ]),
@@ -123,7 +123,7 @@ class _SafetyPageState extends State<SafetyPage> {
         Center(
           child: _svc.sos
               ? Column(children: [
-                  const Icon(CupertinoIcons.exclamationmark_octagon, size: 64, color: AppColors.red),
+                  const Icon(Ph.warningOctagon, size: 64, color: AppColors.red),
                   const SizedBox(height: 8),
                   const Text('SOS aktif. Admin melihat lokasi Anda.', style: TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
@@ -148,7 +148,7 @@ class _SafetyPageState extends State<SafetyPage> {
         Center(
           child: OutlinedButton.icon(
             onPressed: _busy ? null : () => _run(() => _svc.checkIn()),
-            icon: const Icon(CupertinoIcons.checkmark_shield),
+            icon: const Icon(Ph.shieldCheck),
             label: Text(_svc.sos ? 'Saya aman (batalkan SOS)' : 'Saya aman (check-in)'),
           ),
         ),

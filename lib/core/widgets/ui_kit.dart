@@ -131,7 +131,7 @@ class PrimaryButton extends StatelessWidget {
                             key: ValueKey('busy'),
                             width: 22,
                             height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                            child: CircularProgressIndicator.adaptive(strokeWidth: 2.5, backgroundColor: Colors.white),
                           )
                         : Row(key: const ValueKey('label'), mainAxisSize: MainAxisSize.min, children: [
                             Text(label,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -87,8 +87,8 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
             width: double.infinity,
             child: SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'pending', label: Text('Menunggu'), icon: Icon(CupertinoIcons.hourglass)),
-                ButtonSegment(value: 'rejected', label: Text('Ditolak'), icon: Icon(CupertinoIcons.nosign)),
+                ButtonSegment(value: 'pending', label: Text('Menunggu'), icon: Icon(Ph.hourglass)),
+                ButtonSegment(value: 'rejected', label: Text('Ditolak'), icon: Icon(Ph.prohibit)),
               ],
               selected: {_filter},
               onSelectionChanged: (s) {
@@ -114,11 +114,11 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
               final items = snap.data ?? [];
               if (items.isEmpty) {
                 return EmptyState(
-                  icon: CupertinoIcons.person_badge_plus,
+                  icon: Ph.userPlus,
                   message: _filter == 'pending' ? 'Tidak ada pendaftaran yang menunggu.' : 'Belum ada pendaftaran yang ditolak.',
                 );
               }
-              return RefreshIndicator(
+              return RefreshIndicator.adaptive(
                 onRefresh: () async {
                   _reload();
                   await _future;
@@ -158,22 +158,22 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
           ),
           StatusChip(it.status == 'pending' ? 'Menunggu' : 'Ditolak'),
         ]),
-        line(CupertinoIcons.mail, it.email),
-        if ((it.phone ?? '').isNotEmpty) line(CupertinoIcons.phone, it.phone!),
-        if ((it.branchName ?? '').isNotEmpty) line(CupertinoIcons.building_2_fill, it.branchName!),
-        if (date != null) line(CupertinoIcons.clock, 'Mendaftar $date'),
+        line(Ph.envelope, it.email),
+        if ((it.phone ?? '').isNotEmpty) line(Ph.phone, it.phone!),
+        if ((it.branchName ?? '').isNotEmpty) line(Ph.buildings, it.branchName!),
+        if (date != null) line(Ph.clock, 'Mendaftar $date'),
         if (it.status == 'rejected' && (it.rejectionReason ?? '').isNotEmpty)
-          line(CupertinoIcons.info_circle, 'Alasan: ${it.rejectionReason}'),
+          line(Ph.info, 'Alasan: ${it.rejectionReason}'),
         const SizedBox(height: 12),
         if (busy)
-          const Center(child: Padding(padding: EdgeInsets.all(4), child: CircularProgressIndicator()))
+          const Center(child: Padding(padding: EdgeInsets.all(4), child: CircularProgressIndicator.adaptive()))
         else
           Row(children: [
             if (it.status == 'pending')
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _reject(it),
-                  icon: const Icon(CupertinoIcons.xmark),
+                  icon: const Icon(Ph.x),
                   label: const Text('Tolak'),
                 ),
               ),
@@ -181,7 +181,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
             Expanded(
               child: FilledButton.icon(
                 onPressed: () => _approve(it),
-                icon: const Icon(CupertinoIcons.checkmark),
+                icon: const Icon(Ph.check),
                 label: const Text('Setujui'),
               ),
             ),

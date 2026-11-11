@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import '../constants/phosphor_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -77,7 +77,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           clear: onDark,
           semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
           onTap: () => canPop ? Navigator.maybePop(context) : context.go('/dashboard'),
-          child: Icon(CupertinoIcons.chevron_back, size: 21, color: fg),
+          child: Icon(Ph.caretLeft, size: 21, color: fg),
         ),
       );
     }
