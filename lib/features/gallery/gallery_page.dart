@@ -13,7 +13,6 @@ import '../../core/services/access_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/utils/upload_helper.dart';
 import '../../core/widgets/motion.dart';
-import '../../core/widgets/nav_clearance.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../news/news_detail_page.dart';
@@ -203,14 +202,10 @@ class _GalleryPageState extends State<GalleryPage> {
   Widget build(BuildContext context) {
     final shown = _shown;
     return Scaffold(
-      appBar: GlassAppBar(title: const Text('Berita & Dokumentasi')),
-      floatingActionButton: NavClearance(
-        child: FloatingActionButton.extended(
-          onPressed: _compose,
-          icon: const Icon(Ph.notePencil),
-          label: const Text('Tulis berita'),
-        ),
-      ),
+      // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+      appBar: GlassAppBar(title: const Text('Berita & Dokumentasi'), actions: [
+        IconButton(tooltip: 'Tulis berita', icon: const Icon(Ph.notePencil), onPressed: _compose),
+      ]),
       body: PageGlow(accent: AppColors.rose, child: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
@@ -313,9 +308,9 @@ class _GalleryPageState extends State<GalleryPage> {
                   const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                    decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(14)),
                     child: const Text('BARU',
-                        style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                        style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
                   ),
                 ],
               ]),
@@ -338,7 +333,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 Text(p.title,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: AppType.h2, fontWeight: FontWeight.w800, height: 1.25)),
+                    style: const TextStyle(color: Colors.white, fontSize: AppType.h2, fontWeight: FontWeight.w700, height: 1.25)),
                 const SizedBox(height: 8),
                 Row(children: [
                   const Icon(Ph.clock, size: 14, color: Color(0xCCFFFFFF)),
@@ -382,7 +377,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(8)),
-                    child: const Text('BARU', style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800)),
+                    child: const Text('BARU', style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
                   ),
                 ),
             ]),
@@ -398,14 +393,14 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Text(p.album.toUpperCase(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: accent)),
+                    style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: accent)),
               ),
             ]),
             const SizedBox(height: 4),
             Text(p.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead, height: 1.25)),
             if (excerpt.isNotEmpty) ...[
               const SizedBox(height: 3),
               Text(excerpt,
@@ -520,7 +515,7 @@ class _ComposePageState extends State<_ComposePage> {
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Tulis berita'), leading: const CloseButton()),
       body: ListView(padding: barPad(context, const EdgeInsets.fromLTRB(20, 8, 20, 24)), children: [
-        Text('Foto (${_photos.length}/$_maxPhotos)', style: const TextStyle(fontWeight: FontWeight.w800)),
+        Text('Foto (${_photos.length}/$_maxPhotos)', style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 8),
         if (_photos.isEmpty)
           Container(

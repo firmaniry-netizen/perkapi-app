@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -77,16 +78,11 @@ class _AlertsPageState extends State<AlertsPage> {
               icon: const Icon(Ph.check),
               onPressed: AlertService.instance.markAllRead,
             ),
+            // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+            if (admin) IconButton(tooltip: 'Kirim peringatan', icon: const Icon(Ph.megaphone), onPressed: _compose),
           ],
           bottom: TabBar(tabs: tabs),
         ),
-        floatingActionButton: admin
-            ? FloatingActionButton.extended(
-                onPressed: _compose,
-                icon: const Icon(Ph.megaphone),
-                label: const Text('Kirim peringatan'),
-              )
-            : null,
         body: PageGlow(
           accent: AppColors.red,
           child: TabBarView(children: [for (final v in views) _BelowBar(child: v)]),
@@ -162,7 +158,7 @@ class _InboxState extends State<_Inbox> {
                   style: Theme.of(context).textTheme.bodySmall),
             ]),
             const SizedBox(height: 12),
-            Text(a.title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            Text(a.title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             if (a.body.isNotEmpty) Text(a.body),
           ]),
@@ -201,7 +197,7 @@ class _InboxState extends State<_Inbox> {
               Text(a.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: a.isRead ? FontWeight.w600 : FontWeight.w800, fontSize: AppType.lead)),
+                  style: TextStyle(fontWeight: a.isRead ? FontWeight.w600 : FontWeight.w700, fontSize: AppType.lead)),
               const SizedBox(height: 3),
               Text(
                 a.body.isEmpty ? (a.isSystem ? 'Otomatis' : fmtDateTime(a.createdAt)) : a.body,
@@ -339,7 +335,7 @@ class _SentListState extends State<_SentList> {
   Future<void> _delete(Map<String, dynamic> r) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus peringatan?'),
         content: const Text('Peringatan akan hilang dari semua anggota.'),
         actions: [

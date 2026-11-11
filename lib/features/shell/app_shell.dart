@@ -3,6 +3,7 @@ import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
+import '../../core/widgets/nav_clearance.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -23,13 +24,12 @@ import '../../core/services/online_service.dart';
 import '../auth/auth_repository.dart';
 import '../auth/pending_approval_view.dart';
 import '../settings/pin_widgets.dart';
-import 'action_burst.dart';
 import 'more_page.dart';
 import 'nav_items.dart';
 import '../../core/constants/app_tokens.dart';
 import '../../core/widgets/aurora_background.dart';
 
-/// Kerangka utama: bottom nav + FAB (layar sempit) atau sidebar (layar lebar/web).
+/// Kerangka utama: tab bar bawah (layar sempit) atau sidebar (layar lebar/web).
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.location, required this.child});
   final String location;
@@ -120,32 +120,6 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
-  final _fabKey = GlobalKey();
-
-  /// Aksi cepat: menu mekar dari tombol merah. Isinya aksi yang benar-benar sering dipakai,
-  /// ditambah aksi pengurus sesuai hak akses.
-  Future<void> _quickActions() async {
-    final a = Access.instance;
-    final actions = <BurstAction>[
-      const BurstAction('Kartu & QR', Ph.qrCode, '/member-card', color: AppColors.navy),
-      const BurstAction('SOS & Keamanan', PhFill.shield, '/safety', color: AppColors.red),
-      const BurstAction('Tulis berita', Ph.notePencil, '/gallery?add=1', color: AppColors.goldDeep),
-      const BurstAction('Catatan baru', Ph.filePlus, '/module/notes/new', color: AppColors.teal),
-      const BurstAction('Tanya AI', Ph.sparkle, '/ai', color: AppColors.violet),
-      const BurstAction('Data AHU', PhFill.sealCheck, '/ahu', color: AppColors.navyAction),
-      if (a.can('manage_event')) const BurstAction('Buat agenda', Ph.calendarPlus, '/module/events/new', color: AppColors.goldDeep),
-      if (a.can('manage_alert')) const BurstAction('Kirim peringatan', PhFill.megaphone, '/alerts/new', color: AppColors.red),
-      if (a.can('manage_member')) const BurstAction('Verifikasi QR', PhFill.shieldCheck, '/verify-member', color: AppColors.teal),
-    ];
-    final box = _fabKey.currentContext?.findRenderObject() as RenderBox?;
-    final size = MediaQuery.sizeOf(context);
-    final origin = (box != null && box.hasSize)
-        ? box.localToGlobal(box.size.center(Offset.zero))
-        : Offset(size.width / 2, size.height - 60);
-    final route = await showActionBurst(context, origin: origin, actions: actions);
-    if (route != null && mounted) context.push(route);
-  }
-
   @override
   Widget build(BuildContext context) {
     final a = Access.instance;
@@ -222,7 +196,7 @@ class _AppShellState extends State<AppShell> {
                             style: TextStyle(
                                 color: AppColors.gold.withValues(alpha: 0.85),
                                 fontSize: AppType.micro,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w700,
                                 letterSpacing: 1.2)),
                       ),
                       for (final l in g.$2)
@@ -249,7 +223,7 @@ class _AppShellState extends State<AppShell> {
     final visible = bottomItems.where((i) => a.can(i.perm)).toList();
     final current = bottomIndexFor(widget.location);
     final selected = current < 0 ? -1 : visible.indexWhere((i) => i.route == bottomItems[current].route);
-    // Navigasi bawah + tombol aksi cepat hanya di halaman utama; di halaman fitur disembunyikan
+    // Tab bar hanya di halaman utama; di halaman fitur disembunyikan
     // supaya tidak menutupi isi dan tombol halaman itu (halaman fitur punya tombol kembali sendiri).
     if (!isTopLevelRoute(widget.location)) {
       return Scaffold(body: body);
@@ -257,138 +231,104 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       extendBody: true,
       body: body,
-      bottomNavigationBar: _FloatNav(
+      bottomNavigationBar: _TabBar(
         items: visible,
         selected: selected,
         onSelect: (i) => context.go(visible[i].route),
-        onAction: _quickActions,
-        fabKey: _fabKey,
       ),
     );
   }
 }
 
-/// Navigasi bawah mengambang: kapsul dengan tombol aksi merah di tengah.
-/// Item terpilih melebar menampilkan label; item lain hanya ikon.
-class _FloatNav extends StatelessWidget {
-  const _FloatNav({required this.items, required this.selected, required this.onSelect, required this.onAction, required this.fabKey});
-  final GlobalKey fabKey;
+/// Tab bar gaya iOS: bar kaca menempel di tepi bawah, tab sama lebar, ikon dan label selalu tampil.
+/// Tab aktif memakai ikon terisi dan warna aksen; pil lembut di belakangnya meluncur ke tab yang dipilih.
+class _TabBar extends StatelessWidget {
+  const _TabBar({required this.items, required this.selected, required this.onSelect});
   final List<NavItem> items;
   final int selected;
   final ValueChanged<int> onSelect;
-  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final muted = theme.colorScheme.onSurfaceVariant;
     final accent = dark ? AppColors.navyLight : AppColors.navy;
     final still = MediaQuery.disableAnimationsOf(context);
-    final mid = items.length ~/ 2;
-    // Layar sempit (mis. Redmi 9C, lebar sekitar 324dp): kecilkan jarak agar bar tidak overflow.
-    final compact = MediaQuery.sizeOf(context).width < 400;
-    Widget item(int i) {
+    // Kontras tinggi: bar pekat tanpa blur supaya label tetap terbaca.
+    final solid = MediaQuery.highContrastOf(context);
+
+    Widget tab(int i) {
       final on = i == selected;
-      return Semantics(
-        button: true,
-        selected: on,
-        label: items[i].label,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (i != selected) tapHaptic();
-            onSelect(i);
-          },
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: still ? 0 : 220),
-            curve: Curves.easeOutCubic,
-            height: 48,
-            // Lensa kaca aktif (iOS 26): kaca lebih terang di atas kaca bar, dengan kilau tepi & bayangan tipis.
-            decoration: BoxDecoration(
-              color: on ? (dark ? Colors.white.withValues(alpha: 0.14) : Colors.white.withValues(alpha: 0.72)) : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: on
-                  ? [BoxShadow(color: Colors.black.withValues(alpha: dark ? 0.25 : 0.08), blurRadius: 10, offset: const Offset(0, 3))]
-                  : const [],
-            ),
-            child: CustomPaint(
-              foregroundPainter: on ? GlassSheen(dark: dark, radius: 24, strength: 0.9) : null,
-              child: AnimatedPadding(
-              duration: Duration(milliseconds: still ? 0 : 220),
-              curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(horizontal: on ? (compact ? 10 : 14) : (compact ? 8 : 10)),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-              AnimatedScale(
-                scale: on ? 1.12 : 1,
-                duration: Duration(milliseconds: still ? 0 : 240),
-                curve: const Cubic(0.23, 1, 0.32, 1),
-                // Ikon garis dan ikon terisi bertukar dengan cross-fade singkat saat tab dipilih.
-                child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: still ? 0 : 160),
-                  child: Icon(
-                    on ? (items[i].activeIcon ?? items[i].icon) : items[i].icon,
-                    key: ValueKey(on),
-                    size: 24,
-                    color: on ? accent : muted,
-                  ),
+      final color = on ? accent : muted;
+      return Expanded(
+        child: Semantics(
+          button: true,
+          selected: on,
+          label: items[i].label,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (i != selected) tapHaptic();
+              onSelect(i);
+            },
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(on ? (items[i].activeIcon ?? items[i].icon) : items[i].icon, size: 25, color: color),
+              const SizedBox(height: 3),
+              ExcludeSemantics(
+                child: Text(
+                  items[i].label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: color, fontSize: AppType.micro, fontWeight: on ? FontWeight.w600 : FontWeight.w500, height: 1.1),
                 ),
               ),
-              AnimatedSize(
-                duration: Duration(milliseconds: still ? 0 : 220),
-                curve: Curves.easeOutCubic,
-                child: on
-                    ? Padding(
-                        padding: EdgeInsets.only(left: compact ? 6 : 8),
-                        child: Text(items[i].label,
-                            style: TextStyle(color: accent, fontWeight: FontWeight.w800, fontSize: compact ? 12 : 13)),
-                      )
-                    : const SizedBox.shrink(),
-              ),
             ]),
-              ),
-            ),
           ),
         ),
       );
     }
 
-    final children = <Widget>[
-      for (var i = 0; i < items.length; i++) ...[
-        if (i == mid)
-          Semantics(
-            button: true,
-            label: 'Aksi cepat',
-            // Tombol aksi: kaca merah (tint merah tembus pandang + pendar merah), menggembung saat ditekan.
-            child: KeyedSubtree(
-              key: fabKey,
-              child: LiquidGlassButton(
-                circle: true,
-                size: compact ? 48 : 52,
-                tint: AppColors.red.withValues(alpha: 0.86),
-                glow: AppColors.red,
-                onTap: onAction,
-                child: const Icon(Ph.plus, color: Colors.white, size: 28),
-              ),
-            ),
-          ),
-        item(i),
-      ],
-    ];
-    return MediaQuery.withClampedTextScaling(
-      maxScaleFactor: 1.15,
+    final bar = DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor.withValues(alpha: solid ? 1 : 0.78),
+        border: Border(top: BorderSide(color: (dark ? Colors.white : AppColors.navy).withValues(alpha: dark ? 0.12 : 0.08))),
+      ),
       child: SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(compact ? 12 : 16, 0, compact ? 12 : 16, 12),
-        // Liquid Glass: isi halaman terlihat samar di balik bar (blur + saturasi), dengan kilau tepi.
-        child: LiquidGlass(
-          radius: 32,
-          blur: 18,
-          padding: EdgeInsets.symmetric(horizontal: compact ? 6 : 8, vertical: 8),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
+        top: false,
+        child: SizedBox(
+          height: kFloatNavHeight,
+          child: Stack(children: [
+            // Tab sama lebar, jadi posisi pil cukup dihitung dari indeks tab.
+            if (selected >= 0 && items.length > 1)
+              AnimatedAlign(
+                alignment: Alignment(-1 + 2 * selected / (items.length - 1), 0),
+                duration: Duration(milliseconds: still ? 0 : 360),
+                curve: const Cubic(0.23, 1, 0.32, 1),
+                child: FractionallySizedBox(
+                  widthFactor: 1 / items.length,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: dark ? 0.22 : 0.10),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+              ),
+            Row(children: [for (var i = 0; i < items.length; i++) tab(i)]),
+          ]),
         ),
       ),
-    ));
+    );
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.15,
+      // Isi halaman terlihat samar di balik bar (blur + saturasi), seperti tab bar iOS.
+      child: solid ? bar : ClipRect(child: BackdropFilter(filter: LiquidGlass.backdrop(22), child: bar)),
+    );
   }
 }
 
@@ -407,7 +347,7 @@ class _SideItem extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           onTap: onTap,
           child: AnimatedContainer(
             duration: Duration(milliseconds: still ? 0 : 220),
@@ -437,7 +377,7 @@ class _SideItem extends StatelessWidget {
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: AppType.small,
-                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.w600)),
               ),
             ]),
           ),

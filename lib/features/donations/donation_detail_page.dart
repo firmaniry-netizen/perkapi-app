@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -182,7 +183,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         if (c.active && c.ended) const Pill('Selesai', color: AppColors.muted, icon: PhFill.flag),
       ]),
       const SizedBox(height: 10),
-      Text(c.title, style: const TextStyle(fontSize: AppType.h2, fontWeight: FontWeight.w900, height: 1.2)),
+      Text(c.title, style: const TextStyle(fontSize: AppType.h2, fontWeight: FontWeight.w700, height: 1.2)),
     ]);
   }
 
@@ -191,7 +192,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
     final dark = Theme.of(context).brightness == Brightness.dark;
     Widget stat(String v, String l) => Expanded(
           child: Column(children: [
-            Text(v, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: AppType.lead)),
+            Text(v, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
             const SizedBox(height: 2),
             Text(l, style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
           ]),
@@ -202,7 +203,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         Text('Terkumpul', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
         const SizedBox(height: 2),
         Text(rupiah(c.collected),
-            style: TextStyle(fontSize: AppType.display, fontWeight: FontWeight.w900, color: AppColors.onSoft(AppColors.emerald, dark: dark))),
+            style: TextStyle(fontSize: AppType.display, fontWeight: FontWeight.w700, color: AppColors.onSoft(AppColors.emerald, dark: dark))),
         if ((c.target ?? 0) > 0) ...[
           Text('dari target ${rupiah(c.target!)}', style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
           const SizedBox(height: 12),
@@ -230,7 +231,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(c.bankName ?? 'Rekening', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
-                SelectableText(c.accountNumber!, style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900, letterSpacing: 0.6)),
+                SelectableText(c.accountNumber!, style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
                 if (c.accountHolder != null) Text('a.n. ${c.accountHolder}', style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
               ]),
             ),
@@ -250,7 +251,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
           onTap: () => _showImage('donasi-publik', c.qrisPath!, 'QRIS'),
           child: Row(children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: SizedBox(
                 width: 72,
                 height: 72,
@@ -260,7 +261,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Bayar dengan QRIS', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('Bayar dengan QRIS', style: TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text('Ketuk untuk memperbesar, lalu pindai dengan aplikasi bank atau e-wallet.',
                     style: TextStyle(fontSize: AppType.caption, height: 1.35, color: sc.onSurfaceVariant)),
@@ -289,7 +290,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
     return AppCard(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Text(rupiah((r['amount'] as num?) ?? 0), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: AppType.lead))),
+          Expanded(child: Text(rupiah((r['amount'] as num?) ?? 0), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead))),
           Pill(label, color: color, icon: icon),
         ]),
         const SizedBox(height: 4),
@@ -314,7 +315,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
   Future<void> _cancel(Map<String, dynamic> r) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (d) => AlertDialog(
+      builder: (d) => IosDialog(
         title: const Text('Batalkan donasi?'),
         content: const Text('Catatan donasi dan bukti transfer akan dihapus. Uang yang sudah ditransfer tidak otomatis kembali; hubungi bendahara bila perlu.'),
         actions: [
@@ -342,7 +343,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         Row(children: [
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
               Text('${rupiah((r['amount'] as num?) ?? 0)} · ${FmtId.value(r['created_at'])}${r['is_anonymous'] == true ? ' · minta anonim' : ''}',
                   style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
             ]),
@@ -380,7 +381,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
       final ctl = TextEditingController();
       final go = await showSmoothDialog<bool>(
         context: context,
-        builder: (d) => AlertDialog(
+        builder: (d) => IosDialog(
           title: const Text('Tolak donasi'),
           content: TextField(
             controller: ctl,
@@ -416,14 +417,14 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         CircleAvatar(
           radius: 19,
           backgroundColor: AppColors.soft(AppColors.emerald, dark: Theme.of(context).brightness == Brightness.dark),
-          child: Text(initial, style: const TextStyle(fontWeight: FontWeight.w800)),
+          child: Text(initial, style: const TextStyle(fontWeight: FontWeight.w700)),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Expanded(child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
-              Text(rupiah((d['amount'] as num?) ?? 0), style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(rupiah((d['amount'] as num?) ?? 0), style: const TextStyle(fontWeight: FontWeight.w700)),
             ]),
             Text(FmtId.relativeDay(FmtId.parse(d['created_at']) ?? DateTime.now()), style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
             if ((d['message'] ?? '').toString().isNotEmpty)
@@ -452,7 +453,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card)),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
-            title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
             trailing: IconButton(icon: const Icon(Ph.x), onPressed: () => Navigator.pop(d)),
           ),
           Flexible(
@@ -488,7 +489,7 @@ class _DonationDetailPageState extends State<DonationDetailPage> {
           } else if (v == 'delete') {
             final ok = await showSmoothDialog<bool>(
               context: context,
-              builder: (d) => AlertDialog(
+              builder: (d) => IosDialog(
                 title: const Text('Hapus kampanye?'),
                 content: const Text('Kampanye dan seluruh catatan donasinya akan dihapus permanen. Untuk mengakhiri kampanye tanpa menghapus catatan, pilih "Tutup kampanye".'),
                 actions: [
@@ -591,7 +592,7 @@ class _DonateSheetState extends State<_DonateSheet> {
       child: SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
           Text('Donasi untuk', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
-          Text(widget.campaign.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w900)),
+          Text(widget.campaign.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final p in presets)
@@ -602,7 +603,7 @@ class _DonateSheetState extends State<_DonateSheet> {
             controller: _amount,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, _ThousandsFormatter()],
-            style: const TextStyle(fontSize: AppType.heading, fontWeight: FontWeight.w900),
+            style: const TextStyle(fontSize: AppType.heading, fontWeight: FontWeight.w700),
             onChanged: (_) => setState(() => _err = null),
             decoration: const InputDecoration(labelText: 'Nominal', prefixText: 'Rp '),
           ),
@@ -621,7 +622,7 @@ class _DonateSheetState extends State<_DonateSheet> {
             subtitle: const Text('Tampil sebagai "Hamba Allah" di daftar donatur. Pengurus tetap melihat nama Anda.'),
           ),
           const SizedBox(height: 4),
-          const Text('Bukti transfer', style: TextStyle(fontWeight: FontWeight.w800)),
+          const Text('Bukti transfer', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           if (_proof != null)
             AppCard(

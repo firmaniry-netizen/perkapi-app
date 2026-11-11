@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import '../../core/widgets/swipe_row.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -56,6 +59,52 @@ class _ModuleListViewState extends State<ModuleListView> {
     _debounce?.cancel();
     _scroll.dispose();
     super.dispose();
+  }
+
+  /// Hapus satu notifikasi: baris langsung hilang, lalu dihapus di server. Gagal = baris dikembalikan.
+  Future<void> _deleteNotif(Map<String, dynamic> row) async {
+    final at = _items.indexOf(row);
+    if (at < 0) return;
+    setState(() => _items.removeAt(at));
+    try {
+      await DataRepository.deleteNotification('${row['id']}');
+    } on DataException catch (e) {
+      if (!mounted) return;
+      setState(() => _items.insert(at > _items.length ? _items.length : at, row));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  /// Hapus semua notifikasi, setelah konfirmasi (tidak bisa dibatalkan).
+  Future<void> _deleteAllNotifs() async {
+    final ok = await showSmoothDialog<bool>(
+      context: context,
+      builder: (c) => IosDialog(
+        title: const Text('Hapus semua notifikasi?'),
+        content: const Text('Semua notifikasi Anda akan dihapus permanen dan tidak bisa dikembalikan.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Hapus semua'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      final n = await DataRepository.deleteAllNotifications();
+      if (!mounted) return;
+      // Nol baris terhapus padahal daftar berisi: izin hapus di server belum dipasang.
+      if (n == 0 && _items.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Notifikasi belum bisa dihapus. Pengurus perlu menjalankan sql/47_hapus_notifikasi.sql di Supabase.')));
+      }
+    } on DataException catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+    _refresh();
   }
 
   Future<void> _refresh() async {
@@ -183,6 +232,8 @@ class _ModuleListViewState extends State<ModuleListView> {
                   _refresh();
                 },
               ),
+            if (m.id == 'notifications' && _items.isNotEmpty)
+              IconButton(tooltip: 'Hapus semua notifikasi', icon: const Icon(Ph.trash), onPressed: _deleteAllNotifs),
             if (widget.showAdd && _canWrite)
               GradientIconButton(
                 tooltip: 'Tambah',
@@ -245,7 +296,17 @@ class _ModuleListViewState extends State<ModuleListView> {
           // Kartu khusus untuk modul yang isinya punya "bentuk" sendiri (agenda, diskusi, notifikasi).
           if (m.id == 'events') return Reveal(index: i, child: _EventCard(row: row, onTap: () => _open(row)));
           if (m.id == 'forum') return Reveal(index: i, child: _ThreadCard(row: row, onTap: () => _open(row)));
-          if (m.id == 'notifications') return Reveal(index: i, child: _NotifCard(row: row, onTap: () => _open(row)));
+          if (m.id == 'notifications') {
+            // Geser ke kiri (atau tekan lama) untuk menghapus.
+            return Reveal(
+              index: i,
+              child: SwipeRow(
+                key: ValueKey(row['id']),
+                endAction: SwipeAction(label: 'Hapus', icon: Ph.trash, color: AppColors.red, removes: true, onCommit: () => _deleteNotif(row)),
+                child: _NotifCard(row: row, onTap: () => _open(row)),
+              ),
+            );
+          }
           final title = fmtValue(row[m.titleKey]);
           final sub = m.subtitleKeys
               .map((k) => fmtValue(row[k]))
@@ -275,7 +336,7 @@ class _ModuleListViewState extends State<ModuleListView> {
                   Text(title.isEmpty ? '(tanpa judul)' : title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                   if (sub.isNotEmpty) ...[
                     const SizedBox(height: 3),
                     Text(sub,
@@ -360,14 +421,14 @@ class _EventCard extends StatelessWidget {
               Text(start == null ? '-' : '${start.day}', style: AppType.headline(26, color: gold, height: 1)),
               const SizedBox(height: 2),
               Text(start == null ? '' : FmtId.months[start.month - 1].toUpperCase(),
-                  style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 1, color: gold)),
+                  style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 1, color: gold)),
             ]),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('${row['title'] ?? '(tanpa judul)'}',
-                  maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
+                  maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead, height: 1.25)),
               const SizedBox(height: 4),
               Row(children: [
                 Icon(Ph.clock, size: 14, color: scheme.onSurfaceVariant),
@@ -438,7 +499,7 @@ class _ThreadCard extends StatelessWidget {
             ]),
             const SizedBox(height: 6),
             Text('${row['title'] ?? '(tanpa judul)'}',
-                maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.25)),
+                maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead, height: 1.25)),
             if (body.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(body, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, height: 1.4, color: scheme.onSurfaceVariant)),
@@ -472,7 +533,7 @@ class _NotifCard extends StatelessWidget {
             Text('${row['title'] ?? 'Notifikasi'}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontWeight: unread ? FontWeight.w800 : FontWeight.w600, fontSize: AppType.lead)),
+                style: TextStyle(fontWeight: unread ? FontWeight.w700 : FontWeight.w600, fontSize: AppType.lead)),
             if ('${row['body'] ?? ''}'.isNotEmpty) ...[
               const SizedBox(height: 3),
               Text('${row['body']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant)),
@@ -509,7 +570,7 @@ class _MiniChip extends StatelessWidget {
         if (icon != null) ...[Icon(icon, size: 12, color: fg), const SizedBox(width: 4)],
         Flexible(
           child: Text(text,
-              maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, color: fg)),
+              maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, color: fg)),
         ),
       ]),
     );

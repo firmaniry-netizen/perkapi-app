@@ -134,7 +134,7 @@ Padding(
                   Expanded(
                     child: Text('${_months[_month.month - 1]} ${_month.year}',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                   ),
                   IconButton(onPressed: () => _shift(1), icon: const Icon(Ph.caretRight), tooltip: 'Bulan berikutnya'),
                 ]),
@@ -180,7 +180,7 @@ Padding(
                         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                           Text('${day.day}',
                               style: TextStyle(
-                                  fontWeight: isToday || isSel ? FontWeight.w800 : FontWeight.w500,
+                                  fontWeight: isToday || isSel ? FontWeight.w700 : FontWeight.w500,
                                   color: isSel ? Theme.of(context).colorScheme.onPrimary : null)),
                           const SizedBox(height: 3),
                           SizedBox(
@@ -243,7 +243,7 @@ Padding(
                             Text(e.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w800)),
+                                style: const TextStyle(fontWeight: FontWeight.w700)),
                             const SizedBox(height: 2),
                             Text(e.subtitle,
                                 maxLines: 1,

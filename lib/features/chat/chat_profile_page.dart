@@ -111,7 +111,7 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
               const SizedBox(height: 14),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(name, textAlign: TextAlign.center, style: const TextStyle(fontSize: AppType.h2, fontWeight: FontWeight.w800)),
+                child: Text(name, textAlign: TextAlign.center, style: const TextStyle(fontSize: AppType.h2, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(height: 4),
               Text(
@@ -211,11 +211,11 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
   Widget _section(ColorScheme scheme, String title, Widget child) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      decoration: BoxDecoration(color: scheme.surfaceContainerHighest.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(color: scheme.surfaceContainerHighest.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(20)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-          child: Text(title, style: TextStyle(fontWeight: FontWeight.w800, color: scheme.onSurfaceVariant)),
+          child: Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: scheme.onSurfaceVariant)),
         ),
         child,
       ]),

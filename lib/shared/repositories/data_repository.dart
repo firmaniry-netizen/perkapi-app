@@ -151,4 +151,32 @@ class DataRepository {
       throw _wrap(e);
     }
   }
+
+  /// Menghapus satu notifikasi milik pengguna. Permanen.
+  /// Server mengembalikan baris yang terhapus; bila kosong, berarti izin hapus (RLS) belum dipasang:
+  /// tanpa policy DELETE, Postgres tidak melapor galat dan hanya menghapus nol baris.
+  static Future<void> deleteNotification(String id) async {
+    try {
+      final gone = await _db.from('notifications').delete().eq('id', id).select('id');
+      if (gone.isEmpty) throw DataException(_noDeletePolicy);
+    } on DataException {
+      rethrow;
+    } catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  /// Menghapus semua notifikasi milik pengguna. Permanen. Mengembalikan jumlah yang terhapus.
+  static Future<int> deleteAllNotifications() async {
+    _needMember();
+    try {
+      final gone = await _db.from('notifications').delete().eq('member_id', Access.instance.memberId!).select('id');
+      return gone.length;
+    } catch (e) {
+      throw _wrap(e);
+    }
+  }
+
+  static const _noDeletePolicy =
+      'Notifikasi belum bisa dihapus. Pengurus perlu menjalankan sql/47_hapus_notifikasi.sql di Supabase.';
 }

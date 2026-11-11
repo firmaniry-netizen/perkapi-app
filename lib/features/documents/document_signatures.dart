@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -43,7 +44,7 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
   Future<void> _sign() async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Tandatangani dokumen?'),
         content: const Text('Dengan menandatangani, Anda menyatakan telah membaca dan menyetujui isi versi dokumen ini. Tanda tangan tercatat dengan nama, waktu, dan versi file.'),
         actions: [
@@ -76,7 +77,7 @@ class _DocumentSignaturesState extends State<DocumentSignatures> {
       if (!mounted) return;
       await showSmoothDialog<void>(
         context: context,
-        builder: (c) => AlertDialog(
+        builder: (c) => IosDialog(
           content: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(url, fit: BoxFit.contain)),
           actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Tutup'))],
         ),

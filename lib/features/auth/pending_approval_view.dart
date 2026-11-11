@@ -172,7 +172,7 @@ class _Step extends StatelessWidget {
               Text(title,
                   style: TextStyle(
                       color: Colors.white.withValues(alpha: state == _StepState.next ? 0.6 : 1),
-                      fontWeight: FontWeight.w800)),
+                      fontWeight: FontWeight.w700)),
               const SizedBox(height: 2),
               Text(subtitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.62), fontSize: AppType.caption, height: 1.4)),
             ]),

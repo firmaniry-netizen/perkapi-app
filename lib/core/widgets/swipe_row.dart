@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import '../constants/app_colors.dart';
 import 'motion.dart';
 import 'motion_physics.dart';
+import 'smooth_overlays.dart';
 import '../constants/app_tokens.dart';
 
 /// Aksi yang muncul di belakang baris saat digeser.
@@ -27,6 +28,7 @@ class SwipeAction {
 /// - Lepas: lewat ambang (32% lebar) atau dikibas (> 900 px/s) = aksi; selain itu kembali dengan pegas yang
 ///   meneruskan kecepatan jari. Getaran halus sekali saat melewati ambang, ikon aksi membesar 0,25 -> 1.
 /// - Pembaca layar: aksi juga tersedia sebagai aksi aksesibilitas (tanpa perlu menggeser).
+/// - Tekan lama: aksi yang sama muncul sebagai menu di lembar bawah.
 class SwipeRow extends StatefulWidget {
   const SwipeRow({super.key, required this.child, this.startAction, this.endAction, this.radius = 20});
   final Widget child;
@@ -96,6 +98,23 @@ class _SwipeRowState extends State<SwipeRow> with SingleTickerProviderStateMixin
     AppSpring.to(_x, 0, velocity: v, still: still);
   }
 
+  /// Tekan lama: tampilkan aksi geser sebagai menu, untuk yang tidak tahu baris bisa digeser.
+  Future<void> _menu() async {
+    final s = widget.startAction, e = widget.endAction;
+    HapticFeedback.mediumImpact();
+    final picked = await showSmoothSheet<SwipeAction>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        top: false,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          for (final a in [if (s != null) s, if (e != null) e])
+            ListTile(leading: Icon(a.icon, color: a.color), title: Text(a.label), onTap: () => Navigator.pop(ctx, a)),
+        ]),
+      ),
+    );
+    picked?.onCommit();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = widget.startAction, e = widget.endAction;
@@ -114,6 +133,7 @@ class _SwipeRowState extends State<SwipeRow> with SingleTickerProviderStateMixin
           onHorizontalDragStart: _start,
           onHorizontalDragUpdate: _update,
           onHorizontalDragEnd: _end,
+          onLongPress: _menu,
           child: AnimatedBuilder(
             animation: _x,
             child: widget.child,
@@ -172,7 +192,7 @@ class _ActionMark extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 6),
-      Text(action.label, style: TextStyle(color: fg, fontSize: AppType.caption, fontWeight: FontWeight.w800)),
+      Text(action.label, style: TextStyle(color: fg, fontSize: AppType.caption, fontWeight: FontWeight.w700)),
     ]);
   }
 }

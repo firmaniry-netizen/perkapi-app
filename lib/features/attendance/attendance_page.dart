@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/page_glow.dart';
@@ -117,7 +118,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           ),
                         ]),
                         const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
+                        IosSelectField<String>(
                           value: _eventId,
                           isExpanded: true,
                           decoration: const InputDecoration(labelText: 'Pilih event'),
@@ -153,7 +154,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                 Text('${(h['events'] as Map?)?['title'] ?? 'Event'}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontWeight: FontWeight.w800)),
+                                    style: const TextStyle(fontWeight: FontWeight.w700)),
                                 const SizedBox(height: 2),
                                 Text(fmtValue(h['checked_in_at']),
                                     style: TextStyle(fontSize: AppType.small, color: Theme.of(context).colorScheme.onSurfaceVariant)),

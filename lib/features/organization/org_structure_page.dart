@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -56,7 +57,7 @@ class OrgPhoto extends StatelessWidget {
     final fallback = Container(
       color: AppColors.navy,
       alignment: Alignment.center,
-      child: Text(initial, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: circle ? size * 0.42 : 72)),
+      child: Text(initial, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: circle ? size * 0.42 : 72)),
     );
     final img = url == null
         ? fallback
@@ -134,7 +135,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
       builder: (_) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(m.name, style: const TextStyle(fontSize: AppType.heading, fontWeight: FontWeight.w900)),
+          Text(m.name, style: const TextStyle(fontSize: AppType.heading, fontWeight: FontWeight.w700)),
           const SizedBox(height: 2),
           Text(m.position, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.navyAction)),
           const SizedBox(height: 12),
@@ -195,7 +196,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
               child: Row(children: [
                 Container(width: 4, height: 18, decoration: BoxDecoration(color: AppColors.navyAction, borderRadius: BorderRadius.circular(4))),
                 const SizedBox(width: 8),
-                Text(e.key, style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900)),
+                Text(e.key, style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w700)),
               ]),
             ),
             for (final m in e.value)
@@ -210,7 +211,7 @@ class _OrgStructurePageState extends State<OrgStructurePage> {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(m.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                          Text(m.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                           const SizedBox(height: 2),
                           Text(m.position, style: TextStyle(color: sc.onSurfaceVariant, height: 1.3)),
                           if (!m.isActive) const Text('Nonaktif', style: TextStyle(fontSize: AppType.caption, color: AppColors.amber, fontWeight: FontWeight.w700)),
@@ -295,11 +296,11 @@ class _LeaderCard extends StatelessWidget {
           onTap: () => onTap(m),
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(28),
               boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.35), blurRadius: 28, offset: const Offset(0, 14))],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(28),
               child: Stack(fit: StackFit.expand, children: [
                 OrgPhoto(name: m.name, path: m.photoPath, circle: false),
                 const DecoratedBox(
@@ -312,9 +313,9 @@ class _LeaderCard extends StatelessWidget {
                   right: 16,
                   bottom: 16,
                   child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(m.position.toUpperCase(), style: const TextStyle(color: AppColors.gold, fontSize: AppType.caption, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    Text(m.position.toUpperCase(), style: const TextStyle(color: AppColors.gold, fontSize: AppType.caption, fontWeight: FontWeight.w700, letterSpacing: 1)),
                     const SizedBox(height: 3),
-                    Text(m.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w900, height: 1.15)),
+                    Text(m.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w700, height: 1.15)),
                   ]),
                 ),
               ]),
@@ -431,7 +432,7 @@ class _EditSheetState extends State<_EditSheet> {
   Future<void> _delete() async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus pengurus?'),
         content: Text('${widget.item!.name} akan dihapus dari struktur organisasi.'),
         actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')), FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Hapus'))],
@@ -468,7 +469,7 @@ class _EditSheetState extends State<_EditSheet> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(item == null ? 'Tambah pengurus' : 'Ubah pengurus', style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900)),
+          Text(item == null ? 'Tambah pengurus' : 'Ubah pengurus', style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w700)),
           const SizedBox(height: 14),
           Row(children: [
             _bytes != null

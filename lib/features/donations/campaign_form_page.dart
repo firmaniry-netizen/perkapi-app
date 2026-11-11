@@ -126,13 +126,13 @@ class _CampaignFormPageState extends State<CampaignFormPage> {
     final sc = Theme.of(context).colorScheme;
     final has = file != null || path != null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+      Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
       const SizedBox(height: 2),
       Text(hint, style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
       const SizedBox(height: 8),
       Row(children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           child: SizedBox(
             width: contain ? 72 : 120,
             height: 72,

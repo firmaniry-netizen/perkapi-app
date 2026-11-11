@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/widgets/ios_pickers.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
@@ -80,13 +82,13 @@ class _CaseWorkPageState extends State<CaseWorkPage> {
         Container(
           width: 40,
           height: 40,
-          decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: AppColors.navy.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(14)),
           child: const Icon(PhFill.gavel, color: AppColors.navy, size: 22),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+            Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
             Text('${c.type}  •  ${c.court.isEmpty ? 'Pengadilan belum diisi' : c.court}',
                 maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
           ]),
@@ -191,7 +193,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
   Future<void> _delete(Map<String, dynamic> r) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => IosDialog(
         title: const Text('Hapus tahapan?'),
         content: Text('${r['title']}'),
         actions: [
@@ -219,7 +221,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
     final saved = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setD) => AlertDialog(
+        builder: (ctx, setD) => IosDialog(
           title: Text(r == null ? 'Tambah tahapan' : 'Ubah tahapan'),
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -285,11 +287,11 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
     final go = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setD) => AlertDialog(
+        builder: (ctx, setD) => IosDialog(
           title: const Text('Isi dari template'),
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SegmentedButton<bool>(
+              IosSegmentedButton<bool>(
                 segments: const [ButtonSegment(value: false, label: Text('Kepailitan')), ButtonSegment(value: true, label: Text('PKPU'))],
                 selected: {pkpu},
                 onSelectionChanged: (s) => setD(() => pkpu = s.first),
@@ -367,7 +369,7 @@ class _StagesTabState extends State<StagesTab> with AutomaticKeepAliveClientMixi
         if (_rows.isNotEmpty) ...[
           AppCard(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('$done dari ${_rows.length} tahapan selesai', style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text('$done dari ${_rows.length} tahapan selesai', style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -505,7 +507,7 @@ class _LettersTab extends StatelessWidget {
                 child: Icon(it.$2, color: AppColors.navy),
               ),
               const SizedBox(width: 14),
-              Expanded(child: Text(it.$3, style: const TextStyle(fontWeight: FontWeight.w800, height: 1.3))),
+              Expanded(child: Text(it.$3, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.3))),
               Icon(Ph.caretRight, color: sc.onSurfaceVariant),
             ]),
           ),

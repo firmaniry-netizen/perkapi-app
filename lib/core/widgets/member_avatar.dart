@@ -94,7 +94,7 @@ class _MemberAvatarState extends State<MemberAvatar> {
                 _initial,
                 style: TextStyle(
                   color: scheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   fontSize: widget.radius * 0.8,
                 ),
               ),

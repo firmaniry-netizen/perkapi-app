@@ -1,5 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_select.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/icon_badge.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -68,7 +70,7 @@ class _Box extends StatelessWidget {
             Row(children: [
               IconBadge(icon, size: 34),
               const SizedBox(width: 10),
-              Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+              Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
             ]),
             const SizedBox(height: 12),
             child,
@@ -279,8 +281,7 @@ class _EventRsvpSectionState extends State<EventRsvpSection> {
       child: _loading
           ? const SkeletonList()
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SegmentedButton<String>(
-                emptySelectionAllowed: true,
+              IosSegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'Hadir', label: Text('Hadir')),
                   ButtonSegment(value: 'Mungkin', label: Text('Mungkin')),
@@ -387,7 +388,7 @@ class _NoteShareSectionState extends State<NoteShareSection> {
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(
-                  child: DropdownButtonFormField<String>(
+                  child: IosSelectField<String>(
                     value: options.any((o) => o['id'] == _pick) ? _pick : null,
                     isExpanded: true,
                     decoration: const InputDecoration(labelText: 'Pilih anggota', isDense: true),

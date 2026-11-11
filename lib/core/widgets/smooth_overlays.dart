@@ -90,7 +90,7 @@ class _GlassSheetFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final solid = MediaQuery.highContrastOf(context);
-    const r = BorderRadius.vertical(top: Radius.circular(32));
+    const r = BorderRadius.vertical(top: Radius.circular(28));
     Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (handle)
         Center(

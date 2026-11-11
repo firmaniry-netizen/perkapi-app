@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 
@@ -110,7 +111,7 @@ Future<String?> showPinSetupDialog(BuildContext context) {
   return showSmoothDialog<String>(
     context: context,
     builder: (d) => StatefulBuilder(
-      builder: (d, setS) => AlertDialog(
+      builder: (d, setS) => IosDialog(
         title: const Text('Buat PIN aplikasi'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           TextField(
@@ -161,7 +162,7 @@ Future<bool> showPinConfirmDialog(BuildContext context) async {
   final ok = await showSmoothDialog<bool>(
     context: context,
     builder: (d) => StatefulBuilder(
-      builder: (d, setS) => AlertDialog(
+      builder: (d, setS) => IosDialog(
         title: const Text('Masukkan PIN saat ini'),
         content: TextField(
           controller: c,

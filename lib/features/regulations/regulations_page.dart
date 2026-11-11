@@ -128,7 +128,7 @@ class _RegulationsPageState extends State<RegulationsPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(p.$1, style: const TextStyle(fontWeight: FontWeight.w800)),
+                        Text(p.$1, style: const TextStyle(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 2),
                         Text(p.$2, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                       ]),
@@ -171,9 +171,9 @@ class _RegulationsPageState extends State<RegulationsPage> {
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(r.kind.label.toUpperCase(), style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: color)),
+              Text(r.kind.label.toUpperCase(), style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: color)),
               const SizedBox(height: 2),
-              Text(r.number, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead, height: 1.3)),
+              Text(r.number, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead, height: 1.3)),
               if (r.title.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text('tentang ${r.title}', style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),

@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -147,7 +148,7 @@ class _AvatarEditorState extends State<AvatarEditor> {
   Future<void> _remove() async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus foto profil?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),

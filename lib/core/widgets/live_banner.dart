@@ -82,7 +82,7 @@ class _Card extends StatelessWidget {
         direction: DismissDirection.up,
         onDismissed: (_) => LiveNotifier.instance.dismiss(),
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {
             LiveNotifier.instance.dismiss();
             final l = n.link;
@@ -92,7 +92,7 @@ class _Card extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(colors: [Color(0xFF16397A), AppColors.navyDeep]),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(color: color.withValues(alpha: 0.7), width: 1.2),
               boxShadow: [BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 24, offset: const Offset(0, 8))],
             ),
@@ -109,7 +109,7 @@ class _Card extends StatelessWidget {
                   Text(n.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: AppType.body, height: 1.25)),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: AppType.body, height: 1.25)),
                   if (n.body.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),

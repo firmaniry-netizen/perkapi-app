@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -82,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final c = TextEditingController();
     final pw = await showSmoothDialog<String>(
       context: context,
-      builder: (d) => AlertDialog(
+      builder: (d) => IosDialog(
         title: const Text('Ganti password'),
         content: TextField(
             controller: c, obscureText: true, decoration: const InputDecoration(labelText: 'Password baru (min. 8 karakter)')),
@@ -113,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (d) => StatefulBuilder(
-        builder: (d, set) => AlertDialog(
+        builder: (d, set) => IosDialog(
           title: const Text('Hapus akun?'),
           content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('Akun login dan data pribadi Anda (catatan pribadi, percakapan AI, notifikasi, foto profil) '
@@ -154,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _info(String title, String body) => showSmoothDialog<void>(
         context: context,
-        builder: (d) => AlertDialog(title: Text(title), content: Text(body), actions: [
+        builder: (d) => IosDialog(title: Text(title), content: Text(body), actions: [
           TextButton(onPressed: () => Navigator.pop(d), child: const Text('Tutup'))
         ]),
       );
@@ -205,8 +207,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 valueListenable: ThemeController.mode,
                 builder: (_, mode, __) => SizedBox(
                   width: double.infinity,
-                  child: SegmentedButton<ThemeMode>(
-                    showSelectedIcon: false,
+                  child: IosSegmentedButton<ThemeMode>(
                     segments: const [
                       ButtonSegment(value: ThemeMode.system, icon: Icon(Ph.circleHalf), label: Text('Sistem')),
                       ButtonSegment(value: ThemeMode.light, icon: Icon(Ph.sun), label: Text('Terang')),

@@ -67,7 +67,7 @@ class PrivacyPolicyPage extends StatelessWidget {
           const SizedBox(height: 8),
           for (final (title, body) in sections) ...[
             const SizedBox(height: 16),
-            Semantics(header: true, child: Text(title, style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            Semantics(header: true, child: Text(title, style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
             const SizedBox(height: 6),
             Text(body, style: t.textTheme.bodyMedium?.copyWith(height: 1.5)),
           ],

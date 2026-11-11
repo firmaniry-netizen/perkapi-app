@@ -45,7 +45,7 @@ class OrganizationProfilePage extends StatelessWidget {
       ]),
     );
     if (uri == null) return row;
-    return InkWell(borderRadius: BorderRadius.circular(12), onTap: () => _open(context, uri), child: row);
+    return InkWell(borderRadius: BorderRadius.circular(14), onTap: () => _open(context, uri), child: row);
   }
 
   @override
@@ -80,7 +80,7 @@ class OrganizationProfilePage extends StatelessWidget {
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(AppConstants.appName, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: AppType.heading, letterSpacing: 0.4)),
+                      Text(AppConstants.appName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.heading, letterSpacing: 0.4)),
                       const SizedBox(height: 2),
                       Text(OrgProfile.fullName.isNotEmpty ? OrgProfile.fullName : AppConstants.appSubtitle, style: TextStyle(height: 1.35, color: sc.onSurfaceVariant)),
                       if (OrgProfile.founded.isNotEmpty) ...[
@@ -102,7 +102,7 @@ class OrganizationProfilePage extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Struktur Organisasi', style: TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                    Text('Struktur Organisasi', style: TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                     SizedBox(height: 2),
                     Text('Susunan pengurus lengkap dengan foto', style: TextStyle(fontSize: AppType.small)),
                   ]),

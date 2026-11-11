@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/app_constants.dart';
@@ -36,6 +37,10 @@ class _PerkapiAppState extends State<PerkapiApp> {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: mode,
+        // Bahasa Indonesia untuk teks bawaan sistem (menu salin/tempel, kalender, label aksesibilitas).
+        locale: const Locale('id'),
+        supportedLocales: const [Locale('id'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: _router,
         scrollBehavior: const _SmoothScroll(),
         builder: (context, child) => LiveBanner(router: _router, child: child ?? const SizedBox.shrink()),

@@ -120,7 +120,7 @@ class Pill extends StatelessWidget {
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (icon != null) ...[Icon(icon, size: 13, color: fg), const SizedBox(width: 4)],
-        Text(label, style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, color: fg)),
+        Text(label, style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, color: fg)),
       ]),
     );
   }
@@ -164,7 +164,7 @@ class CampaignCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(c.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w800, height: 1.25)),
+                  style: const TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w700, height: 1.25)),
               const SizedBox(height: 12),
               if ((c.target ?? 0) > 0) ...[
                 DonationProgress(value: c.progress),
@@ -176,7 +176,7 @@ class CampaignCard extends StatelessWidget {
                     Text('Terkumpul', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
                     const SizedBox(height: 2),
                     Text(rupiah(c.collected),
-                        style: TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w900, color: AppColors.onSoft(AppColors.emerald, dark: Theme.of(context).brightness == Brightness.dark))),
+                        style: TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w700, color: AppColors.onSoft(AppColors.emerald, dark: Theme.of(context).brightness == Brightness.dark))),
                     if ((c.target ?? 0) > 0)
                       Text('dari ${rupiah(c.target!)}', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
                   ]),

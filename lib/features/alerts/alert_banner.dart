@@ -39,7 +39,7 @@ class AlertBanner extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              color: s.color, fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                              color: s.color, fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                       if (list.length > 1)
                         Text('+${list.length - 1} peringatan lainnya',
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: AppType.caption)),

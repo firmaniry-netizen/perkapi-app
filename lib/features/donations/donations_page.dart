@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
@@ -47,14 +48,10 @@ class _DonationsPageState extends State<DonationsPage> {
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(title: const Text('Donasi')),
-      floatingActionButton: _manager
-          ? FloatingActionButton.extended(
-              onPressed: () => _open('/donations/new'),
-              icon: const Icon(Ph.plus),
-              label: const Text('Buat kampanye'),
-            )
-          : null,
+      // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+      appBar: GlassAppBar(title: const Text('Donasi'), actions: [
+        if (_manager) IconButton(tooltip: 'Buat kampanye', icon: const Icon(Ph.plus), onPressed: () => _open('/donations/new')),
+      ]),
       body: PageGlow(
         accent: AppColors.emerald,
         child: RefreshIndicator.adaptive(
@@ -73,13 +70,12 @@ class _DonationsPageState extends State<DonationsPage> {
                 ),
               ),
               const SizedBox(height: 14),
-              SegmentedButton<int>(
+              IosSegmentedButton<int>(
                 segments: const [
                   ButtonSegment(value: 0, label: Text('Kampanye'), icon: Icon(PhFill.megaphone)),
                   ButtonSegment(value: 1, label: Text('Donasi saya'), icon: Icon(Ph.fileText)),
                 ],
                 selected: {_tab},
-                showSelectedIcon: false,
                 onSelectionChanged: (s) => setState(() => _tab = s.first),
               ),
               const SizedBox(height: 12),
@@ -173,7 +169,7 @@ class _DonationsPageState extends State<DonationsPage> {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Total donasi diterima', style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),
-                  Text(rupiah(total), style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w900)),
+                  Text(rupiah(total), style: const TextStyle(fontSize: AppType.title, fontWeight: FontWeight.w700)),
                 ]),
               ),
               Text('${rows.length} kali', style: TextStyle(color: sc.onSurfaceVariant, fontWeight: FontWeight.w700)),
@@ -188,7 +184,7 @@ class _DonationsPageState extends State<DonationsPage> {
                   Expanded(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('${(r['donation_campaigns'] as Map?)?['title'] ?? 'Kampanye'}',
-                          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+                          maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                       const SizedBox(height: 3),
                       Text('${rupiah((r['amount'] as num?) ?? 0)} · ${FmtId.value(r['created_at'])}',
                           style: TextStyle(fontSize: AppType.caption, color: sc.onSurfaceVariant)),

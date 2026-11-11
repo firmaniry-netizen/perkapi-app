@@ -128,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                   dy: 56,
                   child: ClipRRect(
                   // Lembar login berbahan kaca cair: foto latar tampak samar di baliknya.
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   child: BackdropFilter(
                   filter: LiquidGlass.backdrop(28),
                   child: CustomPaint(
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: (dark ? AppColors.navySurface : AppColors.white).withValues(alpha: MediaQuery.highContrastOf(context) ? 1 : (dark ? 0.80 : 0.88)),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
@@ -192,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                     decoration: BoxDecoration(
                                       color: scheme.error.withValues(alpha: 0.10),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                     child: Row(children: [
                                       Icon(Ph.warningCircle, color: scheme.error, size: 18),

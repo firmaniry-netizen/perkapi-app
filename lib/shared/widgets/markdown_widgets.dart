@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 
 /// Penampil Markdown sederhana (tanpa paket tambahan).
@@ -17,7 +18,7 @@ class MarkdownView extends StatelessWidget {
       if (m.start > i) out.add(TextSpan(text: text.substring(i, m.start), style: base));
       final t = m.group(0)!;
       if (t.startsWith('**')) {
-        out.add(TextSpan(text: t.substring(2, t.length - 2), style: base.copyWith(fontWeight: FontWeight.w800)));
+        out.add(TextSpan(text: t.substring(2, t.length - 2), style: base.copyWith(fontWeight: FontWeight.w700)));
       } else if (t.startsWith('`')) {
         out.add(TextSpan(
             text: t.substring(1, t.length - 1),
@@ -51,7 +52,7 @@ class MarkdownView extends StatelessWidget {
         final lvl = h.group(1)!.length;
         final size = lvl == 1 ? 22.0 : (lvl == 2 ? 19.0 : 16.0);
         children.add(line(
-            Text.rich(TextSpan(children: _spans(h.group(2)!, base.copyWith(fontSize: size, fontWeight: FontWeight.w800)))),
+            Text.rich(TextSpan(children: _spans(h.group(2)!, base.copyWith(fontSize: size, fontWeight: FontWeight.w700)))),
             top: 10));
         continue;
       }
@@ -183,9 +184,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       Row(children: [
         Expanded(child: Text(widget.label, style: Theme.of(context).textTheme.labelLarge)),
         if (widget.enabled)
-          SegmentedButton<bool>(
-            showSelectedIcon: false,
-            style: const ButtonStyle(visualDensity: VisualDensity.compact),
+          IosSegmentedButton<bool>(
             segments: const [
               ButtonSegment(value: false, label: Text('Tulis')),
               ButtonSegment(value: true, label: Text('Pratinjau')),
@@ -216,7 +215,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: _c.text.trim().isEmpty ? const Text('-') : MarkdownView(_c.text),
         )

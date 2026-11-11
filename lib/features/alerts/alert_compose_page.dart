@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_select.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/widgets/ios_pickers.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -126,7 +128,7 @@ class _AlertComposePageState extends State<AlertComposePage> {
           const SizedBox(height: 16),
           Text('Tingkat', style: Theme.of(context).textTheme.labelLarge),
           const SizedBox(height: 8),
-          SegmentedButton<String>(
+          IosSegmentedButton<String>(
             segments: const [
               ButtonSegment(value: 'info', label: Text('Info'), icon: Icon(Ph.info)),
               ButtonSegment(
@@ -137,7 +139,7 @@ class _AlertComposePageState extends State<AlertComposePage> {
             onSelectionChanged: (s) => setState(() => _severity = s.first),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
+          IosSelectField<String>(
             value: _targetType,
             decoration: const InputDecoration(labelText: 'Kirim kepada'),
             items: [
@@ -152,7 +154,7 @@ class _AlertComposePageState extends State<AlertComposePage> {
           ),
           if (_targetType != 'all') ...[
             const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
+            IosSelectField<String>(
               value: _options.any((o) => o['id'] == _targetId) ? _targetId : null,
               isExpanded: true,
               decoration: InputDecoration(labelText: _targets[_targetType]),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
@@ -57,7 +59,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
         : 'anggota cabang ${_branches.firstWhere((b) => b['id'] == _branch, orElse: () => {'name': ''})['name']}';
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Kirim pengumuman?'),
         content: Text('Pesan akan dikirim ke $target dan tidak bisa ditarik kembali.'),
         actions: [
@@ -93,7 +95,7 @@ class _BroadcastPageState extends State<BroadcastPage> {
       body: PageGlow(accent: AppColors.violet, child: ListView(padding: barPad(context, const EdgeInsets.all(20)), children: [
         Reveal(index: 0, dy: -12, child: ScreenHero(title: 'Pengumuman Massal', subtitle: 'Kirim pesan ke seluruh anggota atau satu cabang', icon: PhFill.megaphone, accent: AppColors.violet)),
         const SizedBox(height: 16),
-        DropdownButtonFormField<String?>(
+        IosSelectField<String?>(
           initialValue: _branch,
           decoration: const InputDecoration(labelText: 'Tujuan'),
           items: [

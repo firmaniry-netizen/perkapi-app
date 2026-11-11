@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/services/access_service.dart';
@@ -55,6 +56,19 @@ class AppRoutes {
 GoRoute _list(String path, String moduleId) =>
     GoRoute(path: path, builder: (_, __) => ModuleListPage(moduleId: moduleId));
 
+/// Halaman tab utama: berganti dengan cross-fade singkat, bukan geser. Geser hanya untuk masuk lebih dalam,
+/// seperti tab bar iOS.
+GoRoute _tab(String path, Widget page) => GoRoute(
+      path: path,
+      pageBuilder: (_, s) => CustomTransitionPage<void>(
+        key: s.pageKey,
+        child: page,
+        transitionDuration: const Duration(milliseconds: 180),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: CurveTween(curve: Curves.easeOut).animate(a), child: child),
+      ),
+    );
+
 GoRouter buildRouter() {
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -81,12 +95,12 @@ GoRouter buildRouter() {
       ShellRoute(
         builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
         routes: [
-          GoRoute(path: AppRoutes.dashboard, builder: (_, __) => const DashboardPage()),
-          GoRoute(path: '/pocket-book', builder: (_, __) => const PocketBookPage()),
+          _tab(AppRoutes.dashboard, const DashboardPage()),
+          _tab('/pocket-book', const PocketBookPage()),
           GoRoute(
               path: '/pocket-book/:id',
               builder: (_, s) => ModuleFormPage(moduleId: 'notes', rowId: s.pathParameters['id'])),
-          GoRoute(path: '/organization-info', builder: (_, __) => const InfoPage()),
+          _tab('/organization-info', const InfoPage()),
           _list('/members', 'members'),
           _list('/events', 'events'),
           _list('/forum', 'forum'),
@@ -95,7 +109,7 @@ GoRouter buildRouter() {
           GoRoute(path: '/inbox', builder: (_, __) => const AlertsPage()),
           GoRoute(path: '/gallery', builder: (_, s) => GalleryPage(autoAdd: s.uri.queryParameters['add'] == '1', openPostId: s.uri.queryParameters['post'])),
           GoRoute(path: '/ahu', builder: (_, __) => const AhuPage()),
-          GoRoute(path: '/profession', builder: (_, __) => const ProfessionPage()),
+          _tab('/profession', const ProfessionPage()),
           GoRoute(path: '/regulations', builder: (_, __) => const RegulationsPage()),
           GoRoute(path: '/profession/registration', builder: (_, __) => const AhuRegistrationGuidePage()),
           GoRoute(path: '/profession/renewal', builder: (_, __) => const AhuRenewalPage()),

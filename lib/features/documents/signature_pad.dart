@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/widgets/smooth_overlays.dart';
 
 /// Kanvas tanda tangan: coretan jari dikonversi ke gambar PNG (latar putih, tinta hitam).
@@ -34,7 +35,7 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return IosDialog(
       title: const Text('Tanda tangan'),
       content: SizedBox(
         width: 320,
@@ -45,9 +46,9 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
             onPanStart: (d) => setState(() => _strokes.add([d.localPosition])),
             onPanUpdate: (d) => setState(() => _strokes.last.add(d.localPosition)),
             child: Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.black26)),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.black26)),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: CustomPaint(painter: _SigPainter(_strokes), size: Size.infinite),
               ),
             ),

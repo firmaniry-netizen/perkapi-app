@@ -17,7 +17,7 @@ class PocketBookPage extends StatelessWidget {
             title: const Text('Buku Saku'),
             bottom: TabBar(
               indicatorPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              labelStyle: const TextStyle(fontWeight: FontWeight.w800),
+              labelStyle: const TextStyle(fontWeight: FontWeight.w700),
               tabs: const [
                 Tab(height: 48, text: 'Buku Saku Saya'),
                 Tab(height: 48, text: 'Organisasi'),

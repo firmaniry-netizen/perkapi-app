@@ -54,7 +54,7 @@ class GuideList extends StatelessWidget {
             SizedBox(
               width: 26,
               child: numbered
-                  ? Text('${i + 1}.', style: TextStyle(fontWeight: FontWeight.w800, color: sc.primary))
+                  ? Text('${i + 1}.', style: TextStyle(fontWeight: FontWeight.w700, color: sc.primary))
                   : Padding(
                       padding: const EdgeInsets.only(top: 7, left: 4),
                       child: Container(width: 6, height: 6, decoration: BoxDecoration(color: sc.primary, shape: BoxShape.circle)),
@@ -89,7 +89,7 @@ class _GuideChecklistState extends State<GuideChecklist> {
       ),
       for (var i = 0; i < widget.items.length; i++)
         InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           onTap: () => setState(() => _done[i] = !_done[i]),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),

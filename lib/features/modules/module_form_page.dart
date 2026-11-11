@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/widgets/ios_pickers.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
@@ -110,7 +112,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
   Future<void> _delete(ModuleDef mod) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus data?'),
         content: const Text('Tindakan ini tidak dapat dibatalkan.'),
         actions: [
@@ -152,7 +154,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
           onChanged: enabled ? (b) => setState(() => _v[f.key] = b) : null,
         );
       case FieldType.select:
-        return DropdownButtonFormField<String>(
+        return IosSelectField<String>(
           value: f.options.contains(value) ? value as String : null,
           decoration: InputDecoration(labelText: f.label),
           items: [for (final o in f.options) DropdownMenuItem(value: o, child: Text(o))],
@@ -162,7 +164,7 @@ class _ModuleFormPageState extends State<ModuleFormPage> {
       case FieldType.lookup:
         final opts = _lookups[f.key] ?? [];
         final ids = opts.map((e) => e['id']).toSet();
-        return DropdownButtonFormField<String>(
+        return IosSelectField<String>(
           value: ids.contains(value) ? value as String : null,
           isExpanded: true,
           decoration: InputDecoration(labelText: f.label),

@@ -48,7 +48,7 @@ class _PartnerLogosState extends State<PartnerLogos> {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
             child: Wrap(
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,

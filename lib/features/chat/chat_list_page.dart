@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -106,8 +107,10 @@ class _ChatListPageState extends State<ChatListPage> {
     // Isi digulir DI BELAKANG bar kaca (iOS): kolom cari ikut bergulir sebagai baris pertama.
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(title: const Text('Chat')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: _new, icon: const Icon(Ph.pencilSimple), label: const Text('Chat baru')),
+      // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+      appBar: GlassAppBar(title: const Text('Chat'), actions: [
+        IconButton(tooltip: 'Chat baru', icon: const Icon(Ph.notePencil), onPressed: _new),
+      ]),
       body: PageGlow(
         accent: AppColors.violet,
         child: RefreshIndicator.adaptive(
@@ -179,7 +182,7 @@ class _ChatListPageState extends State<ChatListPage> {
       if (people.isNotEmpty) ...[
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-          child: Text('Anggota lain', style: TextStyle(fontWeight: FontWeight.w800, color: scheme.onSurfaceVariant)),
+          child: Text('Anggota lain', style: TextStyle(fontWeight: FontWeight.w700, color: scheme.onSurfaceVariant)),
         ),
         InsetGroup(children: [
           for (final m in people)
@@ -207,7 +210,7 @@ class _ChatListPageState extends State<ChatListPage> {
         leading: r['kind'] == 'group'
             ? const IconBadge(Ph.usersThree, size: 46)
             : MemberAvatar(name: '${r['title']}', radius: 23),
-        title: Text('${r['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: unread > 0 ? FontWeight.w900 : FontWeight.w700)),
+        title: Text('${r['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w700)),
         subtitle: Text('${r['last_body'] ?? 'Belum ada pesan'}', maxLines: 1, overflow: TextOverflow.ellipsis),
         trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(chatTimeLabel(DateTime.tryParse('${r['last_at']}')), style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant)),
@@ -216,7 +219,7 @@ class _ChatListPageState extends State<ChatListPage> {
               margin: const EdgeInsets.only(top: 4),
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
               decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(10)),
-              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800)),
+              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
             ),
         ]),
       ),
@@ -290,7 +293,7 @@ class _NewChatPageState extends State<NewChatPage> {
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: SegmentedButton<bool>(
+          child: IosSegmentedButton<bool>(
             segments: const [ButtonSegment(value: false, label: Text('Pribadi')), ButtonSegment(value: true, label: Text('Grup'))],
             selected: {_group},
             onSelectionChanged: (s) => setState(() => _group = s.first),

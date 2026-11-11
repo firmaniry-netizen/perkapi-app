@@ -2,13 +2,16 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_tokens.dart';
+import '../../core/services/access_service.dart';
 import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/motion_physics.dart';
+import '../../core/widgets/smooth_overlays.dart';
 
 class BurstAction {
   const BurstAction(this.label, this.icon, this.route, {this.color = AppColors.navyAction});
@@ -18,7 +21,7 @@ class BurstAction {
   final Color color;
 }
 
-/// Menu aksi cepat yang "mekar" dari tombol merah di tengah navigasi.
+/// Menu aksi cepat yang "mekar" dari tombol "+" pemicunya (lihat [openQuickActions]).
 ///
 /// Gerak:
 /// - Latar: blur 0 -> 10 + tirai dongker 0 -> 62%, 420 ms ease-out.
@@ -109,7 +112,9 @@ class _ActionBurst extends StatelessWidget {
     final cellW = gridW / cols;
     final rowH = 92 + ts.scale(AppType.caption) * 2.4;
     final left = (size.width - gridW) / 2;
-    final gridBottom = origin.dy - 52;
+    // Pemicu di paruh atas layar (tombol "+" di bar atas): grid mekar ke bawahnya. Di paruh bawah: ke atasnya.
+    final below = origin.dy < size.height / 2;
+    final gridBottom = below ? origin.dy + 52 + 44 + rows * rowH : origin.dy - 52;
 
     Offset target(int i) {
       final r = i ~/ cols, c = i % cols;
@@ -255,4 +260,37 @@ class _Bubble extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Membuka menu aksi cepat dari tombol "+": lembar bawah berisi daftar polos, seperti menu aksi iOS.
+/// Isinya aksi yang sering dipakai, ditambah aksi pengurus sesuai hak akses.
+Future<void> openQuickActions(BuildContext context) async {
+  final a = Access.instance;
+  final actions = <BurstAction>[
+    const BurstAction('Kartu & QR', Ph.qrCode, '/member-card'),
+    const BurstAction('SOS & Keamanan', PhFill.shield, '/safety', color: AppColors.red),
+    const BurstAction('Tulis berita', Ph.notePencil, '/gallery?add=1'),
+    const BurstAction('Catatan baru', Ph.filePlus, '/module/notes/new'),
+    const BurstAction('Tanya AI', Ph.sparkle, '/ai'),
+    const BurstAction('Data AHU', PhFill.sealCheck, '/ahu'),
+    if (a.can('manage_event')) const BurstAction('Buat agenda', Ph.calendarPlus, '/module/events/new'),
+    if (a.can('manage_alert')) const BurstAction('Kirim peringatan', PhFill.megaphone, '/alerts/new', color: AppColors.red),
+    if (a.can('manage_member')) const BurstAction('Verifikasi QR', PhFill.shieldCheck, '/verify-member'),
+  ];
+  final route = await showSmoothSheet<String>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      top: false,
+      child: ListView(shrinkWrap: true, children: [
+        for (final x in actions)
+          ListTile(
+            // Hanya aksi bahaya (merah) yang berwarna; sisanya mengikuti warna ikon daftar.
+            leading: Icon(x.icon, color: x.color == AppColors.red ? AppColors.red : null),
+            title: Text(x.label),
+            onTap: () => Navigator.pop(ctx, x.route),
+          ),
+      ]),
+    ),
+  );
+  if (route != null && context.mounted) context.push(route);
 }

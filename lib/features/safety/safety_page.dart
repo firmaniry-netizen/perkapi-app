@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/ui_kit.dart';
@@ -55,7 +56,7 @@ class _SafetyPageState extends State<SafetyPage> {
     final note = TextEditingController();
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Kirim SOS?'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Admin utama akan diberi tahu dan dapat melihat lokasi Anda sampai SOS dibatalkan.'),
@@ -125,7 +126,7 @@ class _SafetyPageState extends State<SafetyPage> {
               ? Column(children: [
                   const Icon(Ph.warningOctagon, size: 64, color: AppColors.red),
                   const SizedBox(height: 8),
-                  const Text('SOS aktif. Admin melihat lokasi Anda.', style: TextStyle(fontWeight: FontWeight.w800)),
+                  const Text('SOS aktif. Admin melihat lokasi Anda.', style: TextStyle(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   OutlinedButton(onPressed: _busy ? null : () => _run(_svc.cancelSos), child: const Text('Batalkan SOS, saya aman')),
                 ])
@@ -140,7 +141,7 @@ class _SafetyPageState extends State<SafetyPage> {
                       boxShadow: [BoxShadow(color: AppColors.red.withValues(alpha: 0.45), blurRadius: 32, spreadRadius: 4)],
                     ),
                     alignment: Alignment.center,
-                    child: const Text('SOS', style: TextStyle(color: Colors.white, fontSize: AppType.hero, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                    child: const Text('SOS', style: TextStyle(color: Colors.white, fontSize: AppType.hero, fontWeight: FontWeight.w700, letterSpacing: 2)),
                   ),
                 ),
         ),

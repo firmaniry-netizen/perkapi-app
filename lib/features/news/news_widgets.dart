@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/widgets/liquid_glass.dart';
@@ -55,14 +56,14 @@ class NewsPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: color ?? newsAlbumColor(text), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: color ?? newsAlbumColor(text), borderRadius: BorderRadius.circular(14)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           if (icon != null) ...[Icon(icon, size: 12, color: Colors.white), const SizedBox(width: 4)],
           Flexible(
             child: Text(text.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.6)),
+                style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
           ),
         ]),
       );
@@ -101,7 +102,7 @@ class GlassCircleButton extends StatelessWidget {
 Future<bool> confirmDeleteNews(BuildContext context, NewsPost p) async {
   final ok = await showSmoothDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
+    builder: (ctx) => IosDialog(
       icon: Container(
         width: 52,
         height: 52,
@@ -202,7 +203,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(28),
           boxShadow: [BoxShadow(color: AppColors.navy.withValues(alpha: 0.26), blurRadius: 24, offset: const Offset(0, 12))],
         ),
         child: Stack(fit: StackFit.expand, children: [
@@ -233,9 +234,9 @@ class _NewsCarouselState extends State<NewsCarousel> {
                 const SizedBox(width: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                  decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(14)),
                   child: const Text('BARU',
-                      style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                      style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
                 ),
               ],
             ]),
@@ -258,7 +259,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
               Text(p.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w800, height: 1.25)),
+                  style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w700, height: 1.25)),
               const SizedBox(height: 8),
               Row(children: [
                 const Icon(Ph.clock, size: 14, color: Color(0xCCFFFFFF)),

@@ -137,8 +137,8 @@ class _AiPageState extends State<AiPage> {
                         decoration: BoxDecoration(
                           color: m.fromUser ? (dark ? AppColors.navyAction : AppColors.navy) : scheme.surface,
                           borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(22),
-                            topRight: const Radius.circular(22),
+                            topLeft: const Radius.circular(20),
+                            topRight: const Radius.circular(20),
                             bottomLeft: Radius.circular(m.fromUser ? 22 : 6),
                             bottomRight: Radius.circular(m.fromUser ? 6 : 22),
                           ),

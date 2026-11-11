@@ -42,7 +42,7 @@ class ReportsPage extends StatelessWidget {
           accent: AppColors.red,
         ),
         const SizedBox(height: 22),
-        Text('Ekspor data', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Text('Ekspor data', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text('File CSV bisa dibuka di Excel. Hanya data yang boleh Anda lihat yang ikut terekspor.', style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.small)),
         const SizedBox(height: 10),

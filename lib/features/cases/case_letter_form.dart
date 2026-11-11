@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/widgets/ios_pickers.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -172,7 +173,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
         AppCard(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Terisi otomatis', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Terisi otomatis', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             Text(
               'Perkara ${c.number}\n${c.title}\nDebitur: ${c.debtorName}\n$role: ${_officer.text}'
@@ -247,7 +248,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
           AppCard(
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const Text('Ditujukan kepada', style: TextStyle(fontWeight: FontWeight.w800)),
+              const Text('Ditujukan kepada', style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Wrap(spacing: 8, children: [
                 if (c.creditors.isNotEmpty)
@@ -257,7 +258,7 @@ class _CaseLetterFormState extends State<CaseLetterForm> {
               ]),
               if (_to == _To.one) ...[
                 gap(),
-                DropdownButtonFormField<String>(
+                IosSelectField<String>(
                   value: _creditorId,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Pilih kreditur'),

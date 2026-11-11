@@ -3,14 +3,14 @@ import 'dart:ui' show FontFeature;
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
-import '../constants/app_photos.dart';
 import '../constants/app_tokens.dart';
+import 'large_title_presence.dart';
 import 'liquid_glass.dart';
 import 'motion.dart';
 
 bool _dark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
 
-/// Kartu solid: permukaan putih (terang) / dongker (gelap), garis tipis, bayangan lembut.
+/// Kartu polos gaya iOS: permukaan putih (terang) / abu gelap (gelap), tanpa garis tepi dan tanpa bayangan.
 /// [accentTop] menambah strip merah 3 px di tepi atas (dipakai hanya pada kartu anggota).
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -32,7 +32,7 @@ class AppCard extends StatelessWidget {
   final bool accentTop;
   final bool elevated;
 
-  /// Warna aksen untuk gradasi tipis di latar kartu (kiri atas ke permukaan polos). Opsional.
+  /// Tidak dipakai lagi (dulu gradasi tipis di latar kartu). Dipertahankan agar pemanggil tidak berubah.
   final Color? wash;
 
   @override
@@ -48,20 +48,7 @@ class AppCard extends StatelessWidget {
       );
     }
     Widget box = DecoratedBox(
-      decoration: BoxDecoration(
-        color: bg,
-        gradient: wash == null
-            ? null
-            : LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color.alphaBlend(wash!.withValues(alpha: dark ? 0.18 : 0.10), bg), bg],
-                stops: const [0, 0.7],
-              ),
-        borderRadius: r,
-        border: Border.all(color: dark ? AppColors.navyLine : AppColors.line.withValues(alpha: 0.7)),
-        boxShadow: (elevated && !dark) ? softShadow() : null,
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: r),
       child: accentTop
           ? ClipRRect(
               borderRadius: r,
@@ -135,7 +122,7 @@ class PrimaryButton extends StatelessWidget {
                           )
                         : Row(key: const ValueKey('label'), mainAxisSize: MainAxisSize.min, children: [
                             Text(label,
-                                style: const TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w800, letterSpacing: 0.1)),
+                                style: const TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w700, letterSpacing: 0.1)),
                             if (icon != null) ...[
                               const SizedBox(width: 8),
                               Icon(icon, color: Colors.white, size: 20),
@@ -161,7 +148,7 @@ class AppIconButton extends StatelessWidget {
   final String? tooltip;
   final int badge;
 
-  /// Berdenyut dua kali saat [badge] naik (hanya untuk lonceng peringatan).
+  /// Tidak dipakai lagi (dulu lonceng berdenyut saat [badge] naik). Dipertahankan agar pemanggil tidak berubah.
   final bool pulse;
 
   @override
@@ -175,7 +162,6 @@ class AppIconButton extends StatelessWidget {
         textColor: Colors.white,
         child: i,
       );
-      if (pulse) i = PulseTwice(value: badge, child: i);
     }
     // Kaca cair (iOS 26): tombol kaca kotak membulat, menggembung & berkilau saat ditekan.
     return Tooltip(
@@ -297,7 +283,7 @@ class Wordmark extends StatelessWidget {
     return Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
       Text('PERKAPI',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: c, fontSize: size, fontWeight: FontWeight.w800, letterSpacing: 1.2, height: 1)),
+              color: c, fontSize: size, fontWeight: FontWeight.w700, letterSpacing: 1.2, height: 1)),
       Padding(
         padding: EdgeInsets.only(left: size * 0.12, bottom: size * 0.06),
         child: Container(
@@ -401,7 +387,7 @@ class StatCard extends StatelessWidget {
                           color: scheme.onSurface,
                           fontSize: AppType.display,
                           height: 1.1,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
@@ -420,13 +406,11 @@ class StatCard extends StatelessWidget {
   }
 }
 
-/// Kepala layar dongker bergradasi (layar dalam): titik halus, timbangan keadilan, strip merah,
-/// judul + subjudul + chip. Teks putih di atas dongker (kontras tinggi).
+/// Kepala layar gaya iOS: judul besar polos, subjudul abu, dan chip keterangan. Tanpa foto dan tanpa latar.
+/// [icon], [accent], [heroTag] dan [photo] tidak dipakai lagi; dipertahankan agar pemanggil tidak berubah.
 class ScreenHero extends StatelessWidget {
   const ScreenHero({super.key, required this.title, this.subtitle, this.icon, this.chips = const [], this.accent, this.heroTag, this.photo});
   final String? heroTag;
-
-  /// Foto latar (images/foto/). Default: dipilih dari [icon] lewat [AppPhotos.forIcon].
   final String? photo;
   final String title;
   final String? subtitle;
@@ -434,134 +418,45 @@ class ScreenHero extends StatelessWidget {
   final List<(IconData, String)> chips;
   final Color? accent;
 
-  Widget _heroChip(IconData i) => Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
-        ),
-        child: Icon(i, size: 23, color: Colors.white),
-      );
-
   @override
   Widget build(BuildContext context) {
-    final tint = accent ?? AppColors.iosBlue;
-    return Container(
+    final scheme = Theme.of(context).colorScheme;
+    // Beri tahu bar atas bahwa halaman ini punya judul besar (diset setelah frame, bukan saat build).
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      final shown = largeTitleOn(route);
+      if (!shown.value) WidgetsBinding.instance.addPostFrameCallback((_) => shown.value = true);
+    }
+    return SizedBox(
       width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.hero),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.navyDeep, AppColors.navy, Color.lerp(const Color(0xFF1B4A9C), tint, 0.42)!],
-          stops: const [0, 0.5, 1],
-        ),
-        boxShadow: [BoxShadow(color: Color.lerp(AppColors.navy, tint, 0.35)!.withValues(alpha: 0.34), blurRadius: 30, offset: const Offset(0, 14))],
-      ),
-      child: Stack(children: [
-        // Foto kegiatan/tema modul + selimut dongker (kiri pekat agar judul terbaca, kanan foto lebih terlihat).
-        Positioned.fill(
-          child: Image.asset(
-            photo ?? AppPhotos.forIcon(icon),
-            fit: BoxFit.cover,
-            cacheWidth: 900,
-            filterQuality: FilterQuality.medium,
-            excludeFromSemantics: true,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-          ),
-        ),
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  AppColors.navyDeep.withValues(alpha: 0.92),
-                  Color.lerp(AppColors.navy, tint, 0.35)!.withValues(alpha: 0.72),
-                  tint.withValues(alpha: 0.45),
-                ],
-                stops: const [0, 0.55, 1],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 20,
-          bottom: 0,
-          child: Container(
-            width: 40,
-            height: 4,
-            decoration: const BoxDecoration(
-              color: AppColors.red,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-            ),
-          ),
-        ),
-        // Garis emas tipis di tepi atas: ciri yang sama dengan kartu anggota & situs resmi.
-        Positioned(
-          left: 0,
-          right: 0,
-          top: 0,
-          height: 1.5,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-                AppColors.gold.withValues(alpha: 0),
-                AppColors.gold.withValues(alpha: 0.75),
-                AppColors.gold.withValues(alpha: 0),
-              ]),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              if (icon != null) ...[
-                heroTag == null ? _heroChip(icon!) : Hero(tag: heroTag!, child: _heroChip(icon!)),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppType.headline(22, color: Colors.white)),
-                  const SizedBox(height: 2),
-                  if (subtitle != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 96),
-                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withValues(alpha: 0.80), fontSize: AppType.small, height: 1.3)),
-                    ),
-                ]),
-              ),
-            ]),
-            if (chips.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                for (final c in chips)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.13),
-                      borderRadius: BorderRadius.circular(AppRadius.chip),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-                    ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(c.$1, size: 14, color: Colors.white),
-                      const SizedBox(width: 6),
-                      Text(c.$2, style: const TextStyle(color: Colors.white, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
-                    ]),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppType.headline(34, color: scheme.onSurface, height: 1.15)),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(subtitle!, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.body, height: 1.35)),
+          ],
+          if (chips.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final c in chips)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: scheme.onSurface.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(AppRadius.chip),
                   ),
-              ]),
-            ],
-          ]),
-        ),
-      ]),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(c.$1, size: 14, color: scheme.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(c.$2, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.caption, fontWeight: FontWeight.w600)),
+                  ]),
+                ),
+            ]),
+          ],
+        ]),
+      ),
     );
   }
 }

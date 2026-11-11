@@ -4,9 +4,11 @@ import '../constants/phosphor_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/shell/action_burst.dart' show openQuickActions;
 import '../../features/shell/nav_items.dart' show isTopLevelRoute;
 
 import '../constants/app_colors.dart';
+import 'large_title_presence.dart';
 import 'liquid_glass.dart';
 
 /// Padding daftar untuk halaman dengan `extendBodyBehindAppBar: true`: tambahkan tinggi status bar + bar kaca
@@ -22,7 +24,7 @@ EdgeInsets barPad(BuildContext context, EdgeInsets p) {
 /// App bar ala iOS 26 (Liquid Glass): judul tetap di atas latar halaman, tombol kembali menjadi
 /// lingkaran kaca, dan semua aksi di kanan dikumpulkan dalam satu kapsul kaca.
 /// Pengganti langsung `AppBar(...)` untuk parameter yang dipakai aplikasi ini.
-class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
+class GlassAppBar extends StatefulWidget implements PreferredSizeWidget {
   const GlassAppBar({
     super.key,
     this.title,
@@ -50,11 +52,66 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 
   @override
+  State<GlassAppBar> createState() => _GlassAppBarState();
+}
+
+class _GlassAppBarState extends State<GlassAppBar> {
+  /// Seberapa jauh isi halaman sudah digulir: 0 = paling atas, 1 = lewat 44 px.
+  final _scrolled = ValueNotifier<double>(0);
+  ScrollNotificationObserverState? _observer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Scaffold meneruskan notifikasi gulir isi halaman lewat observer ini (cara yang sama dipakai AppBar bawaan).
+    _observer?.removeListener(_onScroll);
+    _observer = ScrollNotificationObserver.maybeOf(context);
+    _observer?.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _observer?.removeListener(_onScroll);
+    _scrolled.dispose();
+    super.dispose();
+  }
+
+  void _onScroll(ScrollNotification n) {
+    // Daftar utama halaman atau daftar di dalam tab (depth 0-1, vertikal); yang lebih dalam diabaikan.
+    if (n.depth > 1 || n.metrics.axis != Axis.vertical) return;
+    _scrolled.value = (n.metrics.extentBefore / 44).clamp(0.0, 1.0);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final actions = widget.actions;
+    final bottom = widget.bottom;
+    final leading = widget.leading;
+    final backgroundColor = widget.backgroundColor;
+    final foregroundColor = widget.foregroundColor;
+    final titleSpacing = widget.titleSpacing;
+    final centerTitle = widget.centerTitle;
+    final automaticallyImplyLeading = widget.automaticallyImplyLeading;
+    final still = MediaQuery.disableAnimationsOf(context);
+    final page = ModalRoute.of(context);
+    final large = page == null ? null : largeTitleOn(page);
+    // Halaman dengan judul besar di isinya: judul bar tersembunyi di puncak dan muncul saat digulir (seperti iOS).
+    // Halaman lain: judul sedikit lebih besar di puncak, lalu mengecil ke ukuran bar begitu digulir.
+    final Widget? title = widget.title == null
+        ? null
+        : ListenableBuilder(
+            listenable: Listenable.merge([_scrolled, if (large != null) large]),
+            child: widget.title,
+            builder: (_, child) {
+              final t = _scrolled.value;
+              if (large != null && large.value) return Opacity(opacity: t, child: child);
+              return Transform.scale(scale: still ? 1.0 : 1.12 - 0.12 * t, child: child);
+            },
+          );
     final theme = Theme.of(context);
     final fg = foregroundColor ?? theme.appBarTheme.foregroundColor ?? theme.colorScheme.onSurface;
     // Latar gelap kustom (mis. penampil foto): kaca bening agar menyatu dengan foto.
-    final onDark = backgroundColor != null && backgroundColor!.computeLuminance() < 0.3;
+    final onDark = backgroundColor != null && backgroundColor.computeLuminance() < 0.3;
     final route = ModalRoute.of(context);
     final canPop = route?.impliesAppBarDismissal ?? false;
     // Halaman yang dibuka langsung (context.go / notifikasi / tautan) tidak punya riwayat untuk "kembali".
@@ -82,9 +139,22 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    final acts = actions;
-    final List<Widget>? glassActions = (acts == null || acts.isEmpty)
-        ? acts
+    // Halaman tab utama (tanpa tombol kembali): tombol "+" aksi cepat di kanan bar.
+    var quick = false;
+    if (!canPop) {
+      try {
+        quick = isTopLevelRoute(GoRouterState.of(context).uri.path);
+      } catch (_) {}
+    }
+    final acts = <Widget>[
+      ...?actions,
+      if (quick)
+        Builder(
+          builder: (c) => IconButton(tooltip: 'Aksi cepat', icon: const Icon(Ph.plus), onPressed: () => openQuickActions(c)),
+        ),
+    ];
+    final List<Widget>? glassActions = acts.isEmpty
+        ? actions
         : [
             Center(
               child: Padding(

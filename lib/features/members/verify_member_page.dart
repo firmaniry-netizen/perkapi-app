@@ -141,7 +141,7 @@ class _VerifyMemberPageState extends State<VerifyMemberPage> {
                   const SizedBox(width: 8),
                   Text(_valid ? 'KARTU VALID' : 'KARTU TIDAK AKTIF / KEDALUWARSA',
                       style: TextStyle(
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: _valid ? AppColors.emerald : AppColors.amber)),
                 ]),
                 const SizedBox(height: 12),

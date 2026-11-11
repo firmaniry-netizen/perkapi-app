@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +15,6 @@ import 'document_signatures.dart';
 import '../../core/widgets/smooth_overlays.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/upload_helper.dart';
-import '../../core/widgets/nav_clearance.dart';
 import '../../core/widgets/glass_app_bar.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/constants/app_tokens.dart';
@@ -138,7 +138,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     final c = TextEditingController(text: initial);
     return showSmoothDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => IosDialog(
         title: const Text('Judul dokumen'),
         content: TextField(
           controller: c,
@@ -165,7 +165,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     Widget tile(IconData icon, String title, String sub, String kind) => ListTile(
           minVerticalPadding: 12,
           leading: IconBadge(icon),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
           subtitle: Text(sub),
           onTap: () {
             Navigator.pop(context);
@@ -302,7 +302,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     Navigator.of(context).pop(); // tutup indikator
     await showSmoothDialog<void>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Ringkasan AI'),
         content: SingleChildScrollView(child: SelectableText(summary ?? err ?? '')),
         actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Tutup'))],
@@ -313,7 +313,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
   Future<void> _delete(Map<String, dynamic> d) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus dokumen?'),
         content: const Text('Seluruh versi dokumen ini akan dihapus permanen.'),
         actions: [
@@ -373,6 +373,14 @@ class _DocumentsPageState extends State<DocumentsPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(title: const Text('Dokumen'), actions: [
+        // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+        IconButton(
+          tooltip: _busy ? 'Mengunggah...' : 'Upload',
+          onPressed: _busy ? null : _addSheet,
+          icon: _busy
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
+              : const Icon(Ph.plus),
+        ),
         if (canWrite)
           IconButton(
             onPressed: _busy ? null : _reindexAll,
@@ -380,16 +388,6 @@ class _DocumentsPageState extends State<DocumentsPage> {
             tooltip: 'Indeks isi PDF (agar bisa dicari)',
           ),
       ]),
-      // Dibungkus NavClearance: tanpa ini tombol tertimpa bar navigasi mengambang dan tidak terlihat.
-      floatingActionButton: NavClearance(
-        child: FloatingActionButton.extended(
-          onPressed: _busy ? null : _addSheet,
-          icon: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
-              : const Icon(Ph.clipboardText),
-          label: Text(_busy ? 'Mengunggah...' : 'Upload'),
-        ),
-      ),
       body: PageGlow(accent: AppColors.sky, child: Column(children: [
         // bar kaca di atas: isi mulai tepat di bawahnya (status bar + judul)
         SizedBox(height: MediaQuery.paddingOf(context).top),
@@ -464,7 +462,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                                     Text('${d['title'] ?? d['file_path']}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                                        style: const TextStyle(fontWeight: FontWeight.w700)),
                                     const SizedBox(height: 3),
                                     Text('v${d['version'] ?? 1} • ${fmtValue(d['created_at'])}',
                                         style: TextStyle(fontSize: AppType.small, color: sc.onSurfaceVariant)),
@@ -543,7 +541,7 @@ class _DocSheetState extends State<_DocSheet> {
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
         child: ListView(padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), shrinkWrap: true, children: [
           Text('${d['title'] ?? d['file_path']}',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Text('Versi saat ini: v${d['version'] ?? 1} • ${_size(d['size_bytes'])}'),
           const SizedBox(height: 12),

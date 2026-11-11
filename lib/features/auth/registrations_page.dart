@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_select.dart';
+import '../../core/widgets/ios_segmented.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -85,7 +88,7 @@ class _RegistrationsPageState extends State<RegistrationsPage> {
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
           child: SizedBox(
             width: double.infinity,
-            child: SegmentedButton<String>(
+            child: IosSegmentedButton<String>(
               segments: const [
                 ButtonSegment(value: 'pending', label: Text('Menunggu'), icon: Icon(Ph.hourglass)),
                 ButtonSegment(value: 'rejected', label: Text('Ditolak'), icon: Icon(Ph.prohibit)),
@@ -218,13 +221,13 @@ class _ApproveDialogState extends State<_ApproveDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return IosDialog(
       title: const Text('Setujui pendaftaran'),
       content: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(widget.name),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
+          IosSelectField<String>(
             value: _role,
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Role'),
@@ -271,7 +274,7 @@ class _RejectDialogState extends State<_RejectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return IosDialog(
       title: const Text('Tolak pendaftaran'),
       content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(widget.name),

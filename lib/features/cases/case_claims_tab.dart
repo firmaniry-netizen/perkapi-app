@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/constants/phosphor_icons.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -88,12 +90,12 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
     final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setD) => AlertDialog(
+        builder: (ctx, setD) => IosDialog(
           title: Text(r == null ? 'Tambah tagihan' : 'Ubah tagihan'),
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               if (creditors.isNotEmpty) ...[
-                DropdownButtonFormField<String?>(
+                IosSelectField<String?>(
                   value: creditors.any((c) => c['id'] == creditorId) ? creditorId : null,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Pilih dari daftar kreditur'),
@@ -110,7 +112,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
               ],
               TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Nama kreditur')),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              IosSelectField<String>(
                 value: type,
                 decoration: const InputDecoration(labelText: 'Jenis tagihan'),
                 items: [for (final t in _types) DropdownMenuItem(value: t, child: Text(t))],
@@ -119,7 +121,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
               const SizedBox(height: 12),
               TextField(controller: amount, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Jumlah tagihan diajukan (Rp)')),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              IosSelectField<String>(
                 value: status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: [for (final s in _statuses) DropdownMenuItem(value: s, child: Text(s))],
@@ -350,7 +352,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
               Text(label, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.caption, fontWeight: FontWeight.w600)),
             ]),
             const SizedBox(height: 3),
-            Text(rp(v), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: AppType.body)),
+            Text(rp(v), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: AppType.body)),
           ]),
         );
     return Container(
@@ -363,7 +365,7 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('${_rows.length} tagihan  •  total diajukan', style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.small)),
         const SizedBox(height: 4),
-        Text(rp(total), style: const TextStyle(color: Colors.white, fontSize: AppType.display, fontWeight: FontWeight.w800)),
+        Text(rp(total), style: const TextStyle(color: Colors.white, fontSize: AppType.display, fontWeight: FontWeight.w700)),
         const SizedBox(height: 14),
         Row(children: [cell('Diakui', dia, const Color(0xFF5CE08A)), cell('Bersyarat', bers, const Color(0xFFFFC857))]),
         const SizedBox(height: 10),
@@ -390,17 +392,17 @@ class _ClaimsTabState extends State<ClaimsTab> with AutomaticKeepAliveClientMixi
       onTap: _canWrite ? () => _edit(r) : null,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Text('${r['creditor_name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, height: 1.25))),
+          Expanded(child: Text('${r['creditor_name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.25))),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.chip), border: Border.all(color: c.withValues(alpha: 0.35))),
-            child: Text(st, style: TextStyle(color: c, fontWeight: FontWeight.w800, fontSize: AppType.caption)),
+            child: Text(st, style: TextStyle(color: c, fontWeight: FontWeight.w700, fontSize: AppType.caption)),
           ),
         ]),
         const SizedBox(height: 8),
         Row(children: [
-          Text(rp(amount), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+          Text(rp(amount), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
           if (showRec) Text('   diakui ${rp(numOf(r['recognized_amount']))}', style: TextStyle(fontSize: AppType.small, fontWeight: FontWeight.w700, color: c)),
           const Spacer(),
           Text('${r['claim_type']}', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: sc.onSurfaceVariant)),

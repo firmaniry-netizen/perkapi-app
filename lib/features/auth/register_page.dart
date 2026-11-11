@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_select.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:go_router/go_router.dart';
 
@@ -114,7 +115,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: dark ? AppColors.navySurface : AppColors.white,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                     ),
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
@@ -202,7 +203,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         if (_branches.isNotEmpty) ...[
           const SizedBox(height: 14),
-          DropdownButtonFormField<String>(
+          IosSelectField<String>(
             value: _branchId,
             isExpanded: true,
             decoration: const InputDecoration(

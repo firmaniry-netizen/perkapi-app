@@ -84,7 +84,7 @@ class ProfessionPage extends StatelessWidget {
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(entries[i].$2, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                            Text(entries[i].$2, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                             const SizedBox(height: 3),
                             Text(entries[i].$3, style: TextStyle(fontSize: AppType.small, height: 1.35, color: sc.onSurfaceVariant)),
                           ]),
@@ -234,7 +234,7 @@ class AhuRenewalPage extends StatelessWidget {
             if (until == null) {
               return AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Masa berlaku Anda belum diketahui', style: TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                  const Text('Masa berlaku Anda belum diketahui', style: TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                   const SizedBox(height: 6),
                   Text('Isi tanggal terbit atau tanggal berlaku di Data AHU Saya agar hitung mundur muncul di sini.',
                       style: TextStyle(height: 1.4, color: sc.onSurfaceVariant)),
@@ -395,7 +395,7 @@ Tanggal efektif pindah : ...
           const SizedBox(height: 12),
           Text('Disampaikan kepada: $to', style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35)),
           const SizedBox(height: 12),
-          const Text('Isi paling sedikit', style: TextStyle(fontWeight: FontWeight.w800)),
+          const Text('Isi paling sedikit', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           GuideList(contents),
           const SizedBox(height: 16),

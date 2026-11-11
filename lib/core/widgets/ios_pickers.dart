@@ -1,4 +1,6 @@
-import 'package:flutter/cupertino.dart' show CupertinoDatePicker, CupertinoDatePickerMode, DatePickerDateOrder;
+import 'package:flutter/cupertino.dart'
+    show CupertinoDatePicker, CupertinoDatePickerMode, CupertinoLocalizations, DatePickerDateOrder, DefaultCupertinoLocalizations;
+import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/material.dart';
 
 import 'smooth_overlays.dart';
@@ -28,13 +30,17 @@ Future<DateTime?> showIosDatePicker({
       cancelText: cancelText ?? 'Batal',
       confirmText: confirmText ?? 'Pilih',
       read: () => value,
-      picker: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.date,
-        dateOrder: DatePickerDateOrder.dmy,
-        initialDateTime: value,
-        minimumDate: first,
-        maximumDate: last,
-        onDateTimeChanged: (d) => value = DateUtils.dateOnly(d),
+      picker: Localizations.override(
+        context: context,
+        delegates: const [_IdMonthsDelegate()],
+        child: CupertinoDatePicker(
+          mode: CupertinoDatePickerMode.date,
+          dateOrder: DatePickerDateOrder.dmy,
+          initialDateTime: value,
+          minimumDate: first,
+          maximumDate: last,
+          onDateTimeChanged: (d) => value = DateUtils.dateOnly(d),
+        ),
       ),
     ),
   );
@@ -103,7 +109,7 @@ class _PickerSheet<T> extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, read()),
-              child: Text(confirmText, style: const TextStyle(fontWeight: FontWeight.w800)),
+              child: Text(confirmText, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ]),
         ),
@@ -111,4 +117,33 @@ class _PickerSheet<T> extends StatelessWidget {
       ]),
     );
   }
+}
+
+/// Nama bulan bahasa Indonesia untuk roda tanggal. Aplikasi belum memasang paket lokalisasi penuh,
+/// jadi hanya nama bulan yang diganti; teks lain memakai bawaan.
+class _IdMonths extends DefaultCupertinoLocalizations {
+  const _IdMonths();
+  static const _names = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+
+  @override
+  String datePickerMonth(int monthIndex) => _names[monthIndex - 1];
+
+  @override
+  String datePickerStandaloneMonth(int monthIndex) => _names[monthIndex - 1];
+}
+
+class _IdMonthsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _IdMonthsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) => SynchronousFuture<CupertinoLocalizations>(const _IdMonths());
+
+  @override
+  bool shouldReload(_IdMonthsDelegate old) => false;
 }

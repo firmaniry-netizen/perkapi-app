@@ -155,7 +155,7 @@ class _CardFace extends StatelessWidget {
                           style: TextStyle(
                               color: AppColors.gold.withValues(alpha: 0.95),
                               fontSize: AppType.micro,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               letterSpacing: 1.3)),
                     ]),
                   ),
@@ -342,7 +342,7 @@ class _QrBadge extends StatelessWidget {
         height: 42,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: const Icon(Ph.qrCode, color: AppColors.navy, size: 24),

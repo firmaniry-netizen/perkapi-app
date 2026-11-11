@@ -158,13 +158,13 @@ class _TrackingPageState extends State<TrackingPage> {
                             final r = _rows[i];
                             return Card(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.circular(20),
                                 side: BorderSide(color: r.sos ? AppColors.red : scheme.outline, width: r.sos ? 1.6 : 1),
                               ),
                               child: ListTile(
                                 onTap: r.pos == null ? null : () => _map.move(r.pos!, 16),
                                 leading: Icon(r.sos ? Ph.warningOctagon : Ph.userCircle, color: r.sos ? AppColors.red : scheme.primary, size: 30),
-                                title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                                title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.w700)),
                                 subtitle: Text(r.sos
                                     ? 'SOS${r.note != null ? ': ${r.note}' : ''} · ${_ago(r.at)}'
                                     : r.requested

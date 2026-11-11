@@ -164,7 +164,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                   height: 28,
                   decoration: BoxDecoration(
                     color: bg,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                 ),
               ),
@@ -183,9 +183,9 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: AppColors.red, borderRadius: BorderRadius.circular(14)),
                       child: const Text('BARU',
-                          style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+                          style: TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
                     ),
                   ],
                 ]),
@@ -195,7 +195,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 index: 1,
                 dy: 14,
                 child: Text(p.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800, height: 1.25)),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, height: 1.25)),
               ),
               const SizedBox(height: 12),
               Reveal(
@@ -230,7 +230,7 @@ class _NewsDetailPageState extends State<NewsDetailPage> {
                 ),
               if (p.rows.length > 1) ...[
                 const SizedBox(height: 28),
-                const Text('Foto kegiatan', style: TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w800)),
+                const Text('Foto kegiatan', style: TextStyle(fontSize: AppType.lead, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 92,

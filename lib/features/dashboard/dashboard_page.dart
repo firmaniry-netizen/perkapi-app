@@ -20,6 +20,7 @@ import '../alerts/alert_service.dart';
 import '../news/news_post.dart';
 import '../news/news_widgets.dart';
 import 'member_hero_card.dart';
+import '../shell/action_burst.dart' show openQuickActions;
 import '../../core/widgets/smooth_overlays.dart';
 
 /// Beranda (redesain 3.0): satu titik fokus (kartu anggota 3D), lalu hal yang paling sering dicari:
@@ -56,7 +57,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(width: AppSpace.md),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
                 const SizedBox(height: 2),
                 Text(sub, style: TextStyle(color: scheme.onSurfaceVariant, fontSize: AppType.small, height: 1.4)),
               ]),
@@ -238,6 +239,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: AppType.accent(24, color: Theme.of(context).brightness == Brightness.dark ? AppColors.gold : AppColors.goldDeep, height: 1.05)),
             ]),
           ),
+          // Aksi cepat: menu mekar dari tombol ini.
+          Builder(builder: (c) => AppIconButton(icon: Ph.plus, tooltip: 'Aksi cepat', onTap: () => openQuickActions(c))),
+          const SizedBox(width: 8),
           AppIconButton(icon: Ph.squaresFour, tooltip: 'Semua menu', onTap: () => context.push('/more')),
           const SizedBox(width: 8),
           // SATU lonceng: kotak masuk berisi Peringatan + Notifikasi (lencana = jumlah keduanya).
@@ -335,7 +339,7 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Belum ada berita', style: TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.lead)),
+              const Text('Belum ada berita', style: TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.lead)),
               const SizedBox(height: 2),
               Text('Tulis kabar kegiatan pertama. Berita tampil di beranda semua anggota.',
                   style: TextStyle(fontSize: AppType.small, height: 1.35, color: scheme.onSurfaceVariant)),
@@ -455,7 +459,7 @@ class _AgendaStrip extends StatelessWidget {
                         Text(t == null ? '' : FmtId.monthsLong[t.month - 1].toUpperCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                            style: const TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, letterSpacing: 1)),
                         Text(t == null ? '' : FmtId.relativeDay(t),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -465,7 +469,7 @@ class _AgendaStrip extends StatelessWidget {
                   ]),
                   const Spacer(),
                   Text('${e['title']}',
-                      maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, height: 1.25)),
+                      maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.25)),
                   const SizedBox(height: 4),
                   Text(
                     [if (timed && t != null) FmtId.time(t), '${e['location'] ?? 'Lokasi belum diisi'}'].join(' • '),

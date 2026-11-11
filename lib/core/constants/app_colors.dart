@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Palet PERKAPI: dongker (utama), merah segel (aksi/peringatan), putih (isi).
+/// Palet PERKAPI gaya iOS: latar abu polos, sel putih, teks hitam/abu. Dongker = SATU warna aksen untuk semua
+/// yang bisa ditekan; merah segel hanya untuk hapus, bahaya dan SOS.
 /// Rasio kontras terukur: putih/dongker 13,8:1 • putih/merah 5,7:1 • dongker/kertas 12,7:1
 /// • merah terang/dongker gelap 6,6:1. Merah #C8202F hanya sebagai isi tombol di latar gelap (3,2:1 bila jadi teks).
 class AppColors {
@@ -9,9 +10,9 @@ class AppColors {
   // Inti
   static const navy = Color(0xFF0F2B5B); // dongker utama
   static const navyDeep = Color(0xFF08142E); // latar mode gelap
-  static const navySurface = Color(0xFF0F1E3F); // kartu mode gelap
-  static const navyLine = Color(0xFF22365F); // garis tipis mode gelap
-  static const navySoft = Color(0xFFA9B6D3); // teks redup mode gelap
+  static const navySurface = Color(0xFF1C1C1E); // sel/kartu mode gelap (abu iOS)
+  static const navyLine = Color(0xFF38383A); // garis pemisah mode gelap
+  static const navySoft = Color(0xFF98989F); // teks sekunder mode gelap
   static const navyLight = Color(0xFF9DB4E6); // ikon/aksen di latar gelap
   static const navyAction = Color(0xFF2456B8); // tombol umum mode gelap
   static const red = Color(0xFFC8202F); // merah segel
@@ -19,20 +20,18 @@ class AppColors {
   static const redBright = Color(0xFFE5303E); // ujung terang gradasi merah
   static const navyGlow = Color(0xFF2F6FD6); // ujung terang gradasi dongker
   static const white = Color(0xFFFFFFFF);
-  static const paper = Color(0xFFF4F6FB); // latar mode terang
-  static const ink = Color(0xFF0B1530); // teks utama mode terang
-  static const muted = Color(0xFF5B6785); // teks redup mode terang
-  static const line = Color(0xFFE2E7F1); // garis tipis mode terang
+  static const paper = Color(0xFFF2F2F7); // latar halaman mode terang (abu iOS)
+  static const ink = Color(0xFF000000); // teks utama mode terang
+  static const muted = Color(0xFF6C6C70); // teks sekunder mode terang (4,6:1 di latar abu)
+  static const line = Color(0xFFC6C6C8); // garis pemisah mode terang
 
-  // Aksen tambahan (modern): ikon modul, grafik, dan status. Dongker tetap warna utama,
-  // merah tetap untuk aksi utama; warna di bawah hanya pembeda modul agar layar tidak monoton.
-  // Palet aksen SELARAS SITUS RESMI (emas, teal, langit, ungu). Emas = warna khas PERKAPI kedua setelah dongker:
-  // dipakai untuk berita, agenda, informasi, angka penting, dan lencana terverifikasi.
-  static const sky = Color(0xFF2E7BD6);
-  static const teal = Color(0xFF0F8F86);
-  static const violet = Color(0xFF6D5BD0);
-  static const gold = Color(0xFFE8B53A); // emas situs: teks/ikon di atas dongker (9,7:1 pada navyDeep)
-  static const goldDeep = Color(0xFF9A6B0A); // emas tua: ubin ikon & teks di latar terang (4,7:1 pada putih)
+  // Dulu ada aksen emas, teal, langit dan ungu. Semuanya dilebur ke dongker agar antarmuka memakai satu warna aksen
+  // seperti iOS. Nama lama dipertahankan supaya layar yang memakainya tidak perlu diubah.
+  static const sky = navyAction;
+  static const teal = navyAction;
+  static const violet = navyAction;
+  static const gold = navyLight; // dipakai di atas latar gelap
+  static const goldDeep = navy; // dipakai di atas latar terang
   static const goldHi = Color(0xFFF6CF6F); // ujung terang gradasi emas (foil kartu)
 
   // Semantik (bukan dekorasi): berhasil & perlu perhatian.

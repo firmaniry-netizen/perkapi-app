@@ -136,7 +136,7 @@ class _ChatImageState extends State<ChatImage> {
       builder: (context, snap) {
         final u = snap.data;
         final box = ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 160, maxHeight: 320),
             child: u == null
@@ -193,7 +193,7 @@ class ChatFileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = mine ? Colors.white : Theme.of(context).colorScheme.onSurface;
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       onTap: () async {
         final u = await ChatFiles.url(path);
         if (u == null) {
@@ -204,7 +204,7 @@ class ChatFileTile extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: fg.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: fg.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(14)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(_icon, size: 34, color: fg),
           const SizedBox(width: 10),

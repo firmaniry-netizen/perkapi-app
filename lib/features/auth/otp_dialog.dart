@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 
@@ -76,7 +77,7 @@ class _OtpDialogState extends State<OtpDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return IosDialog(
       title: const Text('Masuk dengan kode email'),
       content: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [

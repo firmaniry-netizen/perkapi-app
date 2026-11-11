@@ -4,6 +4,7 @@ import 'dart:ui' show FontFeature;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -455,7 +456,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _delete(Map<String, dynamic> m) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus pesan untuk semua?'),
         content: const Text('Pesan ini akan diganti tulisan "Pesan ini telah dihapus" di semua peserta.'),
         actions: [
@@ -746,8 +747,8 @@ class _ChatPageState extends State<ChatPage> {
         decoration: BoxDecoration(
           color: mine ? scheme.primary : scheme.surfaceContainerHighest.withValues(alpha: 0.95),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
             bottomLeft: Radius.circular(mine ? 18 : 4),
             bottomRight: Radius.circular(mine ? 4 : 18),
           ),
@@ -758,7 +759,7 @@ class _ChatPageState extends State<ChatPage> {
           if (_group && !mine && showName)
             Padding(
               padding: EdgeInsets.only(bottom: 2, left: kind == 'image' ? 6 : 0),
-              child: Text(_names['${m['sender_id']}'] ?? 'Anggota', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w800, color: scheme.primary)),
+              child: Text(_names['${m['sender_id']}'] ?? 'Anggota', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: scheme.primary)),
             ),
           if (m['reply_to'] != null && !deleted)
             Container(
@@ -771,7 +772,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                 Text(reply == null ? 'Pesan' : (reply['sender_id'] == _me ? 'Anda' : (_names['${reply['sender_id']}'] ?? 'Anggota')),
-                    style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w800, color: mine ? Colors.white : scheme.primary)),
+                    style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: mine ? Colors.white : scheme.primary)),
                 Text(_preview(reply), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.caption, color: sub)),
               ]),
             ),
@@ -808,7 +809,7 @@ class _ChatPageState extends State<ChatPage> {
               padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
               decoration: BoxDecoration(
                 color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 border: Border(left: BorderSide(color: scheme.primary, width: 3)),
               ),
               child: Row(children: [
@@ -818,7 +819,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                     Text(
                       _editing != null ? 'Edit pesan' : 'Membalas ${banner['sender_id'] == _me ? 'diri sendiri' : (_names['${banner['sender_id']}'] ?? 'Anggota')}',
-                      style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w800, color: scheme.primary),
+                      style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: scheme.primary),
                     ),
                     Text(_preview(banner), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant)),
                   ]),
@@ -838,7 +839,7 @@ class _ChatPageState extends State<ChatPage> {
             Container(
               height: 52,
               padding: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(26)),
+              decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(28)),
               child: Row(children: [
                 IconButton(tooltip: 'Buang', icon: const Icon(Ph.trash, color: AppColors.red), onPressed: () => _recFinish(send: false)),
                 const _RecDot(),
@@ -870,7 +871,7 @@ class _ChatPageState extends State<ChatPage> {
                     filled: true,
                     fillColor: scheme.surfaceContainerHighest,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                   ),
                 ),
               ),

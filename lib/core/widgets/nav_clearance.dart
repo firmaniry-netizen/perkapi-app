@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/shell/nav_items.dart';
 
-/// Tinggi bar navigasi mengambang (kapsul 64 + jarak bawah 12) di AppShell.
+/// Tinggi tab bar gaya iOS di AppShell (tanpa area aman bawah).
 /// Halaman di dalam ShellRoute memakai Scaffold sendiri, sehingga FAB-nya tidak tahu ada bar itu
 /// dan tertimpa di bawahnya. Bungkus FAB dengan [NavClearance] agar mengambang di atas bar.
-const double kFloatNavHeight = 76;
+const double kFloatNavHeight = 50;
 
 class NavClearance extends StatelessWidget {
   const NavClearance({super.key, required this.child});

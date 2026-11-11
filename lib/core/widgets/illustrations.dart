@@ -159,7 +159,7 @@ class EmptyArt extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 color: c.withValues(alpha: dark ? 0.22 : 0.16),
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: c.withValues(alpha: 0.30)),
               ),
             ),

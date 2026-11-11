@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
 import '../../core/constants/app_colors.dart';
@@ -50,7 +51,7 @@ class _GeofencePageState extends State<GeofencePage> {
     final ok = await showSmoothDialog<bool>(
       context: context,
       builder: (c) => StatefulBuilder(
-        builder: (c, setD) => AlertDialog(
+        builder: (c, setD) => IosDialog(
           title: Text(g == null ? 'Tambah area' : 'Ubah area'),
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -117,7 +118,7 @@ class _GeofencePageState extends State<GeofencePage> {
   Future<void> _delete(Map<String, dynamic> g) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => IosDialog(
         title: const Text('Hapus area?'),
         content: Text('Area "${g['name']}" akan dihapus.'),
         actions: [
@@ -138,8 +139,10 @@ class _GeofencePageState extends State<GeofencePage> {
   Widget build(BuildContext context) {
     if (!_allowed) return const AccessDenied();
     return Scaffold(
-      appBar: GlassAppBar(title: const Text('Area (Geofence)')),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => _edit(), icon: const Icon(Ph.plus), label: const Text('Tambah area')),
+      // Aksi utama di bar atas (gaya iOS), bukan tombol mengambang.
+      appBar: GlassAppBar(title: const Text('Area (Geofence)'), actions: [
+        IconButton(tooltip: 'Tambah area', icon: const Icon(Ph.plus), onPressed: () => _edit()),
+      ]),
       body: PageGlow(accent: AppColors.teal, child: _loading
           ? const SkeletonList()
           : _error != null
@@ -156,7 +159,7 @@ class _GeofencePageState extends State<GeofencePage> {
                           child: ListTile(
                             onTap: () => _edit(g),
                             leading: const IconBadge(Ph.mapPinLine, size: 44),
-                            title: Text('${g['name']}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                            title: Text('${g['name']}', style: const TextStyle(fontWeight: FontWeight.w700)),
                             subtitle: Text('Radius ${g['radius_m']} m · ${(g['lat'] as num).toStringAsFixed(4)}, ${(g['lng'] as num).toStringAsFixed(4)}'),
                             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                               Switch.adaptive(value: g['active'] == true, onChanged: (v) => _toggle(g, v)),

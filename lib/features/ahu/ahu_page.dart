@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/ios_dialog.dart';
 import '../../core/widgets/ios_pickers.dart';
 import '../../core/constants/phosphor_icons.dart';
 import '../../core/widgets/page_glow.dart';
@@ -58,7 +59,7 @@ class AhuBadge extends StatelessWidget {
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: compact ? 14 : 17, color: color),
         const SizedBox(width: 6),
-        Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: compact ? 11.5 : 13)),
+        Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: compact ? 11.5 : 13)),
       ]),
     );
   }
@@ -166,7 +167,7 @@ class _AhuPageState extends State<AhuPage> {
   Future<void> _verify(Map<String, dynamic> r) async {
     final ok = await showSmoothDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => IosDialog(
         title: const Text('Verifikasi pendaftaran AHU?'),
         content: Text(
             '${r['full_name']}\nNomor: ${r['ahu_registration_number']}\n\nPastikan nomor ini sudah dicocokkan dengan dokumen Surat Bukti Pendaftaran atau situs AHU.'),
@@ -210,20 +211,20 @@ class _AhuPageState extends State<AhuPage> {
                 Row(children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
                     child: Image.asset(AppAssets.logoAhu, height: 28, errorBuilder: (_, __, ___) => const Icon(Ph.buildings, color: AppColors.navy)),
                   ),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text('Kurator dan Pengurus\nterdaftar di AHU',
-                        style: TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w800, height: 1.25)),
+                        style: TextStyle(color: Colors.white, fontSize: AppType.lead, fontWeight: FontWeight.w700, height: 1.25)),
                   ),
                 ]),
                 const SizedBox(height: 16),
                 AhuBadge(number: number, verified: verified),
                 if (number.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  Text(number, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w800)),
+                  Text(number, style: const TextStyle(color: Colors.white, fontSize: AppType.title, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
                   Text('Terbit ${ahuDate(m['ahu_registration_date'])}  •  Berlaku s.d. ${ahuDate(m['ahu_valid_until'])}',
                       style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: AppType.small)),
