@@ -15,6 +15,8 @@ import '../../core/widgets/motion.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../../core/widgets/ui_kit.dart';
 import '../../core/constants/app_tokens.dart';
+import '../../core/widgets/smooth_overlays.dart';
+import 'chat_prefs.dart';
 
 String chatTimeLabel(DateTime? d) {
   if (d == null) return '';
@@ -25,6 +27,20 @@ String chatTimeLabel(DateTime? d) {
   }
   return '${l.day.toString().padLeft(2, '0')}/${l.month.toString().padLeft(2, '0')}';
 }
+
+/// Teks "terakhir dilihat" gaya WhatsApp: hari ini / kemarin / tanggal, lalu jam.
+String chatLastSeenLabel(DateTime t) {
+  final now = DateTime.now();
+  String two(int v) => v.toString().padLeft(2, '0');
+  final jam = '${two(t.hour)}.${two(t.minute)}';
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(t.year, t.month, t.day);
+  final diff = today.difference(day).inDays;
+  if (diff <= 0) return 'terakhir dilihat hari ini pukul $jam';
+  if (diff == 1) return 'terakhir dilihat kemarin pukul $jam';
+  return 'terakhir dilihat ${two(t.day)}/${two(t.month)}/${t.year} pukul $jam';
+}
+
 
 /// Daftar percakapan (pribadi dan grup) dengan penanda belum dibaca.
 class ChatListPage extends StatefulWidget {
@@ -41,6 +57,9 @@ class _ChatListPageState extends State<ChatListPage> {
   final _q = TextEditingController();
   List<Map<String, dynamic>>? _dir; // semua anggota (untuk cari nama yang belum pernah di-chat)
   bool _opening = false;
+
+  /// Tampilkan percakapan yang diarsipkan (seperti folder "Diarsipkan" di WhatsApp).
+  bool _showArchived = false;
 
   @override
   void initState() {
@@ -154,8 +173,10 @@ class _ChatListPageState extends State<ChatListPage> {
       return [Padding(padding: const EdgeInsets.all(24), child: Text(_error!, textAlign: TextAlign.center))];
     }
     final q = _q.text.trim().toLowerCase();
+    // Saat mencari, arsip ikut tercari. Tanpa pencarian, arsip hanya tampil di bagian "Diarsipkan".
+    final archived = _rows.where((r) => r['archived'] == true).toList();
     final threads = q.isEmpty
-        ? _rows
+        ? (_showArchived ? archived : _rows.where((r) => r['archived'] != true).toList())
         : _rows.where((r) => '${r['title']}'.toLowerCase().contains(q) || '${r['last_body'] ?? ''}'.toLowerCase().contains(q)).toList();
     // anggota yang cocok namanya tapi belum punya chat pribadi dengan saya
     final directTitles = {for (final r in _rows) if (r['kind'] == 'direct') '${r['title']}'.toLowerCase()};
@@ -165,8 +186,22 @@ class _ChatListPageState extends State<ChatListPage> {
             .where((m) => '${m['name']}'.toLowerCase().contains(q) && !directTitles.contains('${m['name']}'.toLowerCase()))
             .take(30)
             .toList();
+    final archiveRow = q.isEmpty && (archived.isNotEmpty || _showArchived)
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: AppSpace.md),
+            child: InsetGroup(children: [
+              ListTile(
+                leading: Icon(_showArchived ? Ph.caretLeft : Ph.archive, color: scheme.primary),
+                title: Text(_showArchived ? 'Kembali ke semua chat' : 'Diarsipkan', style: const TextStyle(fontWeight: FontWeight.w600)),
+                trailing: _showArchived ? null : Text('${archived.length}', style: TextStyle(color: scheme.onSurfaceVariant)),
+                onTap: () => setState(() => _showArchived = !_showArchived),
+              ),
+            ]),
+          )
+        : null;
     if (threads.isEmpty && people.isEmpty) {
       return [
+        if (archiveRow != null) archiveRow,
         SizedBox(
           height: 360,
           child: EmptyState(
@@ -178,6 +213,7 @@ class _ChatListPageState extends State<ChatListPage> {
       ];
     }
     return [
+      if (archiveRow != null) archiveRow,
       if (threads.isNotEmpty) InsetGroup(children: [for (final r in threads) _threadTile(r, scheme)]),
       if (people.isNotEmpty) ...[
         Padding(
@@ -198,11 +234,72 @@ class _ChatListPageState extends State<ChatListPage> {
     ];
   }
 
+  /// Tekan lama percakapan: sematkan, bisukan, arsipkan (seperti WhatsApp).
+  void _threadMenu(Map<String, dynamic> r) {
+    final id = '${r['thread_id']}';
+    final pinned = r['pinned'] == true, archived = r['archived'] == true, muted = ChatPrefs.isMuted(r['muted_until']);
+    Future<void> run(Future<void> Function() f, String fail) async {
+      try {
+        await f();
+        await _load();
+      } catch (_) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(fail)));
+      }
+    }
+
+    showSmoothSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text('${r['title']}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+          ),
+          if (!archived)
+            ListTile(
+              leading: Icon(pinned ? Ph.pushPinSlash : Ph.pushPin),
+              title: Text(pinned ? 'Lepas sematan' : 'Sematkan di atas'),
+              onTap: () {
+                Navigator.pop(ctx);
+                run(() => ChatPrefs.set(id, pinned: !pinned), 'Gagal menyematkan chat.');
+              },
+            ),
+          ListTile(
+            leading: Icon(muted ? Ph.bell : Ph.bellSlash),
+            title: Text(muted ? 'Bunyikan notifikasi' : 'Bisukan notifikasi'),
+            onTap: () async {
+              Navigator.pop(ctx);
+              if (muted) {
+                run(() => ChatPrefs.set(id, setMute: true), 'Gagal mengubah notifikasi.');
+                return;
+              }
+              final until = await ChatPrefs.pickMute(context);
+              if (until != null) run(() => ChatPrefs.set(id, setMute: true, mutedUntil: until), 'Gagal mengubah notifikasi.');
+            },
+          ),
+          ListTile(
+            leading: Icon(archived ? Ph.tray : Ph.archive),
+            title: Text(archived ? 'Keluarkan dari arsip' : 'Arsipkan'),
+            subtitle: archived ? null : const Text('Kembali ke daftar saat ada pesan baru.'),
+            onTap: () {
+              Navigator.pop(ctx);
+              // Chat yang diarsipkan tidak lagi disematkan.
+              run(() => ChatPrefs.set(id, archived: !archived, pinned: archived ? null : false), 'Gagal mengarsipkan chat.');
+            },
+          ),
+        ]),
+      ),
+    );
+  }
+
   Widget _threadTile(Map<String, dynamic> r, ColorScheme scheme) {
     final unread = (r['unread'] as num?)?.toInt() ?? 0;
+    final muted = ChatPrefs.isMuted(r['muted_until']);
+    final pinned = r['pinned'] == true;
     return Material(
       color: Colors.transparent,
       child: ListTile(
+        onLongPress: () => _threadMenu(r),
         onTap: () async {
           await context.push('/chat/${r['thread_id']}');
           _load();
@@ -214,13 +311,23 @@ class _ChatListPageState extends State<ChatListPage> {
         subtitle: Text('${r['last_body'] ?? 'Belum ada pesan'}', maxLines: 1, overflow: TextOverflow.ellipsis),
         trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(chatTimeLabel(DateTime.tryParse('${r['last_at']}')), style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant)),
-          if (unread > 0)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(10)),
-              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
-            ),
+          const SizedBox(height: 4),
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            if (muted) Icon(PhFill.bellSlash, size: 15, color: scheme.onSurfaceVariant),
+            if (pinned) ...[
+              if (muted) const SizedBox(width: 4),
+              Icon(PhFill.pushPin, size: 15, color: scheme.onSurfaceVariant),
+            ],
+            if (unread > 0) ...[
+              if (muted || pinned) const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                // Chat yang dibisukan: lencana abu-abu, seperti WhatsApp.
+                decoration: BoxDecoration(color: muted ? scheme.onSurfaceVariant : scheme.primary, borderRadius: BorderRadius.circular(10)),
+                child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: AppType.micro, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ]),
         ]),
       ),
     );

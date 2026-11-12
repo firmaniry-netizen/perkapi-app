@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,6 +8,8 @@ import 'supabase_service.dart';
 /// Status "online" anggota lewat Supabase Realtime Presence.
 /// Anggota dianggap online selama aplikasinya terbuka di layar (bukan di latar belakang).
 /// Dipasang sekali oleh AppShell; halaman chat cukup membaca [online].
+/// Juga mencatat "terakhir dilihat" di server (sql/48_terakhir_dilihat.sql): saat aplikasi dibuka, tiap menit selama
+/// terbuka, dan saat ditinggalkan.
 class OnlineService with WidgetsBindingObserver {
   OnlineService._();
   static final instance = OnlineService._();
@@ -16,6 +20,7 @@ class OnlineService with WidgetsBindingObserver {
   RealtimeChannel? _ch;
   String? _me;
   bool _tracked = false;
+  Timer? _seenTick;
 
   void start(String? memberId) {
     if (memberId == null || _me == memberId) return;
@@ -27,10 +32,13 @@ class OnlineService with WidgetsBindingObserver {
     ch.onPresenceSync((_) => _sync()).subscribe((status, _) {
       if (status == RealtimeSubscribeStatus.subscribed) _track(true);
     });
+    _seen(true);
   }
 
   void stop() {
     WidgetsBinding.instance.removeObserver(this);
+    _seenTick?.cancel();
+    _seenTick = null;
     final ch = _ch;
     _ch = null;
     _tracked = false;
@@ -68,8 +76,25 @@ class OnlineService with WidgetsBindingObserver {
     online.value = ids;
   }
 
+  /// Catat waktu sekarang sebagai "terakhir dilihat". Gagal (mis. SQL 48 belum dijalankan) diabaikan.
+  Future<void> _touch() async {
+    if (_me == null) return;
+    try {
+      await SupabaseService.client.rpc('touch_last_seen');
+    } catch (_) {}
+  }
+
+  /// Aplikasi terbuka: catat sekarang dan tiap menit. Ditinggalkan: catat sekali lalu berhenti.
+  void _seen(bool active) {
+    _seenTick?.cancel();
+    _seenTick = active ? Timer.periodic(const Duration(minutes: 1), (_) => _touch()) : null;
+    _touch();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _track(state == AppLifecycleState.resumed);
+    final active = state == AppLifecycleState.resumed;
+    _track(active);
+    if (active || state == AppLifecycleState.paused) _seen(active);
   }
 }

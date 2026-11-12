@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Palet PERKAPI gaya iOS: latar abu polos, sel putih, teks hitam/abu. Dongker = SATU warna aksen untuk semua
-/// yang bisa ditekan; merah segel hanya untuk hapus, bahaya dan SOS.
+/// Palet PERKAPI gaya iOS 27 (Liquid Glass): dongker untuk semua yang bisa ditekan, emas untuk sorotan
+/// (status unggulan, angka penting, cahaya latar), merah segel hanya untuk hapus, bahaya dan SOS.
+/// Latar netral (abu terang / hitam kebiruan) supaya kaca berwarna lembut di atasnya tetap terbaca.
 /// Rasio kontras terukur: putih/dongker 13,8:1 • putih/merah 5,7:1 • dongker/kertas 12,7:1
 /// • merah terang/dongker gelap 6,6:1. Merah #C8202F hanya sebagai isi tombol di latar gelap (3,2:1 bila jadi teks).
 class AppColors {
@@ -10,8 +11,8 @@ class AppColors {
   // Inti
   static const navy = Color(0xFF0F2B5B); // dongker utama
   static const navyDeep = Color(0xFF08142E); // latar mode gelap
-  static const navySurface = Color(0xFF1C1C1E); // sel/kartu mode gelap (abu iOS)
-  static const navyLine = Color(0xFF38383A); // garis pemisah mode gelap
+  static const navySurface = Color(0xFF161B26); // sel/kartu mode gelap (abu kebiruan)
+  static const navyLine = Color(0xFF2C3342); // garis pemisah mode gelap
   static const navySoft = Color(0xFF98989F); // teks sekunder mode gelap
   static const navyLight = Color(0xFF9DB4E6); // ikon/aksen di latar gelap
   static const navyAction = Color(0xFF2456B8); // tombol umum mode gelap
@@ -25,13 +26,12 @@ class AppColors {
   static const muted = Color(0xFF6C6C70); // teks sekunder mode terang (4,6:1 di latar abu)
   static const line = Color(0xFFC6C6C8); // garis pemisah mode terang
 
-  // Dulu ada aksen emas, teal, langit dan ungu. Semuanya dilebur ke dongker agar antarmuka memakai satu warna aksen
-  // seperti iOS. Nama lama dipertahankan supaya layar yang memakainya tidak perlu diubah.
+  // Teal, langit dan ungu dilebur ke dongker supaya warna tidak ramai. Emas dipertahankan sebagai warna kedua PERKAPI.
   static const sky = navyAction;
   static const teal = navyAction;
   static const violet = navyAction;
-  static const gold = navyLight; // dipakai di atas latar gelap
-  static const goldDeep = navy; // dipakai di atas latar terang
+  static const gold = Color(0xFFE8B53A); // emas: teks/ikon di atas dongker atau latar gelap (9,7:1 pada navyDeep)
+  static const goldDeep = Color(0xFF9A6B0A); // emas tua: teks/ikon di latar terang (4,7:1 pada putih)
   static const goldHi = Color(0xFFF6CF6F); // ujung terang gradasi emas (foil kartu)
 
   // Semantik (bukan dekorasi): berhasil & perlu perhatian.

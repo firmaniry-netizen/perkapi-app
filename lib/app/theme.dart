@@ -15,7 +15,8 @@ class AppTheme {
   static ThemeData _build(Brightness b) {
     final isDark = b == Brightness.dark;
 
-    final bg = isDark ? Colors.black : AppColors.paper;
+    // Gelap: hitam kebiruan, senada dongker. Terang: abu iOS.
+    final bg = isDark ? const Color(0xFF070B14) : AppColors.paper;
     final surface = isDark ? AppColors.navySurface : AppColors.white;
     final line = isDark ? AppColors.navyLine : AppColors.line;
     final onSurface = isDark ? Colors.white : AppColors.ink;
@@ -120,7 +121,8 @@ class AppTheme {
           backgroundColor: action,
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
+          // Tombol kapsul seperti iOS 26/27.
+          shape: const StadiumBorder(),
           textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
         ),
       ),
@@ -128,7 +130,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: onSurface,
           side: BorderSide(color: isDark ? AppColors.navyLine : const Color(0xFFC9D2E6)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
+          shape: const StadiumBorder(),
           minimumSize: const Size(64, 48),
         ),
       ),
@@ -225,9 +227,13 @@ class AppTheme {
         unselectedLabelColor: muted,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: isDark ? AppColors.navyLight : AppColors.navy),
+      // Sakelar gaya iOS: jalur hijau sistem saat aktif, abu tembus saat mati, kenop putih, tanpa garis tepi.
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white : muted),
-        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? action : line),
+        thumbColor: const WidgetStatePropertyAll(Colors.white),
+        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected)
+            ? (isDark ? const Color(0xFF30D158) : const Color(0xFF34C759))
+            : (isDark ? const Color(0x52787880) : const Color(0x29787880))),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
     );
   }

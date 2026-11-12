@@ -240,8 +240,8 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-/// Tab bar gaya iOS: bar kaca menempel di tepi bawah, tab sama lebar, ikon dan label selalu tampil.
-/// Tab aktif memakai ikon terisi dan warna aksen; pil lembut di belakangnya meluncur ke tab yang dipilih.
+/// Tab bar Liquid Glass gaya iOS 26: kapsul kaca mengambang di atas isi halaman, tab sama lebar dengan ikon dan label.
+/// Lensa kaca terang di belakang tab aktif meluncur dengan pegas ke tab yang dipilih; ikon aktif terisi.
 class _TabBar extends StatelessWidget {
   const _TabBar({required this.items, required this.selected, required this.onSelect});
   final List<NavItem> items;
@@ -255,8 +255,8 @@ class _TabBar extends StatelessWidget {
     final muted = theme.colorScheme.onSurfaceVariant;
     final accent = dark ? AppColors.navyLight : AppColors.navy;
     final still = MediaQuery.disableAnimationsOf(context);
-    // Kontras tinggi: bar pekat tanpa blur supaya label tetap terbaca.
-    final solid = MediaQuery.highContrastOf(context);
+    // Layar sempit (mis. Redmi 9C, lebar sekitar 324dp): kurangi jarak tepi.
+    final compact = MediaQuery.sizeOf(context).width < 400;
 
     Widget tab(int i) {
       final on = i == selected;
@@ -273,14 +273,27 @@ class _TabBar extends StatelessWidget {
               onSelect(i);
             },
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(on ? (items[i].activeIcon ?? items[i].icon) : items[i].icon, size: 25, color: color),
-              const SizedBox(height: 3),
+              AnimatedScale(
+                scale: on ? 1.08 : 1,
+                duration: Duration(milliseconds: still ? 0 : 260),
+                curve: const Cubic(0.23, 1, 0.32, 1),
+                child: AnimatedSwitcher(
+                  duration: Duration(milliseconds: still ? 0 : 160),
+                  child: Icon(
+                    on ? (items[i].activeIcon ?? items[i].icon) : items[i].icon,
+                    key: ValueKey(on),
+                    size: 23,
+                    color: color,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 2),
               ExcludeSemantics(
                 child: Text(
                   items[i].label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: color, fontSize: AppType.micro, fontWeight: on ? FontWeight.w600 : FontWeight.w500, height: 1.1),
+                  style: TextStyle(color: color, fontSize: 10, fontWeight: on ? FontWeight.w600 : FontWeight.w500, height: 1.1),
                 ),
               ),
             ]),
@@ -289,45 +302,50 @@ class _TabBar extends StatelessWidget {
       );
     }
 
-    final bar = DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor.withValues(alpha: solid ? 1 : 0.78),
-        border: Border(top: BorderSide(color: (dark ? Colors.white : AppColors.navy).withValues(alpha: dark ? 0.12 : 0.08))),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: kFloatNavHeight,
-          child: Stack(children: [
-            // Tab sama lebar, jadi posisi pil cukup dihitung dari indeks tab.
-            if (selected >= 0 && items.length > 1)
-              AnimatedAlign(
-                alignment: Alignment(-1 + 2 * selected / (items.length - 1), 0),
-                duration: Duration(milliseconds: still ? 0 : 360),
-                curve: const Cubic(0.23, 1, 0.32, 1),
-                child: FractionallySizedBox(
-                  widthFactor: 1 / items.length,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: dark ? 0.22 : 0.10),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                ),
-              ),
-            Row(children: [for (var i = 0; i < items.length; i++) tab(i)]),
-          ]),
-        ),
-      ),
-    );
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: 1.15,
-      // Isi halaman terlihat samar di balik bar (blur + saturasi), seperti tab bar iOS.
-      child: solid ? bar : ClipRect(child: BackdropFilter(filter: LiquidGlass.backdrop(22), child: bar)),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(compact ? 12 : 20, 0, compact ? 12 : 20, 12),
+          // Liquid Glass: isi halaman terlihat samar di balik bar (blur + saturasi), dengan kilau tepi.
+          child: LiquidGlass(
+            radius: 32,
+            blur: 18,
+            padding: const EdgeInsets.all(6),
+            child: SizedBox(
+              height: 52,
+              child: Stack(children: [
+                // Tab sama lebar, jadi posisi lensa cukup dihitung dari indeks. Pegas sedikit memantul, seperti iOS 26.
+                if (selected >= 0 && items.length > 1)
+                  AnimatedAlign(
+                    alignment: Alignment(-1 + 2 * selected / (items.length - 1), 0),
+                    duration: Duration(milliseconds: still ? 0 : 420),
+                    curve: const Cubic(0.34, 1.36, 0.64, 1),
+                    child: FractionallySizedBox(
+                      widthFactor: 1 / items.length,
+                      heightFactor: 1,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: dark ? Colors.white.withValues(alpha: 0.14) : Colors.white.withValues(alpha: 0.72),
+                          borderRadius: BorderRadius.circular(26),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withValues(alpha: dark ? 0.25 : 0.08), blurRadius: 10, offset: const Offset(0, 3)),
+                          ],
+                        ),
+                        child: CustomPaint(
+                          foregroundPainter: GlassSheen(dark: dark, radius: 26, strength: 0.9),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
+                    ),
+                  ),
+                Row(children: [for (var i = 0; i < items.length; i++) tab(i)]),
+              ]),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

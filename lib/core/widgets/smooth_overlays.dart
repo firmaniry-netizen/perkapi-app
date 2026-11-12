@@ -27,6 +27,10 @@ Future<T?> showSmoothSheet<T>({
     isScrollControlled: isScrollControlled,
     showDragHandle: false,
     useSafeArea: useSafeArea,
+    // Latar dan bentuk digambar oleh _GlassSheetFrame (lembar mengambang), bukan oleh tema.
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    clipBehavior: Clip.none,
     barrierColor: _scrim,
     sheetAnimationStyle: AnimationStyle(
       duration: still ? Duration.zero : const Duration(milliseconds: 460),
@@ -79,8 +83,9 @@ Future<T?> showSmoothDialog<T>({
   );
 }
 
-/// Bingkai lembar bawah kaca: blur + saturasi latar, kilau tepi, pegangan kaca. Warna isi tembus pandang
-/// datang dari bottomSheetTheme (lihat theme.dart), jadi teks tetap terbaca.
+/// Bingkai lembar bawah kaca gaya iOS 26/27: mengambang 8 px dari tepi layar dengan keempat sudut membulat 36,
+/// blur + saturasi latar, kilau tepi, pegangan kaca. Warna isi tembus pandang diambil dari bottomSheetTheme
+/// (lihat theme.dart), jadi teks tetap terbaca.
 class _GlassSheetFrame extends StatelessWidget {
   const _GlassSheetFrame({required this.child, required this.handle});
   final Widget child;
@@ -90,7 +95,8 @@ class _GlassSheetFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final solid = MediaQuery.highContrastOf(context);
-    const r = BorderRadius.vertical(top: Radius.circular(28));
+    const r = BorderRadius.all(Radius.circular(36));
+    final fill = Theme.of(context).bottomSheetTheme.modalBackgroundColor ?? Theme.of(context).colorScheme.surface;
     Widget body = Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       if (handle)
         Center(
@@ -106,8 +112,14 @@ class _GlassSheetFrame extends StatelessWidget {
         ),
       Flexible(child: child),
     ]);
-    body = CustomPaint(foregroundPainter: GlassSheen(dark: dark, radius: 32, solid: solid), child: body);
-    if (solid) return body;
-    return ClipRRect(borderRadius: r, child: BackdropFilter(filter: LiquidGlass.backdrop(30), child: body));
+    body = DecoratedBox(
+      decoration: BoxDecoration(color: solid ? fill.withValues(alpha: 1) : fill, borderRadius: r),
+      child: CustomPaint(foregroundPainter: GlassSheen(dark: dark, radius: 36, solid: solid), child: body),
+    );
+    if (!solid) body = BackdropFilter(filter: LiquidGlass.backdrop(30), child: body);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+      child: ClipRRect(borderRadius: r, child: body),
+    );
   }
 }

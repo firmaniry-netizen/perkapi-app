@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 
-/// Dialog gaya iOS: judul dan isi rata tengah, lalu tombol selebar dialog yang dipisah garis tipis.
+/// Dialog gaya iOS 26/27: kartu kaca bersudut 34, judul dan isi rata tengah, lalu tombol berbentuk kapsul.
 /// Dua tombol tampil berdampingan; satu atau lebih dari dua tombol ditumpuk.
 /// Parameter sengaja sama dengan AlertDialog bawaan, jadi pemanggil cukup mengganti nama kelas.
 ///
 /// Tombol di [actions] tetap ditulis sebagai TextButton / FilledButton; dialog ini hanya mengambil
-/// `onPressed` dan `child`-nya lalu menggambarnya sendiri: FilledButton = aksi utama (tebal),
-/// FilledButton berlatar merah = aksi bahaya (teks merah), TextButton = aksi biasa.
+/// `onPressed` dan `child`-nya lalu menggambarnya sendiri: FilledButton = aksi utama (kapsul warna aksen),
+/// FilledButton berlatar merah = aksi bahaya (teks merah), TextButton = aksi biasa (kapsul abu).
 class IosDialog extends StatelessWidget {
   const IosDialog({super.key, this.icon, this.title, this.content, this.actions, this.actionsAlignment});
   final Widget? icon;
@@ -24,7 +24,6 @@ class IosDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
-    final line = theme.dividerTheme.color ?? scheme.outline;
     final acts = actions ?? const <Widget>[];
     // Isi berupa teks biasa: rata tengah dan sempit seperti alert iOS. Isi lain (formulir, daftar): rata kiri dan lebih lebar.
     final plain = content == null || content is Text || content is SelectableText;
@@ -33,22 +32,33 @@ class IosDialog extends StatelessWidget {
       if (a is! ButtonStyleButton) return a;
       final bg = a.style?.backgroundColor?.resolve(const <WidgetState>{});
       final danger = bg == AppColors.red || bg == scheme.error;
-      final color = a.onPressed == null
+      final primary = a is FilledButton && !danger;
+      final enabled = a.onPressed != null;
+      final fg = !enabled
           ? scheme.onSurfaceVariant
-          : danger
-              ? (dark ? AppColors.redLight : AppColors.red)
-              : scheme.primary;
-      return InkWell(
-        onTap: a.onPressed,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 44),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: DefaultTextStyle.merge(
-                textAlign: TextAlign.center,
-                style: TextStyle(color: color, fontSize: 17, fontWeight: a is FilledButton ? FontWeight.w600 : FontWeight.w400, letterSpacing: -0.4),
-                child: IconTheme.merge(data: IconThemeData(color: color, size: 18), child: a.child ?? const SizedBox.shrink()),
+          : primary
+              ? Colors.white
+              : danger
+                  ? (dark ? AppColors.redLight : AppColors.red)
+                  : scheme.onSurface;
+      final fill = primary && enabled ? scheme.primary : scheme.onSurface.withValues(alpha: dark ? 0.14 : 0.08);
+      return Material(
+        color: fill,
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: a.onPressed,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: DefaultTextStyle.merge(
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(color: fg, fontSize: 17, fontWeight: (primary || danger) ? FontWeight.w600 : FontWeight.w500, letterSpacing: -0.4),
+                  child: IconTheme.merge(data: IconThemeData(color: fg, size: 18), child: a.child ?? const SizedBox.shrink()),
+                ),
               ),
             ),
           ),
@@ -59,7 +69,7 @@ class IosDialog extends StatelessWidget {
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 36, vertical: 24),
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(34)),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: plain ? 300 : 420),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -87,20 +97,22 @@ class IosDialog extends StatelessWidget {
                 ),
               ),
             ),
-          if (acts.isNotEmpty) Divider(height: 1, thickness: 1, color: line),
-          if (acts.length == 2)
-            IntrinsicHeight(
-              child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Expanded(child: action(acts[0])),
-                VerticalDivider(width: 1, thickness: 1, color: line),
-                Expanded(child: action(acts[1])),
-              ]),
-            )
-          else
-            for (var i = 0; i < acts.length; i++) ...[
-              if (i > 0) Divider(height: 1, thickness: 1, color: line),
-              action(acts[i]),
-            ],
+          if (acts.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+              child: acts.length == 2
+                  ? Row(children: [
+                      Expanded(child: action(acts[0])),
+                      const SizedBox(width: 10),
+                      Expanded(child: action(acts[1])),
+                    ])
+                  : Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      for (var i = 0; i < acts.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 8),
+                        action(acts[i]),
+                      ],
+                    ]),
+            ),
         ]),
       ),
     );

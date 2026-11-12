@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/widgets/ios_dialog.dart';
 import '../../core/constants/phosphor_icons.dart';
+import '../../core/widgets/liquid_glass.dart';
 import '../../core/widgets/motion.dart';
 import '../../core/widgets/smooth_overlays.dart';
 import '../../core/widgets/swipe_row.dart';
@@ -170,7 +171,8 @@ class _ModuleListViewState extends State<ModuleListView> {
     // Satu gulir untuk semua: kepala (cari, mode offline) ikut bergulir sehingga di halaman dengan
     // extendBodyBehindAppBar isi lewat DI BELAKANG bar kaca. Di halaman biasa padding atas = 0.
     final top = MediaQuery.paddingOf(context).top;
-    return RefreshIndicator.adaptive(
+    final tools = m.markAllRead || (m.id == 'notifications' && _items.isNotEmpty) || (widget.showAdd && _canWrite);
+    final list = RefreshIndicator.adaptive(
       edgeOffset: top,
       onRefresh: _refresh,
       child: CustomScrollView(
@@ -203,20 +205,12 @@ class _ModuleListViewState extends State<ModuleListView> {
               : const SizedBox.shrink(),
         ),
           ),
+          // Tombol aksi daftar (rata kanan). Kolom cari pindah ke kapsul kaca di bawah layar.
+          if (tools)
           SliverToBoxAdapter(
             child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-          child: Row(children: [
-            Expanded(
-              child: TextField(
-                onChanged: _onSearch,
-                decoration: InputDecoration(
-                  hintText: 'Cari ${m.title.toLowerCase()}',
-                  prefixIcon: const Icon(Ph.magnifyingGlass),
-                  isDense: true,
-                ),
-              ),
-            ),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+          child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
             if (m.markAllRead)
               IconButton(
                 tooltip: 'Tandai semua dibaca',
@@ -247,6 +241,41 @@ class _ModuleListViewState extends State<ModuleListView> {
         ],
       ),
     );
+    // iOS 26/27: kolom cari berupa kapsul kaca mengambang di bawah layar, di atas tab bar dan area aman.
+    // Scaffold dengan extendBody menaruh tinggi tab bar di padding bawah, jadi SafeArea otomatis melewatinya.
+    return Stack(children: [
+      Positioned.fill(child: list),
+      Positioned(
+        left: 16,
+        right: 16,
+        bottom: 0,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: LiquidGlass(
+              radius: 24,
+              blur: 18,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: TextField(
+                onChanged: _onSearch,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Cari ${m.title.toLowerCase()}',
+                  prefixIcon: const Icon(Ph.magnifyingGlass, size: 20),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 
   /// Keadaan kosong per modul + satu tombol aksi bila pengguna boleh menambah data.

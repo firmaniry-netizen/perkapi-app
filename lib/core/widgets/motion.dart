@@ -49,8 +49,8 @@ class FadeThroughBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// Muncul dengan pudar singkat 220 ms, tanpa jeda berjenjang dan tanpa gerak naik (iOS tidak menganimasikan isi daftar).
-/// [index] dan [dy] tidak dipakai lagi; dipertahankan agar pemanggil tidak berubah. Index > 9 langsung tampil.
+/// Muncul bertahap: fade + naik. [index] mengatur jeda (maks. 8 langkah x 55 ms) agar daftar "mengalir".
+/// Item dengan index > 9 langsung tampil (tidak mengulang saat di-scroll).
 class Reveal extends StatelessWidget {
   const Reveal({super.key, required this.child, this.index = 0, this.dy = 18});
   final Widget child;
@@ -61,12 +61,15 @@ class Reveal extends StatelessWidget {
   Widget build(BuildContext context) {
     if (reduceMotion(context) || index > 9) return child;
     return _Delayed(
-      delay: Duration.zero,
+      delay: Duration(milliseconds: 55 * (index > 8 ? 8 : index)),
       builder: (go) => TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: go ? 1 : 0),
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        builder: (context, t, c) => Opacity(opacity: t, child: c),
+        duration: const Duration(milliseconds: 620),
+        curve: const Cubic(0.16, 1, 0.3, 1),
+        builder: (context, t, c) => Opacity(
+          opacity: t,
+          child: Transform.translate(offset: Offset(0, (1 - t) * dy), child: c),
+        ),
         child: child,
       ),
     );
@@ -128,8 +131,7 @@ class _SkeletonListState extends State<SkeletonList> with SingleTickerProviderSt
   }
 }
 
-/// Umpan balik sentuhan gaya iOS: meredup seketika saat disentuh, kembali 200 ms saat dilepas.
-/// [scale] tidak dipakai lagi; dipertahankan agar pemanggil tidak berubah.
+/// Umpan balik sentuhan: turun 2% selama 90 ms saat ditekan (menjawab aksi pengguna).
 class Pressable extends StatefulWidget {
   const Pressable({super.key, required this.child, this.onTap, this.scale = 0.98});
   final Widget child;
@@ -154,10 +156,10 @@ class _PressableState extends State<Pressable> {
       onPointerDown: (_) => _set(true),
       onPointerUp: (_) => _set(false),
       onPointerCancel: (_) => _set(false),
-      child: AnimatedOpacity(
-        opacity: _down ? 0.55 : 1,
-        duration: Duration(milliseconds: (still || _down) ? 0 : 200),
-        curve: Curves.easeOut,
+      child: AnimatedScale(
+        scale: (_down && !still) ? widget.scale : 1,
+        duration: Duration(milliseconds: still ? 0 : (_down ? 100 : 200)),
+        curve: const Cubic(0.23, 1, 0.32, 1),
         child: widget.child,
       ),
     );

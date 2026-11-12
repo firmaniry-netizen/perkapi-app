@@ -34,6 +34,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _bio = false;
   bool _pin = false;
 
+  /// Sembunyikan "terakhir dilihat" di chat (null = belum dimuat atau SQL 49 belum dijalankan).
+  bool? _hideSeen;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +46,20 @@ class _SettingsPageState extends State<SettingsPage> {
     PinService.isEnabled().then((v) {
       if (mounted) setState(() => _pin = v);
     });
+    SupabaseService.client.rpc('chat_privacy').then((v) {
+      if (mounted) setState(() => _hideSeen = v == true);
+    }).catchError((_) {});
+  }
+
+  Future<void> _toggleHideSeen(bool on) async {
+    final old = _hideSeen;
+    setState(() => _hideSeen = on);
+    try {
+      await SupabaseService.client.rpc('chat_set_hide_last_seen', params: {'p_hide': on});
+    } catch (_) {
+      if (mounted) setState(() => _hideSeen = old);
+      _snack('Gagal menyimpan pengaturan privasi.');
+    }
   }
 
   void _snack(String m) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
@@ -224,6 +241,16 @@ class _SettingsPageState extends State<SettingsPage> {
             _tile(Ph.bell, 'Notifikasi & pengingat',
                 sub: 'Cek push, izin, dan kirim notifikasi uji', onTap: () => context.push('/notification-status')),
           ]),
+          if (_hideSeen != null)
+            _group('Privasi chat', [
+              SwitchListTile.adaptive(
+                secondary: const Icon(Ph.eyeSlash),
+                title: const Text('Sembunyikan "terakhir dilihat"', style: TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: const Text('Orang lain tidak melihat kapan Anda terakhir aktif, dan Anda juga tidak melihat milik mereka.'),
+                value: _hideSeen!,
+                onChanged: _toggleHideSeen,
+              ),
+            ]),
           _group('Keamanan', [
             SwitchListTile.adaptive(
               secondary: const Icon(Ph.lockKey),

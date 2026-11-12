@@ -8,6 +8,7 @@ import '../../core/services/online_service.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/widgets/member_avatar.dart';
 import 'call_service.dart';
+import 'chat_list_page.dart' show chatLastSeenLabel;
 import 'chat_media.dart';
 import '../../core/widgets/glass_app_bar.dart';
 import '../../core/widgets/motion.dart';
@@ -37,6 +38,9 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
   List<Map<String, dynamic>> _media = [];
   bool _loading = true;
 
+  /// "Terakhir dilihat" kontak (null = belum diketahui atau disembunyikan oleh pengaturan privasi).
+  DateTime? _lastSeen;
+
   String? get _me => Access.instance.memberId;
 
   @override
@@ -61,6 +65,10 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
       if (!widget.isGroup && widget.memberId != null) {
         final r = List<Map<String, dynamic>>.from(await _db.rpc('chat_member_profile', params: {'p_member': widget.memberId}) as List);
         if (r.isNotEmpty) _p = r.first;
+        try {
+          final t = await _db.rpc('member_last_seen', params: {'p_member': widget.memberId});
+          _lastSeen = t == null ? null : DateTime.tryParse('$t')?.toLocal();
+        } catch (_) {}
       }
       if (widget.isGroup && widget.threadId != null) {
         _members = List<Map<String, dynamic>>.from(await _db.rpc('chat_thread_members', params: {'p_thread': widget.threadId}) as List)
@@ -115,7 +123,13 @@ class _ChatProfilePageState extends State<ChatProfilePage> {
               ),
               const SizedBox(height: 4),
               Text(
-                widget.isGroup ? 'Grup · ${_members.length} anggota' : (online ? 'online' : (_p?['member_number'] != null ? 'No. anggota ${_p!['member_number']}' : 'Anggota PERKAPI')),
+                widget.isGroup
+                    ? 'Grup · ${_members.length} anggota'
+                    : online
+                        ? 'online'
+                        : _lastSeen != null
+                            ? chatLastSeenLabel(_lastSeen!)
+                            : (_p?['member_number'] != null ? 'No. anggota ${_p!['member_number']}' : 'Anggota PERKAPI'),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: online ? AppColors.emerald : scheme.onSurfaceVariant, fontWeight: FontWeight.w600),
               ),

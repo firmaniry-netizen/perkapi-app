@@ -70,7 +70,8 @@ class LiquidGlass extends StatelessWidget {
     final solid = MediaQuery.highContrastOf(context);
     final circle = shape == BoxShape.circle;
     final br = circle ? null : BorderRadius.circular(radius);
-    final double a = solid ? 1 : (clear ? (dark ? 0.16 : 0.20) : (dark ? 0.42 : 0.46));
+    // iOS 27: kaca sedikit lebih pekat dan isi di belakangnya lebih tersebar, supaya teks di atas kaca terbaca.
+    final double a = solid ? 1 : (clear ? (dark ? 0.20 : 0.26) : (dark ? 0.50 : 0.55));
     final fill = tint ?? (dark ? AppColors.navySurface.withValues(alpha: a) : Colors.white.withValues(alpha: a));
 
     Widget glass = DecoratedBox(
@@ -81,7 +82,7 @@ class LiquidGlass extends StatelessWidget {
       ),
     );
 
-    if (!solid && blur > 0) glass = BackdropFilter(filter: backdrop(blur), child: glass);
+    if (!solid && blur > 0) glass = BackdropFilter(filter: backdrop(blur * 1.25), child: glass);
     glass = circle ? ClipOval(child: glass) : ClipRRect(borderRadius: br!, child: glass);
 
     if (!shadow) return glass;
@@ -162,7 +163,7 @@ class GlassSheen extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.white.withValues(alpha: (dark ? 0.09 : 0.30) * s), Colors.white.withValues(alpha: 0)],
+          colors: [Colors.white.withValues(alpha: (dark ? 0.14 : 0.42) * s), Colors.white.withValues(alpha: 0)],
         ).createShader(top),
     );
 
@@ -182,6 +183,15 @@ class GlassSheen extends CustomPainter {
     );
     canvas.restore();
 
+    // 0. tepi gelap tipis di sekeliling kaca (iOS 27): memberi kedalaman dan memisahkan kaca dari latar
+    canvas.drawRRect(
+      rr.deflate(0.25),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.75
+        ..color = Colors.black.withValues(alpha: dark ? 0.55 : 0.14),
+    );
+
     // 4. kilau tepi: terang di kiri-atas, redup di tengah, menyala lagi tipis di kanan-bawah (pembiasan)
     canvas.drawRRect(
       rr.deflate(0.6),
@@ -192,7 +202,7 @@ class GlassSheen extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: ((dark ? 0.60 : 0.95) * s).clamp(0.0, 1.0)),
+            Colors.white.withValues(alpha: ((dark ? 0.78 : 1.0) * s).clamp(0.0, 1.0)),
             Colors.white.withValues(alpha: (dark ? 0.08 : 0.25) * s),
             Colors.white.withValues(alpha: (dark ? 0.05 : 0.15) * s),
             Colors.white.withValues(alpha: ((dark ? 0.34 : 0.65) * s).clamp(0.0, 1.0)),

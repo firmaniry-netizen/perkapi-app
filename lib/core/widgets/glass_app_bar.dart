@@ -187,26 +187,32 @@ class _GlassAppBarState extends State<GlassAppBar> {
       // Bar kaca: transparan + latar buram. Di halaman yang isinya digulir di belakang bar
       // (extendBodyBehindAppBar), isi tampak samar di balik kaca seperti iOS.
       backgroundColor: backgroundColor ?? Colors.transparent,
-      flexibleSpace: backgroundColor == null ? const _GlassBarFill() : null,
+      flexibleSpace: backgroundColor == null ? _GlassBarFill(scrolled: _scrolled) : null,
     ));
   }
 }
 
-/// Latar bar atas berbahan kaca: blur + saturasi, tint warna latar halaman, garis rambut + kaustik di bawah.
+/// Latar bar atas berbahan kaca: blur + saturasi dan tint warna latar halaman.
+/// iOS 27: di puncak halaman bar nyaris bening; begitu isi digulir ke bawah bar, tint menebal jadi bar seragam
+/// (dan garis rambut muncul) supaya judul dan tombol tetap terbaca.
 class _GlassBarFill extends StatelessWidget {
-  const _GlassBarFill();
+  const _GlassBarFill({required this.scrolled});
+  final ValueListenable<double> scrolled;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
     final solid = MediaQuery.highContrastOf(context);
-    final fill = DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor.withValues(alpha: solid ? 1 : 0.72),
-        border: Border(bottom: BorderSide(color: (dark ? Colors.white : AppColors.navy).withValues(alpha: dark ? 0.10 : 0.07))),
+    final fill = ValueListenableBuilder<double>(
+      valueListenable: scrolled,
+      builder: (_, t, __) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor.withValues(alpha: solid ? 1 : 0.12 + 0.70 * t),
+          border: Border(bottom: BorderSide(color: (dark ? Colors.white : AppColors.navy).withValues(alpha: (dark ? 0.10 : 0.07) * t))),
+        ),
+        child: const SizedBox.expand(),
       ),
-      child: const SizedBox.expand(),
     );
     if (solid) return fill;
     return ClipRect(child: BackdropFilter(filter: LiquidGlass.backdrop(22), child: fill));

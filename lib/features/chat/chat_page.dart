@@ -13,6 +13,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/access_service.dart';
 import '../../core/services/online_service.dart';
+import 'chat_prefs.dart';
+import 'chat_wallpaper.dart';
+import 'emoji_panel.dart';
 import '../../core/services/supabase_service.dart';
 import '../../core/widgets/motion.dart' show reduceMotion, SkeletonList;
 import '../../core/widgets/page_glow.dart';
@@ -26,7 +29,10 @@ import '../../core/widgets/glass_app_bar.dart';
 import '../../shared/widgets/state_widgets.dart';
 import '../../core/constants/app_tokens.dart';
 
-const _cols = 'id,sender_id,body,created_at,kind,attachment_path,attachment_name,attachment_size,attachment_mime,duration_ms,reply_to,edited_at,deleted_at';
+const _cols = 'id,sender_id,body,created_at,kind,attachment_path,attachment_name,attachment_size,attachment_mime,duration_ms,reply_to,edited_at,deleted_at,forwarded';
+
+/// Reaksi cepat di menu tekan lama, seperti WhatsApp.
+const _quickReacts = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
 /// Percakapan satu thread, seperti WhatsApp:
 /// teks, foto, dokumen, pesan suara; balas (geser kanan / tekan lama), edit & hapus untuk semua,
@@ -84,14 +90,90 @@ class _ChatPageState extends State<ChatPage> {
     _rec.dispose();
     _input.dispose();
     _focus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
   void _rebuild() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    // Lawan bicara baru saja offline: "terakhir dilihat" = sekarang (tanpa menunggu server).
+    final on = OnlineService.instance.isOnline(_peerId);
+    // Bila server menyembunyikan waktunya (privasi), tetap disembunyikan.
+    if (_peerWasOnline && !on && _peerLastSeen != null) _peerLastSeen = DateTime.now();
+    _peerWasOnline = on;
+    setState(() {});
   }
 
   String? _peerAvatar;
+
+  /// "Terakhir dilihat" lawan bicara (chat pribadi). Null = belum diketahui atau disembunyikan server.
+  DateTime? _peerLastSeen;
+  bool _peerWasOnline = false;
+
+  /// Panel emoji menggantikan keyboard di bawah kolom pesan.
+  bool _emoji = false;
+
+  /// Reaksi: message_id -> (member_id -> emoji).
+  final Map<String, Map<String, String>> _reacts = {};
+
+  /// Pesan yang saya bintangi di percakapan ini (pribadi).
+  final Set<String> _stars = {};
+
+  /// Pesan yang disematkan di percakapan ini (terlihat semua peserta).
+  Map<String, dynamic>? _pinned;
+
+  /// Pesan yang sedang disorot setelah dipilih dari pencarian, bintang, atau banner sematan.
+  String? _flashId;
+  final _scroll = ScrollController();
+  final Map<String, GlobalKey> _keys = {};
+
+  /// Latar chat (indeks [ChatWallpaper.names]).
+  int _wallpaper = 0;
+
+  /// Notifikasi percakapan ini dibisukan sampai kapan (null = tidak dibisukan).
+  DateTime? _mutedUntil;
+
+  Future<void> _loadPeerLastSeen() async {
+    final peer = _peerId;
+    if (_group || peer == null || peer.isEmpty) return;
+    try {
+      final r = await _db.rpc('member_last_seen', params: {'p_member': peer});
+      final t = r == null ? null : DateTime.tryParse('$r');
+      if (t != null && mounted) setState(() => _peerLastSeen = t.toLocal());
+    } catch (_) {}
+  }
+
+  void _insertEmoji(String e) {
+    final v = _input.value;
+    final s = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+    final text = v.text.replaceRange(s.start, s.end, e);
+    _input.value = TextEditingValue(text: text, selection: TextSelection.collapsed(offset: s.start + e.length));
+    setState(() {});
+  }
+
+  void _backspace() {
+    final v = _input.value;
+    final s = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
+    if (!s.isCollapsed) {
+      _input.value = TextEditingValue(text: v.text.replaceRange(s.start, s.end, ''), selection: TextSelection.collapsed(offset: s.start));
+    } else if (s.start > 0) {
+      // Hapus satu karakter yang terlihat (emoji bisa terdiri dari beberapa kode).
+      final before = v.text.substring(0, s.start).characters;
+      final cut = before.skipLast(1).toString();
+      _input.value = TextEditingValue(text: cut + v.text.substring(s.start), selection: TextSelection.collapsed(offset: cut.length));
+    }
+    setState(() {});
+  }
+
+  void _toggleEmoji() {
+    if (_emoji) {
+      setState(() => _emoji = false);
+      _focus.requestFocus();
+    } else {
+      _focus.unfocus();
+      setState(() => _emoji = true);
+    }
+  }
 
   Future<void> _loadPeerAvatar() async {
     final peer = _peerId;
@@ -121,6 +203,7 @@ class _ChatPageState extends State<ChatPage> {
       final t = ov.firstWhere((e) => '${e['thread_id']}' == widget.threadId, orElse: () => {});
       _title = '${t['title'] ?? 'Chat'}';
       _group = t['kind'] == 'group';
+      _mutedUntil = ChatPrefs.isMuted(t['muted_until']) ? DateTime.tryParse('${t['muted_until']}')?.toLocal() : null;
       final mem = List<Map<String, dynamic>>.from(await _db.rpc('chat_thread_members', params: {'p_thread': widget.threadId}) as List);
       for (final m in mem) {
         _names['${m['member_id']}'] = '${m['name']}';
@@ -128,9 +211,12 @@ class _ChatPageState extends State<ChatPage> {
       final rows = await _db.from('chat_messages').select(_cols).eq('thread_id', widget.threadId).order('created_at', ascending: false).limit(200);
       _msgs = List<Map<String, dynamic>>.from(rows as List);
       await _loadReads();
+      await _loadExtras();
+      _wallpaper = await ChatWallpaper.load(widget.threadId);
       _subscribe();
       _markRead();
       _loadPeerAvatar();
+      _loadPeerLastSeen();
       if (mounted) setState(() { _loading = false; _error = null; });
     } catch (_) {
       if (mounted) setState(() { _loading = false; _error = 'Gagal memuat percakapan.'; });
@@ -149,6 +235,42 @@ class _ChatPageState extends State<ChatPage> {
     } catch (_) {
       // SQL 41 belum dijalankan: centang biru tidak tampil, chat tetap jalan
     }
+  }
+
+  /// Reaksi, bintang, dan pesan tersemat (SQL 49). Bila belum dijalankan, fitur ini diam saja.
+  Future<void> _loadExtras() async {
+    try {
+      final r = await _db.from('chat_reactions').select('message_id,member_id,emoji').eq('thread_id', widget.threadId);
+      for (final x in r as List) {
+        _reacts.putIfAbsent('${x['message_id']}', () => {})['${x['member_id']}'] = '${x['emoji']}';
+      }
+      final st = await _db.from('chat_stars').select('message_id').eq('thread_id', widget.threadId);
+      _stars
+        ..clear()
+        ..addAll((st as List).map((e) => '${e['message_id']}'));
+      final t = await _db.from('chat_threads').select('pinned_message_id').eq('id', widget.threadId).maybeSingle();
+      await _loadPinned(t?['pinned_message_id'] as String?);
+    } catch (_) {}
+  }
+
+  Future<void> _loadPinned(String? id) async {
+    if (id == null) {
+      _pinned = null;
+    } else {
+      _pinned = _find(id) ?? await _db.from('chat_messages').select(_cols).eq('id', id).maybeSingle();
+    }
+    if (mounted) setState(() {});
+  }
+
+  void _setReact(Map<String, dynamic> r) {
+    if (!mounted) return;
+    setState(() => _reacts.putIfAbsent('${r['message_id']}', () => {})['${r['member_id']}'] = '${r['emoji']}');
+  }
+
+  void _dropReact(Map<String, dynamic> r) {
+    final map = _reacts['${r['message_id']}'];
+    if (map == null || !mounted) return;
+    setState(() => map.remove('${r['member_id']}'));
   }
 
   void _subscribe() {
@@ -171,6 +293,20 @@ class _ChatPageState extends State<ChatPage> {
               if (d != null) _reads[who] = d;
               if (dv != null) _delivered[who] = dv;
             });
+          },
+        )
+        .onPostgresChanges(event: PostgresChangeEvent.insert, schema: 'public', table: 'chat_reactions', filter: filter, callback: (p) => _setReact(p.newRecord))
+        .onPostgresChanges(event: PostgresChangeEvent.update, schema: 'public', table: 'chat_reactions', filter: filter, callback: (p) => _setReact(p.newRecord))
+        // Event hapus tidak bisa difilter per kolom; yang bukan milik percakapan ini tidak cocok dengan pesan mana pun.
+        .onPostgresChanges(event: PostgresChangeEvent.delete, schema: 'public', table: 'chat_reactions', callback: (p) => _dropReact(p.oldRecord))
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'chat_threads',
+          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'id', value: widget.threadId),
+          callback: (p) {
+            final id = p.newRecord['pinned_message_id'] as String?;
+            if (id != _pinned?['id']) _loadPinned(id);
           },
         )
         .onBroadcast(
@@ -396,10 +532,54 @@ class _ChatPageState extends State<ChatPage> {
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           if (!deleted && kind != 'call')
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                for (final e in _quickReacts)
+                  _ReactButton(
+                    emoji: e,
+                    selected: _reacts['${m['id']}']?[_me] == e,
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _react(m, e);
+                    },
+                  ),
+                _ReactButton(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pickReaction(m);
+                  },
+                ),
+              ]),
+            ),
+          if (!deleted && kind != 'call')
             ListTile(leading: const Icon(Ph.arrowBendUpLeft), title: const Text('Balas'), onTap: () {
               Navigator.pop(ctx);
               _startReply(m);
             }),
+          if (!deleted && kind != 'call')
+            ListTile(leading: const Icon(Ph.arrowBendUpRight), title: const Text('Teruskan'), onTap: () {
+              Navigator.pop(ctx);
+              _forward(m);
+            }),
+          if (!deleted && kind != 'call')
+            ListTile(
+              leading: Icon(_stars.contains('${m['id']}') ? PhFill.star : Ph.star),
+              title: Text(_stars.contains('${m['id']}') ? 'Hapus bintang' : 'Bintangi'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _star(m);
+              },
+            ),
+          if (!deleted && kind != 'call')
+            ListTile(
+              leading: Icon(_pinned?['id'] == m['id'] ? Ph.pushPinSlash : Ph.pushPin),
+              title: Text(_pinned?['id'] == m['id'] ? 'Lepas sematan' : 'Sematkan'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pin(_pinned?['id'] == m['id'] ? null : m);
+              },
+            ),
           if (!deleted && '${m['body'] ?? ''}'.isNotEmpty)
             ListTile(leading: const Icon(Ph.copy), title: const Text('Salin teks'), onTap: () {
               Navigator.pop(ctx);
@@ -426,6 +606,360 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
         ]),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------- reaksi, teruskan, bintang, sematkan
+  Future<void> _react(Map<String, dynamic> m, String emoji) async {
+    final me = _me;
+    if (me == null) return;
+    final id = '${m['id']}';
+    final cur = _reacts[id]?[me];
+    HapticFeedback.selectionClick();
+    void apply(String? e) => setState(() {
+          final map = _reacts.putIfAbsent(id, () => {});
+          if (e == null) {
+            map.remove(me);
+          } else {
+            map[me] = e;
+          }
+        });
+    // Memilih emoji yang sama lagi = membatalkan reaksi (seperti WhatsApp).
+    apply(cur == emoji ? null : emoji);
+    try {
+      if (cur == emoji) {
+        await _db.from('chat_reactions').delete().eq('message_id', id).eq('member_id', me);
+      } else {
+        await _db.from('chat_reactions').upsert({'message_id': id, 'member_id': me, 'thread_id': widget.threadId, 'emoji': emoji});
+      }
+    } catch (_) {
+      if (mounted) apply(cur);
+      _snack('Reaksi gagal dikirim.');
+    }
+  }
+
+  void _pickReaction(Map<String, dynamic> m) {
+    showSmoothSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: EmojiPanel(onEmoji: (e) {
+          Navigator.pop(ctx);
+          _react(m, e);
+        }),
+      ),
+    );
+  }
+
+  /// Siapa memberi reaksi apa. Ketuk reaksi sendiri untuk menghapusnya.
+  void _showReactions(Map<String, dynamic> m) {
+    final map = _reacts['${m['id']}'] ?? const {};
+    showSmoothSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text('${map.length} reaksi', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+          ),
+          for (final e in map.entries)
+            ListTile(
+              leading: MemberAvatar(name: e.key == _me ? 'Anda' : (_names[e.key] ?? 'Anggota'), radius: 18),
+              title: Text(e.key == _me ? 'Anda' : (_names[e.key] ?? 'Anggota')),
+              subtitle: e.key == _me ? const Text('Ketuk untuk menghapus') : null,
+              trailing: Text(e.value, style: const TextStyle(fontSize: 24)),
+              onTap: e.key == _me
+                  ? () {
+                      Navigator.pop(ctx);
+                      _react(m, e.value);
+                    }
+                  : null,
+            ),
+        ]),
+      ),
+    );
+  }
+
+  Future<void> _forward(Map<String, dynamic> m) async {
+    final me = _me;
+    if (me == null) return;
+    List<Map<String, dynamic>> threads;
+    try {
+      threads = List<Map<String, dynamic>>.from(await _db.rpc('chat_threads_overview') as List);
+    } catch (_) {
+      _snack('Gagal memuat daftar chat.');
+      return;
+    }
+    if (!mounted) return;
+    final target = await showSmoothSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text('Teruskan ke…', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final t in threads)
+                  ListTile(
+                    leading: t['kind'] == 'group'
+                        ? const CircleAvatar(radius: 20, backgroundColor: AppColors.navyAction, child: Icon(PhFill.usersThree, size: 20, color: Colors.white))
+                        : MemberAvatar(name: '${t['title']}', radius: 20),
+                    title: Text('${t['title']}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                    onTap: () => Navigator.pop(ctx, t),
+                  ),
+              ]),
+            ),
+          ]),
+        ),
+      ),
+    );
+    if (target == null) return;
+    final tid = '${target['thread_id']}';
+    final kind = '${m['kind'] ?? 'text'}';
+    setState(() => _uploading = 'Meneruskan pesan…');
+    try {
+      // Lampiran disalin ke folder percakapan tujuan, karena akses berkas mengikuti keanggotaan percakapan.
+      String? path = m['attachment_path'] as String?;
+      if (path != null && kind != 'text') {
+        final bytes = await _db.storage.from(ChatFiles.bucket).download(path);
+        path = await ChatFiles.upload(threadId: tid, memberId: me, bytes: bytes, name: '${m['attachment_name'] ?? 'berkas'}', mime: m['attachment_mime'] as String?);
+      }
+      final row = await _db
+          .from('chat_messages')
+          .insert({
+            'thread_id': tid,
+            'sender_id': me,
+            'body': m['body'] ?? '',
+            'kind': kind,
+            'forwarded': true,
+            if (path != null) ...{
+              'attachment_path': path,
+              'attachment_name': m['attachment_name'],
+              'attachment_size': m['attachment_size'],
+              'attachment_mime': m['attachment_mime'],
+              if (m['duration_ms'] != null) 'duration_ms': m['duration_ms'],
+            },
+          })
+          .select(_cols)
+          .single();
+      if (tid == widget.threadId) _upsert(Map<String, dynamic>.from(row));
+      _snack('Diteruskan ke ${target['title']}.');
+    } on ChatUploadException catch (e) {
+      _snack(e.message);
+    } catch (_) {
+      _snack('Gagal meneruskan pesan.');
+    } finally {
+      if (mounted) setState(() => _uploading = null);
+    }
+  }
+
+  Future<void> _star(Map<String, dynamic> m) async {
+    final me = _me;
+    if (me == null) return;
+    final id = '${m['id']}';
+    final on = !_stars.contains(id);
+    void apply(bool v) => setState(() {
+          if (v) {
+            _stars.add(id);
+          } else {
+            _stars.remove(id);
+          }
+        });
+    apply(on);
+    try {
+      if (on) {
+        await _db.from('chat_stars').insert({'member_id': me, 'message_id': id, 'thread_id': widget.threadId});
+      } else {
+        await _db.from('chat_stars').delete().eq('member_id', me).eq('message_id', id);
+      }
+    } catch (_) {
+      if (mounted) apply(!on);
+      _snack('Gagal menyimpan bintang.');
+    }
+  }
+
+  Future<void> _pin(Map<String, dynamic>? m) async {
+    final old = _pinned;
+    setState(() => _pinned = m);
+    try {
+      await _db.rpc('chat_pin_message', params: {'p_thread': widget.threadId, 'p_message': m?['id']});
+    } catch (_) {
+      if (mounted) setState(() => _pinned = old);
+      _snack(m == null ? 'Gagal melepas sematan.' : 'Gagal menyematkan pesan.');
+    }
+  }
+
+  /// Gulir ke pesan lalu sorot sebentar.
+  void _jumpTo(Map<String, dynamic> m) {
+    final id = '${m['id']}';
+    final i = _msgs.indexWhere((e) => e['id'] == id);
+    if (i < 0) {
+      _snack('Pesan ini terlalu lama dan belum dimuat.');
+      return;
+    }
+    setState(() => _flashId = id);
+    // Daftar terbalik (indeks 0 di bawah). Lompat kira-kira dulu bila gelembung belum dibangun, lalu pas-kan.
+    if (_keys[id]?.currentContext == null && _scroll.hasClients) {
+      _scroll.jumpTo((i * 72.0).clamp(0.0, _scroll.position.maxScrollExtent));
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _keys[id]?.currentContext;
+      if (c != null) {
+        Scrollable.ensureVisible(c, alignment: 0.5, duration: Duration(milliseconds: reduceMotion(context) ? 0 : 320), curve: Curves.easeOutCubic);
+      }
+    });
+    Future.delayed(const Duration(milliseconds: 1600), () {
+      if (mounted && _flashId == id) setState(() => _flashId = null);
+    });
+  }
+
+  // ---------------------------------------------------------------- menu percakapan
+  void _menu() {
+    final muted = _mutedUntil != null && _mutedUntil!.isAfter(DateTime.now());
+    showSmoothSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(leading: const Icon(Ph.magnifyingGlass), title: const Text('Cari'), onTap: () {
+            Navigator.pop(ctx);
+            _search();
+          }),
+          ListTile(leading: const Icon(Ph.star), title: const Text('Pesan berbintang'), onTap: () {
+            Navigator.pop(ctx);
+            _starred();
+          }),
+          ListTile(leading: const Icon(Ph.paintBrush), title: const Text('Latar chat'), onTap: () {
+            Navigator.pop(ctx);
+            _pickWallpaper();
+          }),
+          ListTile(
+            leading: Icon(muted ? Ph.bell : Ph.bellSlash),
+            title: Text(muted ? 'Bunyikan notifikasi' : 'Bisukan notifikasi'),
+            onTap: () {
+              Navigator.pop(ctx);
+              _toggleMute(muted);
+            },
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Future<void> _toggleMute(bool muted) async {
+    final until = muted ? null : await ChatPrefs.pickMute(context);
+    if (!muted && until == null) return;
+    try {
+      await ChatPrefs.set(widget.threadId, setMute: true, mutedUntil: until);
+      if (mounted) setState(() => _mutedUntil = until);
+      _snack(muted ? 'Notifikasi dibunyikan.' : 'Notifikasi dibisukan.');
+    } catch (_) {
+      _snack('Gagal mengubah notifikasi.');
+    }
+  }
+
+  Future<void> _search() async {
+    final picked = await showSmoothSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _ChatSearchSheet(threadId: widget.threadId, names: _names, me: _me),
+    );
+    if (picked != null) _jumpTo(picked);
+  }
+
+  Future<void> _starred() async {
+    List<Map<String, dynamic>> rows = [];
+    if (_stars.isNotEmpty) {
+      try {
+        rows = List<Map<String, dynamic>>.from(
+            await _db.from('chat_messages').select(_cols).inFilter('id', _stars.toList()).order('created_at', ascending: false) as List);
+      } catch (_) {
+        _snack('Gagal memuat pesan berbintang.');
+        return;
+      }
+    }
+    if (!mounted) return;
+    final picked = await showSmoothSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(ctx).height * 0.7),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text('Pesan berbintang', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            ),
+            if (rows.isEmpty)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
+                child: Text('Belum ada. Tekan lama sebuah pesan, lalu pilih Bintangi.', textAlign: TextAlign.center),
+              )
+            else
+              Flexible(
+                child: ListView(shrinkWrap: true, children: [
+                  for (final r in rows)
+                    ListTile(
+                      leading: const Icon(PhFill.star, color: AppColors.gold),
+                      title: Text(r['sender_id'] == _me ? 'Anda' : (_names['${r['sender_id']}'] ?? 'Anggota')),
+                      subtitle: Text(_preview(r), maxLines: 2, overflow: TextOverflow.ellipsis),
+                      trailing: Text(chatTimeLabel(DateTime.tryParse('${r['created_at']}'))),
+                      onTap: () => Navigator.pop(ctx, r),
+                    ),
+                ]),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (picked != null) _jumpTo(picked);
+  }
+
+  void _pickWallpaper() {
+    showSmoothSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: Text('Latar chat', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            ),
+            Wrap(spacing: 12, runSpacing: 12, alignment: WrapAlignment.center, children: [
+              for (var i = 0; i < ChatWallpaper.names.length; i++)
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    setState(() => _wallpaper = i);
+                    ChatWallpaper.save(widget.threadId, i);
+                  },
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      width: 64,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        gradient: ChatWallpaper.gradient(i),
+                        color: i == 0 ? Theme.of(ctx).scaffoldBackgroundColor : null,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: i == _wallpaper ? Theme.of(ctx).colorScheme.primary : Theme.of(ctx).colorScheme.outlineVariant,
+                          width: i == _wallpaper ? 2.5 : 1,
+                        ),
+                      ),
+                      child: i == _wallpaper ? const Icon(PhFill.checkCircle, color: Colors.white) : null,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(ChatWallpaper.names[i], style: const TextStyle(fontSize: AppType.caption)),
+                  ]),
+                ),
+            ]),
+          ]),
+        ),
       ),
     );
   }
@@ -489,7 +1023,9 @@ class _ChatPageState extends State<ChatPage> {
       return n.length == 1 ? '${n.first} mengetik…' : '${n.length} orang mengetik…';
     }
     if (_group) return '${_names.length} anggota';
-    return OnlineService.instance.isOnline(_peerId) ? 'online' : '';
+    if (OnlineService.instance.isOnline(_peerId)) return 'online';
+    final seen = _peerLastSeen;
+    return seen == null ? '' : chatLastSeenLabel(seen);
   }
 
   /// Dibaca semua peserta lain sejak pesan dikirim?
@@ -622,11 +1158,12 @@ class _ChatPageState extends State<ChatPage> {
               onPressed: () => CallService.instance.call(context, threadId: widget.threadId, peerId: peer, peerName: _title, video: false),
             ),
           ],
+          IconButton(tooltip: 'Lainnya', icon: const Icon(Ph.dotsThree), onPressed: _loading ? null : _menu),
         ],
       ),
-      body: PageGlow(
-        accent: AppColors.violet,
-        child: Column(children: [
+      body: _background(
+        Column(children: [
+          if (_pinned != null) _pinBanner(scheme),
           Expanded(
             child: _loading
                 ? const SkeletonList()
@@ -635,6 +1172,7 @@ class _ChatPageState extends State<ChatPage> {
                     : _msgs.isEmpty
                         ? const EmptyState(icon: Ph.chatCircle, title: 'Belum ada pesan', message: 'Sapa duluan!')
                         : ListView.builder(
+                            controller: _scroll,
                             reverse: true,
                             padding: const EdgeInsets.fromLTRB(10, 12, 10, 8),
                             itemCount: _msgs.length,
@@ -656,12 +1194,44 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Widget _background(Widget child) {
+    final g = ChatWallpaper.gradient(_wallpaper);
+    if (g == null) return PageGlow(accent: AppColors.violet, child: child);
+    return DecoratedBox(decoration: BoxDecoration(gradient: g), child: child);
+  }
+
+  Widget _pinBanner(ColorScheme scheme) {
+    final p = _find(_pinned!['id'] as String?) ?? _pinned!;
+    return Material(
+      color: scheme.surface.withValues(alpha: 0.92),
+      child: InkWell(
+        onTap: () => _jumpTo(p),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
+          child: Row(children: [
+            Icon(PhFill.pushPin, size: 18, color: scheme.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                Text('Pesan disematkan', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: scheme.primary)),
+                Text(_preview(p), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: AppType.small, color: scheme.onSurfaceVariant)),
+              ]),
+            ),
+            IconButton(tooltip: 'Lepas sematan', icon: const Icon(Ph.x, size: 18), onPressed: () => _pin(null)),
+          ]),
+        ),
+      ),
+    );
+  }
+
   Widget _row(int i, ColorScheme scheme) {
     final m = _msgs[i];
     final at = DateTime.tryParse('${m['created_at']}')?.toLocal();
     final older = i + 1 < _msgs.length ? DateTime.tryParse('${_msgs[i + 1]['created_at']}')?.toLocal() : null;
     final newDay = at != null && (older == null || older.year != at.year || older.month != at.month || older.day != at.day);
     final sameSenderAbove = i + 1 < _msgs.length && _msgs[i + 1]['sender_id'] == m['sender_id'] && !newDay;
+    final id = '${m['id']}';
+    final reacts = m['deleted_at'] == null ? (_reacts[id] ?? const <String, String>{}) : const <String, String>{};
     final bubble = '${m['kind']}' == 'call'
         ? _callChip(m, scheme)
         : _SwipeToReply(
@@ -671,9 +1241,54 @@ class _ChatPageState extends State<ChatPage> {
           );
     return Column(children: [
       if (newDay) _dayChip(at, scheme),
-      bubble,
+      // Sorotan singkat saat pesan dipilih dari pencarian, bintang, atau sematan.
+      AnimatedContainer(
+        key: _keys.putIfAbsent(id, GlobalKey.new),
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: _flashId == id ? scheme.primary.withValues(alpha: 0.16) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: bubble,
+      ),
+      if (reacts.isNotEmpty) _reactionChip(m, reacts, scheme),
       if (i == _lastMineIndex) _seenLabel(m, scheme),
     ]);
+  }
+
+  /// Reaksi di bawah gelembung: emoji unik (maks. 3) dan jumlahnya, seperti WhatsApp.
+  Widget _reactionChip(Map<String, dynamic> m, Map<String, String> reacts, ColorScheme scheme) {
+    final mine = m['sender_id'] == _me;
+    final counts = <String, int>{};
+    for (final e in reacts.values) {
+      counts[e] = (counts[e] ?? 0) + 1;
+    }
+    final top = (counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).take(3).map((e) => e.key).join();
+    return Align(
+      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      child: Transform.translate(
+        offset: const Offset(0, -6),
+        child: GestureDetector(
+          onTap: () => _showReactions(m),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppRadius.chip),
+              border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 1.5),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text(top, style: const TextStyle(fontSize: 14)),
+              if (reacts.length > 1) ...[
+                const SizedBox(width: 3),
+                Text('${reacts.length}', style: TextStyle(fontSize: AppType.micro, fontWeight: FontWeight.w700, color: scheme.onSurfaceVariant)),
+              ],
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _dayChip(DateTime d, ColorScheme scheme) {
@@ -761,6 +1376,15 @@ class _ChatPageState extends State<ChatPage> {
               padding: EdgeInsets.only(bottom: 2, left: kind == 'image' ? 6 : 0),
               child: Text(_names['${m['sender_id']}'] ?? 'Anggota', style: TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700, color: scheme.primary)),
             ),
+          if (m['forwarded'] == true && !deleted)
+            Padding(
+              padding: EdgeInsets.only(bottom: 3, left: kind == 'image' ? 6 : 0),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Ph.arrowBendUpRight, size: 13, color: sub),
+                const SizedBox(width: 4),
+                Text('Diteruskan', style: TextStyle(fontSize: AppType.caption, fontStyle: FontStyle.italic, color: sub)),
+              ]),
+            ),
           if (m['reply_to'] != null && !deleted)
             Container(
               margin: const EdgeInsets.only(bottom: 6),
@@ -781,6 +1405,10 @@ class _ChatPageState extends State<ChatPage> {
           Padding(
             padding: EdgeInsets.only(right: kind == 'image' && !deleted ? 6 : 0),
             child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              if (_stars.contains('${m['id']}') && !deleted) ...[
+                Icon(PhFill.star, size: 11, color: sub),
+                const SizedBox(width: 3),
+              ],
               if (m['edited_at'] != null && !deleted) Text('diedit · ', style: TextStyle(fontSize: AppType.micro, color: sub)),
               Text(chatTimeLabel(DateTime.tryParse('${m['created_at']}')), style: TextStyle(fontSize: AppType.micro, color: sub)),
               if (mine && !deleted) ...[
@@ -859,6 +1487,10 @@ class _ChatPageState extends State<ChatPage> {
                 child: TextField(
                   controller: _input,
                   focusNode: _focus,
+                  // Mengetuk kolom pesan saat panel emoji terbuka: kembali ke keyboard.
+                  onTap: () {
+                    if (_emoji) setState(() => _emoji = false);
+                  },
                   minLines: 1,
                   maxLines: 5,
                   maxLength: 2000,
@@ -870,8 +1502,14 @@ class _ChatPageState extends State<ChatPage> {
                     isDense: true,
                     filled: true,
                     fillColor: scheme.surfaceContainerHighest,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                    // Tombol emoji di dalam kolom, kiri (seperti WhatsApp). Saat panel terbuka berganti ikon keyboard.
+                    prefixIcon: IconButton(
+                      tooltip: _emoji ? 'Keyboard' : 'Emoji',
+                      onPressed: _toggleEmoji,
+                      icon: Icon(_emoji ? Ph.keyboard : Ph.smiley),
+                    ),
                   ),
                 ),
               ),
@@ -890,6 +1528,7 @@ class _ChatPageState extends State<ChatPage> {
                       icon: const Icon(PhFill.microphone),
                     ),
             ]),
+          if (_emoji && !_recording) EmojiPanel(onEmoji: _insertEmoji, onBackspace: _backspace),
         ]),
       ),
     );
@@ -1001,6 +1640,142 @@ class _AttachOpt extends StatelessWidget {
           const SizedBox(height: 6),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         ]),
+      ),
+    );
+  }
+}
+
+/// Tombol emoji di baris reaksi menu tekan lama. Tanpa [emoji] = tombol "+" untuk emoji lain.
+class _ReactButton extends StatelessWidget {
+  const _ReactButton({this.emoji, this.selected = false, required this.onTap});
+  final String? emoji;
+  final bool selected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: emoji == null ? 'Emoji lain' : 'Reaksi $emoji',
+      child: InkResponse(
+        onTap: onTap,
+        radius: 26,
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: selected ? scheme.primary.withValues(alpha: 0.18) : (emoji == null ? scheme.surfaceContainerHighest : null),
+          ),
+          child: emoji == null ? Icon(Ph.plus, size: 20, color: scheme.onSurfaceVariant) : Text(emoji!, style: const TextStyle(fontSize: 26)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Cari teks di dalam satu percakapan (di server, jadi pesan lama ikut tercari). Mengembalikan pesan yang dipilih.
+class _ChatSearchSheet extends StatefulWidget {
+  const _ChatSearchSheet({required this.threadId, required this.names, required this.me});
+  final String threadId;
+  final Map<String, String> names;
+  final String? me;
+  @override
+  State<_ChatSearchSheet> createState() => _ChatSearchSheetState();
+}
+
+class _ChatSearchSheetState extends State<_ChatSearchSheet> {
+  final _q = TextEditingController();
+  Timer? _debounce;
+  List<Map<String, dynamic>> _hits = [];
+  bool _busy = false;
+  String _last = '';
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _q.dispose();
+    super.dispose();
+  }
+
+  void _changed(String v) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () => _run(v.trim()));
+  }
+
+  Future<void> _run(String q) async {
+    _last = q;
+    if (q.length < 2) {
+      setState(() => _hits = []);
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      // % dan _ adalah karakter khusus ILIKE: di-escape agar dicari apa adanya.
+      final safe = q.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+      final r = await SupabaseService.client
+          .from('chat_messages')
+          .select(_cols)
+          .eq('thread_id', widget.threadId)
+          .isFilter('deleted_at', null)
+          .ilike('body', '%$safe%')
+          .order('created_at', ascending: false)
+          .limit(50);
+      if (mounted && _last == q) setState(() => _hits = List<Map<String, dynamic>>.from(r as List));
+    } catch (_) {
+      if (mounted) setState(() => _hits = []);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final q = _q.text.trim();
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.6,
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: TextField(
+                controller: _q,
+                autofocus: true,
+                onChanged: _changed,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Cari di percakapan ini',
+                  prefixIcon: const Icon(Ph.magnifyingGlass),
+                  isDense: true,
+                  suffixIcon: _busy ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator.adaptive(strokeWidth: 2)) : null,
+                ),
+              ),
+            ),
+            Expanded(
+              child: q.length < 2
+                  ? Center(child: Text('Ketik minimal 2 huruf.', style: TextStyle(color: scheme.onSurfaceVariant)))
+                  : _hits.isEmpty && !_busy
+                      ? Center(child: Text('Tidak ada pesan yang cocok.', style: TextStyle(color: scheme.onSurfaceVariant)))
+                      : ListView.builder(
+                          itemCount: _hits.length,
+                          itemBuilder: (_, i) {
+                            final m = _hits[i];
+                            final who = m['sender_id'] == widget.me ? 'Anda' : (widget.names['${m['sender_id']}'] ?? 'Anggota');
+                            return ListTile(
+                              title: Text(who, style: const TextStyle(fontWeight: FontWeight.w700)),
+                              subtitle: Text('${m['body']}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                              trailing: Text(chatTimeLabel(DateTime.tryParse('${m['created_at']}')), style: TextStyle(fontSize: AppType.caption, color: scheme.onSurfaceVariant)),
+                              onTap: () => Navigator.pop(context, m),
+                            );
+                          },
+                        ),
+            ),
+          ]),
+        ),
       ),
     );
   }
