@@ -114,10 +114,17 @@ workflows:
       - name: Build IPA tanpa tanda tangan
         script: |
           set -ex
-          flutter build ios --release --no-codesign
-          ls -la build/ios/iphoneos/
+          # Flutter versi baru (Swift Package Manager) kadang tetap meminta Development Team walau --no-codesign.
+          # Karena itu Flutter hanya menyiapkan konfigurasi, lalu Xcode membangun dengan tanda tangan dimatikan.
+          flutter build ios --release --no-codesign --config-only
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/xc \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" DEVELOPMENT_TEAM="" \
+            build | tail -n 40
+          test "${PIPESTATUS[0]}" -eq 0
+          ls -la build/xc/Build/Products/Release-iphoneos/
           # Runner.app bisa berupa symlink: ikuti ke folder aslinya, salin utuh dengan ditto.
-          APP_DIR="$(cd build/ios/iphoneos/Runner.app && pwd -P)"
+          APP_DIR="$(cd build/xc/Build/Products/Release-iphoneos/Runner.app && pwd -P)"
           rm -rf build/ipa && mkdir -p build/ipa/Payload
           ditto "$APP_DIR" build/ipa/Payload/Runner.app
           test -f build/ipa/Payload/Runner.app/Runner || { echo "Runner.app kosong, IPA dibatalkan"; exit 1; }
