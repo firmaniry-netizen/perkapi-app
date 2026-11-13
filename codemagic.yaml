@@ -86,10 +86,21 @@ workflows:
         script: flutter pub get
       - name: Build untuk iPhone Simulator
         script: |
-          flutter build ios --simulator
-          cd build/ios/iphonesimulator && zip -qr Runner.zip Runner.app
+          set -ex
+          # mobile_scanner 6 memakai Google ML Kit yang tidak punya versi simulator arm64 (Apple Silicon),
+          # jadi build simulator dibuat khusus x86_64. Appetize dan simulator di Mac tetap bisa menjalankannya.
+          flutter build ios --simulator --debug --config-only
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/xcsim \
+            ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO EXCLUDED_ARCHS=arm64 CODE_SIGNING_ALLOWED=NO \
+            build | tail -n 40
+          test "${PIPESTATUS[0]}" -eq 0
+          APP_DIR="$(cd build/xcsim/Build/Products/Debug-iphonesimulator/Runner.app && pwd -P)"
+          rm -rf build/sim && mkdir -p build/sim
+          ditto "$APP_DIR" build/sim/Runner.app
+          cd build/sim && zip -qry Runner.zip Runner.app && ls -la Runner.zip
     artifacts:
-      - build/ios/iphonesimulator/Runner.zip
+      - build/sim/Runner.zip
       - /tmp/xcodebuild_logs/*.log
 
   ios-ipa-sideload:
