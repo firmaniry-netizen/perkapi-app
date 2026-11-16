@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Token pra-ujian | Admin PERKAPI</title>
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="/css/baru.css">
+<style>
+.adm{max-width:980px;margin:0 auto;padding:clamp(28px,5vw,56px) var(--gut)}
+.adm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
+.adm h1{font:400 clamp(2rem,4vw,2.6rem)/1.1 var(--f-serif)}
+.bar{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:0 0 24px;padding:20px;border-radius:var(--r);background:var(--sand)}
+.bar label{margin:0 0 6px!important}
+.bar input{width:120px!important}
+.bar .f{display:flex;flex-direction:column}
+.sum{display:flex;flex-wrap:wrap;gap:8px 24px;margin:0 0 16px;color:var(--muted);font-size:15px}
+.sum b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13.5px}
+td.t{font:600 18px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.12em;color:var(--navy);white-space:nowrap}
+.st{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--ok-bg);color:var(--ok)}
+.st.used{background:var(--sand);color:var(--ink-2)}
+.st.exp{background:var(--er-bg);color:var(--er)}
+.tbl{overflow-x:auto}
+.lg-box{max-width:420px;margin:8vh auto}
+@media print{.bar,.adm-top .actions,.no-print,.hd{display:none!important}body{background:#fff}td.t{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="lg-box card" id="lg">
+<h1 class="exam-h">Masuk admin</h1>
+<p class="muted">Pakai akun admin situs PERKAPI.</p>
+<form id="fl"><label for="em">Email</label><input id="em" type="email" autocomplete="username" required><label for="pw">Kata sandi</label><input id="pw" type="password" autocomplete="current-password" required><p><button class="btn" id="bl">Masuk</button></p></form>
+<div id="le" class="msg er" hidden></div>
+</div>
+
+<div class="adm" id="ap" hidden>
+<div class="adm-top">
+<div><h1>Token pra-ujian</h1><p class="muted" style="margin:6px 0 0">Satu token untuk satu peserta. Berlaku sampai pukul 23.59 WIB hari dibuat, dan hanya bisa dipakai sekali.</p></div>
+<div class="actions"><a class="btn line" href="/admin/">Panel admin</a><button class="btn line" id="ko" type="button">Keluar</button></div>
+</div>
+<form class="bar" id="fb">
+<div class="f"><label for="jm">Jumlah token baru</label><input id="jm" type="number" min="1" max="200" value="10"></div>
+<button class="btn" id="bb">Buat token</button>
+<div class="f" style="margin-left:auto"><label for="tg">Tampilkan tanggal</label><input id="tg" type="date" style="width:180px!important"></div>
+<button class="btn line" type="button" id="pr">Cetak daftar</button>
+</form>
+<div id="m" class="msg" role="status" hidden></div>
+<div class="sum" id="sum"></div>
+<div class="tbl"><table><thead><tr><th>Token</th><th>Status</th><th>Peserta</th><th>Dipakai</th><th>Skor</th><th class="no-print"></th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+
+<script src="/config.js"></script>
+<script>
+// Halaman admin token pra-ujian. Server: admin_create_exam_tokens(p_count), admin_list_exam_tokens(p_date), admin_revoke_exam_token(p_token).
+(function(){
+var C=window.PERKAPI||{},U=(C.SUPABASE_URL||"").replace(/\/+$/,""),K=C.SUPABASE_ANON_KEY,S=sessionStorage,$=function(i){return document.getElementById(i)};
+var esc=function(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML};
+var jam=function(d){return d?new Date(d).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",timeZone:"Asia/Jakarta"}):"—"};
+var hariIni=function(){return new Date(Date.now()+7*36e5).toISOString().slice(0,10)};
+var fmtTok=function(t){return t.slice(0,4)+"-"+t.slice(4)};
+function pesan(t,c){var m=$("m");m.className="msg "+(c||"");m.textContent=t;m.hidden=!t}
+async function auth(b,g){var r=await fetch(U+"/auth/v1/token?grant_type="+g,{method:"POST",headers:{apikey:K,"Content-Type":"application/json"},body:JSON.stringify(b)}),j=await r.json().catch(function(){return{}});if(!r.ok)throw new Error(j.error_description||j.msg||"Gagal masuk");S.t=j.access_token;S.r=j.refresh_token}
+async function rpc(fn,body,re){var r=await fetch(U+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:K,Authorization:"Bearer "+S.t,"Content-Type":"application/json"},body:JSON.stringify(body||{})});
+ if(r.status===401&&!re&&S.r){await auth({refresh_token:S.r},"refresh_token");return rpc(fn,body,1)}
+ var t=await r.text(),j=t?JSON.parse(t):null;if(r.status===404)throw new Error("Fitur token belum aktif di database (SQL 50 belum dijalankan).");if(!r.ok)throw new Error((j&&j.message)||"Permintaan gagal");return j}
+async function muat(){var rows=await rpc("admin_list_exam_tokens",{p_date:$("tg").value})||[];
+ var now=Date.now(),pakai=rows.filter(function(r){return r.used_at}).length,habis=rows.filter(function(r){return !r.used_at&&new Date(r.expires_at)<now}).length;
+ $("sum").innerHTML="<span><b>"+rows.length+"</b> token</span><span><b>"+pakai+"</b> sudah dipakai</span><span><b>"+(rows.length-pakai-habis)+"</b> siap dipakai</span>"+(habis?"<span><b>"+habis+"</b> kedaluwarsa</span>":"");
+ $("tb").innerHTML=rows.length?rows.map(function(r){var st=r.used_at?'<span class="st used">Sudah dipakai</span>':new Date(r.expires_at)<now?'<span class="st exp">Kedaluwarsa</span>':'<span class="st">Siap</span>';
+  return"<tr><td class=t>"+esc(fmtTok(r.token))+"</td><td>"+st+"</td><td>"+esc(r.full_name||"—")+"</td><td>"+jam(r.used_at)+"</td><td>"+(r.score==null?"—":esc(r.score))+'</td><td class="no-print">'+(!r.used_at&&new Date(r.expires_at)>=now?'<button class="link" data-x="'+esc(r.token)+'" type="button" style="background:none;border:0;cursor:pointer">Batalkan</button>':"")+"</td></tr>"}).join(""):'<tr><td colspan="6" class="muted">Belum ada token untuk tanggal ini. Isi jumlah lalu tekan Buat token.</td></tr>'}
+$("tb").onclick=async function(e){var t=e.target.dataset.x;if(!t)return;try{await rpc("admin_revoke_exam_token",{p_token:t});pesan("Token "+fmtTok(t)+" dibatalkan.","ok");await muat()}catch(x){pesan(x.message,"er")}};
+$("fb").onsubmit=async function(e){e.preventDefault();var n=+$("jm").value;if(!(n>=1&&n<=200))return pesan("Jumlah token 1 sampai 200.","er");var b=$("bb");b.setAttribute("aria-busy","true");
+ try{var r=await rpc("admin_create_exam_tokens",{p_count:n});pesan((r?r.length:n)+" token baru dibuat untuk hari ini.","ok");$("tg").value=hariIni();await muat()}catch(x){pesan(x.message,"er")}finally{b.setAttribute("aria-busy","false")}};
+$("tg").onchange=function(){muat().catch(function(x){pesan(x.message,"er")})};
+$("pr").onclick=function(){print()};
+async function masuk(){if(await rpc("is_site_admin")!==true)throw new Error("Akun ini bukan admin situs.");$("lg").hidden=true;$("ap").hidden=false;$("tg").value=hariIni();await muat().catch(function(x){pesan(x.message,"er")})}
+$("fl").onsubmit=async function(e){e.preventDefault();$("le").hidden=true;var b=$("bl");b.setAttribute("aria-busy","true");try{await auth({email:$("em").value.trim(),password:$("pw").value},"password");await masuk()}catch(x){S.removeItem("t");$("le").textContent=x.message;$("le").hidden=false}finally{b.setAttribute("aria-busy","false")}};
+$("ko").onclick=function(){S.clear();location.reload()};
+if(S.t)masuk().catch(function(){S.clear()});
+})();
+</script>
+</body></html>
