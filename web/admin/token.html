@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
-<link rel="stylesheet" href="/css/baru.css?v=20261116g">
+<link rel="stylesheet" href="/css/baru.css?v=20261116h">
 <style>
 .adm{max-width:980px;margin:0 auto;padding:clamp(28px,5vw,56px) var(--gut)}
 .adm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
@@ -26,7 +26,21 @@ td.t{font:600 18px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.12em;colo
 .st.exp{background:var(--er-bg);color:var(--er)}
 .tbl{overflow-x:auto}
 .lg-box{max-width:420px;margin:8vh auto}
-@media print{.bar,.adm-top .actions,.no-print,.hd{display:none!important}body{background:#fff}td.t{font-size:20px}}
+/* struk token baru: kertas keluar dari celah printer */
+.prn{position:relative;margin:0 0 24px;display:grid;justify-items:center}
+.prn-slot{width:min(380px,100%);height:14px;border-radius:8px;background:var(--navy);box-shadow:inset 0 -4px 0 rgba(0,0,0,.35)}
+.prn-clip{width:min(340px,92%);overflow:hidden;margin-top:-6px}
+.struk{background:#fff;color:#0F1C33;padding:22px 22px 30px;font:500 14px/1.5 ui-monospace,Consolas,monospace;box-shadow:0 14px 26px -18px rgba(13,31,69,.5);transform:translateY(-100%);animation:keluar var(--d,1.6s) steps(var(--n,12)) forwards;
+ -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle 6px at 8px 100%,transparent 6px,#000 6.5px) bottom/16px 10px repeat-x;mask:linear-gradient(#000 0 0) top/100% calc(100% - 10px) no-repeat,radial-gradient(circle 6px at 8px 100%,transparent 6px,#000 6.5px) bottom/16px 10px repeat-x}
+.struk h3{margin:0 0 4px;font:600 15px/1.3 ui-monospace,Consolas,monospace;text-align:center;letter-spacing:.08em}
+.struk p{margin:0;text-align:center;color:#5B6478;font-size:12.5px}
+.struk hr{border:0;border-top:1px dashed #9AA3B5;margin:12px 0}
+.struk ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.struk li{display:flex;justify-content:space-between;font-size:17px;letter-spacing:.12em;font-weight:600}
+.struk li span{color:#8A93A6;font-size:12px;letter-spacing:0;font-weight:500}
+@keyframes keluar{to{transform:none}}
+@media (prefers-reduced-motion:reduce){.struk{animation:none;transform:none}}
+@media print{.prn{display:none!important}.bar,.adm-top .actions,.no-print,.hd{display:none!important}body{background:#fff}td.t{font-size:20px}}
 </style>
 </head>
 <body>
@@ -49,6 +63,7 @@ td.t{font:600 18px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.12em;colo
 <button class="btn line" type="button" id="pr">Cetak daftar</button>
 </form>
 <div id="m" class="msg" role="status" hidden></div>
+<div id="prn" class="prn" hidden aria-live="polite"></div>
 <div class="sum" id="sum"></div>
 <div class="tbl"><table><thead><tr><th>Token</th><th>Status</th><th>Peserta</th><th>Dipakai</th><th>Skor</th><th class="no-print"></th></tr></thead><tbody id="tb"></tbody></table></div>
 </div>
@@ -74,7 +89,10 @@ async function muat(){var rows=await rpc("admin_list_exam_tokens",{p_date:$("tg"
   return"<tr><td class=t>"+esc(fmtTok(r.token))+"</td><td>"+st+"</td><td>"+esc(r.full_name||"—")+"</td><td>"+jam(r.used_at)+"</td><td>"+(r.score==null?"—":esc(r.score))+'</td><td class="no-print">'+(!r.used_at&&new Date(r.expires_at)>=now?'<button class="link" data-x="'+esc(r.token)+'" type="button" style="background:none;border:0;cursor:pointer">Batalkan</button>':"")+"</td></tr>"}).join(""):'<tr><td colspan="6" class="muted">Belum ada token untuk tanggal ini. Isi jumlah lalu tekan Buat token.</td></tr>'}
 $("tb").onclick=async function(e){var t=e.target.dataset.x;if(!t)return;try{await rpc("admin_revoke_exam_token",{p_token:t});pesan("Token "+fmtTok(t)+" dibatalkan.","ok");await muat()}catch(x){pesan(x.message,"er")}};
 $("fb").onsubmit=async function(e){e.preventDefault();var n=+$("jm").value;if(!(n>=1&&n<=200))return pesan("Jumlah token 1 sampai 200.","er");var b=$("bb");b.setAttribute("aria-busy","true");
- try{var r=await rpc("admin_create_exam_tokens",{p_count:n});pesan((r?r.length:n)+" token baru dibuat untuk hari ini.","ok");$("tg").value=hariIni();await muat()}catch(x){pesan(x.message,"er")}finally{b.setAttribute("aria-busy","false")}};
+ try{var r=await rpc("admin_create_exam_tokens",{p_count:n});pesan((r?r.length:n)+" token baru dibuat untuk hari ini.","ok");struk(r);$("tg").value=hariIni();await muat()}catch(x){pesan(x.message,"er")}finally{b.setAttribute("aria-busy","false")}};
+function struk(r){var t=(r||[]).map(function(x){return typeof x=="string"?x:(x&&(x.token||x.admin_create_exam_tokens))||""}).filter(Boolean);if(!t.length)return;
+ var w=$("prn"),d=new Date();w.hidden=false;
+ w.innerHTML='<div class="prn-slot" aria-hidden="true"></div><div class="prn-clip"><div class="struk" style="--n:'+Math.min(24,6+t.length)+';--d:'+Math.min(3.2,1+t.length*.12).toFixed(2)+'s"><h3>TOKEN PRAUJIAN</h3><p>PERKAPI, '+esc(d.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"}))+'</p><p>Berlaku hari ini, sekali pakai</p><hr><ol>'+t.map(function(k,i){return"<li>"+esc(fmtTok(k))+"<span>#"+(i+1)+"</span></li>"}).join("")+'</ol><hr><p>'+t.length+' token dibuat pukul '+esc(d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}))+'</p></div></div>';}
 $("tg").onchange=function(){muat().catch(function(x){pesan(x.message,"er")})};
 $("pr").onclick=function(){print()};
 async function masuk(){if(await rpc("is_site_admin")!==true)throw new Error("Akun ini bukan admin situs.");$("lg").hidden=true;$("ap").hidden=false;$("tg").value=hariIni();await muat().catch(function(x){pesan(x.message,"er")})}
