@@ -732,3 +732,39 @@ input.tok::placeholder{font:400 16px/1 var(--f-sans);letter-spacing:0;text-trans
   .c-body p{font-size:11.5px}
 }
 @media (max-width:420px){.hero3-in{padding-top:120px}.hero3 h1{font-size:clamp(2.4rem,11vw,3rem)}.hero3 .actions .btn{width:100%}}
+/* kaki situs: alamat + ruang untuk tombol WhatsApp mengambang */
+.ft li a.addr{align-items:flex-start;line-height:1.5;padding:8px 0}
+.ft li a.addr .ic{margin-top:3px}
+.ft{padding-bottom:104px}
+.ft-b{align-items:center}
+@media (max-width:860px){.ft{padding-bottom:110px}.ft-b{flex-direction:column;gap:6px}}
+
+/* ===== revisi 7: hero terang kembali + animasi tambahan ===== */
+.hero2 h1.words{color:var(--navy)}
+.hero2-row .actions{margin-top:0}
+.hero2-cap{align-items:center}
+.hero2-cap .scroll-cue{font-size:14px}
+.js .hero2-photo img{transform:scale(1.06);transition:clip-path 1.6s cubic-bezier(.16,1,.3,1) .35s,transform 2.4s cubic-bezier(.16,1,.3,1) .35s}
+.ready .hero2-photo img{transform:none}
+/* penanda belah ketupat berputar masuk */
+.js .rv .h2::before,.js .head>.h2.rv::before,.js .split-h>.h2.rv::before,.js .faq .h2.rv::before{transform:rotate(-135deg) scale(0);transition:transform .9s cubic-bezier(.34,1.56,.64,1) .2s}
+.js .rv.in .h2::before,.js .head>.h2.rv.in::before,.js .split-h>.h2.rv.in::before,.js .faq .h2.rv.in::before{transform:rotate(45deg) scale(1)}
+/* garis emas tumbuh di baris program */
+.vals>div::before{transform:scaleY(0);transform-origin:top;transition:transform 1s cubic-bezier(.16,1,.3,1) .25s}
+.vals>div.in::before,.no-js .vals>div::before{transform:none}
+.vals>div{transition:background-color .3s}
+.vals>div:hover{background:linear-gradient(90deg,var(--gold-soft),transparent 80%)}
+.vals>div:hover dt .ic{transform:scale(1.15) rotate(-6deg)}
+.vals dt .ic{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+/* kilau pada tombol utama */
+.btn:not(.line):not(.is-off):not(.line-dark){overflow:hidden}
+.btn:not(.line):not(.is-off):not(.line-dark)::before{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .7s ease}
+.btn:not(.line):not(.is-off):not(.line-dark):hover::before{left:130%}
+/* ikon lencana bergoyang saat kartu disorot */
+.go2-it:hover .badge,.program:hover .badge{animation:wob .6s ease}
+@keyframes wob{30%{transform:rotate(-8deg) scale(1.06)}60%{transform:rotate(5deg)}100%{transform:none}}
+/* foto split: perlahan membesar saat disorot */
+.split-photo img{transition:transform 1.4s cubic-bezier(.16,1,.3,1)}
+.split-photo:hover img{transform:scale(1.05)}
+@media (prefers-reduced-motion:reduce){.js .hero2-photo img{transform:none}.vals>div::before{transform:none}.btn::before{display:none}}
+@media (max-width:520px){.hero2-row .actions .btn{width:100%}}
