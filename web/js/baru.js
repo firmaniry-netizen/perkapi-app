@@ -64,3 +64,6 @@
     [].forEach.call(dok.querySelectorAll('a[href^="dokumen/"]'), function (a) { a.setAttribute("href", "/" + a.getAttribute("href")); });
   }).observe(dok, { childList: true, subtree: true });
 })();
+
+// angka data terkini: sembunyikan baris yang nilainya 0 (mis. belum ada agenda)
+setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.getElementById(id); if (el && el.textContent.trim() === "0") { var li = el.closest(".b-stat"); if (li) li.hidden = true; } }); }, 2500);

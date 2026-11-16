@@ -1,4 +1,4 @@
-// Pra-ujian di lokasi: peserta memasukkan nama dan token sekali pakai dari admin.
+// Praujian di lokasi: peserta memasukkan nama dan token sekali pakai dari admin.
 // Server: start_exam_token(p_name, p_token) -> uuid peserta, get_exam_questions(p_id), submit_exam_token(p_id, p_answers).
 // Skor tidak ditampilkan ke peserta; hanya admin yang melihatnya.
 (function () {
@@ -15,7 +15,7 @@
     var r = await fetch(U + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: K, "Content-Type": "application/json" }, body: JSON.stringify(body) });
     var t = await r.text(), j; try { j = JSON.parse(t); } catch (e) { j = t; }
     if (!r.ok) {
-      if (r.status === 404) throw new Error("Layanan pra-ujian belum aktif di server. Hubungi pengawas.");
+      if (r.status === 404) throw new Error("Layanan praujian belum aktif di server. Hubungi pengawas.");
       throw new Error((j && j.message) || "Permintaan gagal. Periksa koneksi lalu coba lagi.");
     }
     return j;

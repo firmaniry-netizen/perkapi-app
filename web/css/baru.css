@@ -531,3 +531,133 @@ input.tok{font:600 22px/1 ui-monospace,SFMono-Regular,Consolas,monospace!importa
 #xd{text-align:center;padding:20px 0}
 #xd .badge{margin:0 auto 20px;background:var(--ok-bg);color:var(--ok)}
 input.tok::placeholder{font:400 16px/1 var(--f-sans);letter-spacing:0;text-transform:none}
+
+/* ===== revisi 3: warna lebih berani. Navy sebagai bidang, emas sebagai garis dan motif belah ketupat dari logo ===== */
+:root{
+  --navy-ink:#E9EEF8; --navy-muted:#AEBBD4; --navy-line:rgba(255,255,255,.14);
+  --red:#B3262B;
+  --pattern:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M18 3 33 18 18 33 3 18Z' fill='none' stroke='%23D2B272' stroke-width='1'/%3E%3Ccircle cx='18' cy='18' r='1.6' fill='%23D2B272'/%3E%3C/svg%3E");
+}
+/* bidang navy bermotif */
+.sec.navy,.hero2-band,.ph-navy,.ft{position:relative;isolation:isolate;background:var(--navy);color:var(--navy-ink)}
+.sec.navy::before,.hero2-band::before,.ph-navy::before,.ft::before{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--pattern);background-size:36px 36px;opacity:.07;pointer-events:none}
+.sec.navy::after,.ph-navy::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(55% 70% at 100% 0,rgba(176,141,74,.18),transparent 70%),radial-gradient(45% 60% at 0 100%,rgba(30,55,114,.85),transparent 70%);pointer-events:none}
+.sec.navy h2,.sec.navy h3,.sec.navy b,.ph-navy h1{color:#fff}
+.sec.navy .lead,.sec.navy p,.ph-navy .lead{color:var(--navy-muted)}
+.sec.navy .link,.ph-navy .link{color:var(--gold-hi)}
+
+/* hero: foto menjembatani bidang terang dan navy */
+.hero2-band{background:linear-gradient(to bottom,var(--bg) 0,var(--bg) 46%,var(--navy) 46%);padding-bottom:clamp(28px,3vw,40px)}
+.hero2-band::before{top:46%}
+.hero2-photo img{box-shadow:0 30px 60px -30px rgba(13,31,69,.55)}
+.hero2-cap{color:var(--navy-muted)}
+.hero2-cap .live b{color:#fff}
+.hero2-cap .live li{display:inline-flex;align-items:center;gap:8px}
+.hero2-cap .live li::before{content:"";width:7px;height:7px;background:var(--gold-hi);transform:rotate(45deg)}
+.hero2 h1{color:var(--navy)}
+
+/* aksen belah ketupat emas di judul seksi */
+.h2{position:relative}
+.head .h2::before,.split-h .h2::before,.faq .h2::before{content:"";display:block;width:10px;height:10px;margin:0 0 22px 2px;background:var(--gold);transform:rotate(45deg)}
+.sec.navy .h2::before{background:var(--gold-hi)}
+
+/* nilai: garis emas di kiri tiap baris */
+.vals>div{position:relative;padding-left:24px}
+.vals>div::before{content:"";position:absolute;left:0;top:30px;bottom:30px;width:2px;background:linear-gradient(var(--gold),transparent)}
+
+/* profesi: pita warna di atas kartu */
+.role{border-top:3px solid var(--navy)}
+.role+.role{border-top-color:var(--gold)}
+.role blockquote{color:var(--navy)}
+
+/* cara mendaftar di bidang navy */
+.sec.navy .prows{border-color:var(--navy-line)}
+.sec.navy .prows a{border-color:var(--navy-line)}
+.sec.navy .prows b{color:#fff}
+.sec.navy .prows a>span>span{color:var(--navy-muted)}
+.sec.navy .prows .ic{color:var(--gold-hi)}
+.sec.navy .steps-v li::before{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:500}
+.sec.navy .steps-v li::after{background:linear-gradient(var(--gold-hi),var(--navy-line))}
+.sec.navy .steps-v h3{color:#fff}
+.sec.navy .steps-v p{color:var(--navy-muted)}
+.steps-v li::before{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-ink)}
+
+/* galeri: keterangan di atas foto */
+.gallery .photo{position:relative}
+.gallery .photo::after{content:"";position:absolute;inset:auto 0 0;height:40%;background:linear-gradient(transparent,rgba(13,31,69,.55));pointer-events:none}
+.quote::before{background:linear-gradient(var(--gold),var(--red))}
+
+/* pengurus di bidang navy */
+.sec.navy .wide-photo{box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.sec.navy .cap{color:var(--navy-muted)}
+.sec.navy .cap .ic{color:var(--gold-hi)}
+
+/* aplikasi di atas pasir: kartu navy tetap, beri motif */
+.app::after{content:"";position:absolute;inset:0;z-index:-1;background-image:var(--pattern);background-size:36px 36px;opacity:.06}
+
+/* FAQ: penanda terbuka */
+.qa details[open]{background:linear-gradient(90deg,var(--gold-soft),transparent 70%)}
+.qa details[open] summary{color:var(--navy)}
+.qa summary,.qa .a{padding-left:14px}
+
+/* ajakan akhir: bidang pasir berbingkai emas */
+.cta-sec{padding-bottom:var(--sec)}
+.cta{background:var(--sand);border:1px solid var(--line-2);border-left:4px solid var(--gold);border-radius:var(--r-lg);padding:clamp(32px,5vw,56px)}
+
+/* kepala halaman navy (pendaftaran) */
+.ph-navy{padding-top:0}
+.ph-navy .w{padding-top:clamp(32px,5vw,56px)}
+.ph-navy .crumb,.ph-navy .crumb a{color:var(--navy-muted)}
+.ph-navy+.sec{padding-top:clamp(40px,5vw,64px)!important}
+
+/* tombol emas sebagai aksen kedua */
+.btn.line{box-shadow:inset 0 0 0 1px var(--gold)}
+.btn.line:hover{box-shadow:inset 0 0 0 1px var(--gold-ink);background:var(--gold-soft)}
+
+/* kepala situs: garis emas tipis */
+.hd.scrolled{border-color:transparent;box-shadow:inset 0 -1px 0 var(--line),0 1px 0 rgba(176,141,74,.25)}
+.nav a[aria-current="page"]::after{background:var(--red)}
+.badge{background:var(--gold-soft);color:var(--gold-ink);box-shadow:inset 0 0 0 1px rgba(176,141,74,.35)}
+.ft-b{border-color:var(--navy-line)}
+.split-photo{margin:28px 0 0;aspect-ratio:4/3;border-radius:6px}
+@media (max-width:900px){.split-photo{aspect-ratio:16/10}}
+
+/* ===== tangkapan layar gaya toko aplikasi ===== */
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-self:stretch}
+.shot{position:relative;display:flex;flex-direction:column;margin:0;padding:22px 18px 0;border-radius:22px;overflow:hidden;background:linear-gradient(165deg,#F4E7C8 0%,#D2B272 100%);min-height:440px}
+.shot.alt{background:linear-gradient(165deg,#DCE5F6 0%,#8EA6D6 100%);margin-top:40px}
+.shot figcaption{margin:0 4px 18px;font:600 clamp(16px,1.5vw,19px)/1.25 var(--f-sans);color:var(--navy);letter-spacing:-.01em;text-align:center;text-wrap:balance}
+.dev{position:relative;flex:1;margin:0 auto -40px;width:86%;border-radius:30px 30px 0 0;background:#0A1530;padding:8px 8px 0;box-shadow:0 20px 40px -14px rgba(13,31,69,.5)}
+.dev img{width:100%;height:100%;min-height:360px;object-fit:cover;object-position:top;border-radius:23px 23px 0 0;display:block}
+.dev.chat{display:flex;flex-direction:column;background:#0A1530}
+.dev.chat>*{background:#fff}
+.c-bar{display:flex;align-items:center;gap:10px;padding:16px 12px 10px;border-radius:23px 23px 0 0;border-bottom:1px solid #EEF0F4;color:var(--ink)}
+.c-bar .ic{margin-left:auto;color:var(--navy-3);width:18px;height:18px}
+.c-bar span:nth-child(2){display:flex;flex-direction:column;line-height:1.2}
+.c-bar b{font:600 13px/1.2 var(--f-sans)}
+.c-bar small{font-size:10.5px;color:#1E8E4F}
+.c-av{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--navy);color:var(--gold-hi);font:700 11px/1 var(--f-sans)}
+.c-body{flex:1;display:flex;flex-direction:column;gap:8px;padding:12px 10px;background:linear-gradient(#F6F7FB,#EEF1F8)!important}
+.c-day{align-self:center;padding:3px 10px;border-radius:99px;background:#fff;color:var(--muted);font-size:10px}
+.c-body p{margin:0;max-width:82%;padding:8px 10px 6px;border-radius:12px;font-size:11.5px;line-height:1.4;color:var(--ink)}
+.c-body p small{display:block;margin-top:3px;font-size:9px;color:var(--subtle);text-align:right}
+.c-in{align-self:flex-start;background:#fff;border-top-left-radius:4px!important}
+.c-out{align-self:flex-end;background:var(--navy);color:#fff!important;border-top-right-radius:4px!important}
+.c-out small{color:#AEBBD4!important}
+.c-in-bar{padding:10px 10px 46px}
+.c-in-bar span{display:block;padding:8px 12px;border-radius:99px;background:#F1F3F7;color:#9AA2B1;font-size:11px}
+/* lencana toko: hitam seperti lencana resmi */
+.store{background:#000;border-color:#000;border-radius:10px;min-height:52px;padding:0 18px 0 14px}
+.store small{color:#D0D4DC;font-size:10.5px}
+.store b{font-size:17px;letter-spacing:-.01em}
+@media (max-width:900px){.shots{gap:12px}.shot{min-height:380px;padding:16px 10px 0}.shot.alt{margin-top:28px}.dev{width:92%;border-radius:22px 22px 0 0}.dev img{min-height:300px}}
+@media (max-width:420px){.shot figcaption{font-size:14px}.c-body p{font-size:10.5px}}
+@media (min-width:901px){.app{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}}
+.shots{align-self:center}
+.shot{min-height:0}
+.dev{flex:none;width:88%;aspect-ratio:9/16;margin-bottom:-48px}
+.dev img{min-height:0;height:100%}
+.dev.chat .c-body{overflow:hidden}
+@media (max-width:900px){.dev img{min-height:0}.shot{min-height:0}}
+.shot{aspect-ratio:10/16}
+.dev{aspect-ratio:9/18.5;margin-bottom:0}

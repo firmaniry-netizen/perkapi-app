@@ -2,11 +2,11 @@
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Token pra-ujian | Admin PERKAPI</title>
+<title>Token praujian | Admin PERKAPI</title>
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
-<link rel="stylesheet" href="/css/baru.css">
+<link rel="stylesheet" href="/css/baru.css?v=20261116c">
 <style>
 .adm{max-width:980px;margin:0 auto;padding:clamp(28px,5vw,56px) var(--gut)}
 .adm-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
@@ -39,7 +39,7 @@ td.t{font:600 18px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.12em;colo
 
 <div class="adm" id="ap" hidden>
 <div class="adm-top">
-<div><h1>Token pra-ujian</h1><p class="muted" style="margin:6px 0 0">Satu token untuk satu peserta. Berlaku sampai pukul 23.59 WIB hari dibuat, dan hanya bisa dipakai sekali.</p></div>
+<div><h1>Token praujian</h1><p class="muted" style="margin:6px 0 0">Satu token untuk satu peserta. Berlaku sampai pukul 23.59 WIB hari dibuat, dan hanya bisa dipakai sekali.</p></div>
 <div class="actions"><a class="btn line" href="/admin/">Panel admin</a><button class="btn line" id="ko" type="button">Keluar</button></div>
 </div>
 <form class="bar" id="fb">
@@ -55,7 +55,7 @@ td.t{font:600 18px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.12em;colo
 
 <script src="/config.js"></script>
 <script>
-// Halaman admin token pra-ujian. Server: admin_create_exam_tokens(p_count), admin_list_exam_tokens(p_date), admin_revoke_exam_token(p_token).
+// Halaman admin token praujian. Server: admin_create_exam_tokens(p_count), admin_list_exam_tokens(p_date), admin_revoke_exam_token(p_token).
 (function(){
 var C=window.PERKAPI||{},U=(C.SUPABASE_URL||"").replace(/\/+$/,""),K=C.SUPABASE_ANON_KEY,S=sessionStorage,$=function(i){return document.getElementById(i)};
 var esc=function(s){var d=document.createElement("div");d.textContent=s==null?"":s;return d.innerHTML};
