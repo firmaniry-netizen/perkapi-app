@@ -219,3 +219,260 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     b.classList.add("mag"); b.style.transform = "translate(" + (x * .18).toFixed(1) + "px," + (y * .28).toFixed(1) + "px)";
   });
 })();
+
+// revisi 13: gerak ala pliability, digerakkan GSAP + ScrollTrigger + SplitText
+(function () {
+  var d = document, html = d.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // pil ajakan di bawah layar (tanpa GSAP, agar tetap jalan bila pustaka gagal dimuat)
+  var kind = (window.PAGE && PAGE.kind) || "";
+  if (["pendaftaran", "ujian", "404"].indexOf(kind) < 0) {
+    var dk = d.createElement("div"); dk.className = "dock"; dk.setAttribute("role", "region"); dk.setAttribute("aria-label", "Pendaftaran");
+    dk.innerHTML = '<span><b>Pendidikan Intensif Angkatan I</b><small>Pendaftaran tahun 2026 telah dibuka</small></span><a class="btn" href="pendaftaran.html">Cara Daftar</a>';
+    d.body.appendChild(dk); html.classList.add("has-dock");
+    var stop = d.querySelector(".pl-cta, .cta-sec, .ft"), raf = 0;
+    var cek = function () { raf = 0; var on = scrollY > innerHeight * .7 && !(stop && stop.getBoundingClientRect().top < innerHeight - 40); dk.classList.toggle("on", on); html.classList.toggle("dock-on", on); };
+    addEventListener("scroll", function () { if (!raf) raf = requestAnimationFrame(cek); }, { passive: true }); cek();
+  }
+
+  if (reduce || !window.gsap || !window.ScrollTrigger) { [].forEach.call(d.querySelectorAll(".steps-v"), function (o) { o.style.setProperty("--p", 1); }); return; }
+  gsap.registerPlugin(ScrollTrigger, window.SplitText || {});
+  html.classList.add("gs");
+  var glow = d.createElement("div"); glow.className = "edge-glow"; glow.setAttribute("aria-hidden", "true"); d.body.appendChild(glow);
+  var E = "expo.out", $$ = function (s, r) { return [].slice.call((r || d).querySelectorAll(s)); };
+  var D0 = html.classList.contains("pl-first") ? 1.8 : html.classList.contains("pt-in") ? .45 : 0;
+  var mm = gsap.matchMedia();
+
+  // judul bagian: kabur ke tajam, naik pelan (menggantikan muncul bawaan)
+  $$(".head > .h2, .split-h > .h2, .faq .h2, .pl-cards-head .h2, .ab-g > .h2, .pl-cta h2").forEach(function (h) {
+    h.classList.remove("rv", "in");
+    gsap.fromTo(h, { autoAlpha: 0, y: 40, filter: "blur(14px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1.3, ease: E, clearProps: "filter",
+      scrollTrigger: { trigger: h, start: "top 88%", once: true } });
+  });
+
+  // paragraf Tentang: kata menyala satu per satu mengikuti gulir
+  if (window.SplitText) d.fonts.ready.then(function () {
+    $$(".ab-p").forEach(function (p) {
+      var sp = SplitText.create(p, { type: "words", wordsClass: "wd" });
+      gsap.fromTo(sp.words, { opacity: .14 }, { opacity: 1, stagger: .1, ease: "none",
+        scrollTrigger: { trigger: p, start: "top 82%", end: "bottom 45%", scrub: .6 } });
+    });
+    // kata raksasa di footer naik per huruf
+    $$(".ft-word span").forEach(function (w) {
+      var sp = SplitText.create(w, { type: "chars", charsClass: "ch" });
+      gsap.from(sp.chars, { yPercent: 110, opacity: 0, stagger: .045, duration: 1.4, ease: E, scrollTrigger: { trigger: w, start: "top 95%", once: true } });
+    });
+    ScrollTrigger.refresh();
+  });
+
+  // hero: teks terangkat dan memudar, bingkai foto melayang lebih lambat
+  var hero = d.querySelector(".pl-hero");
+  if (hero) {
+    gsap.to(".pl-hero-in", { yPercent: -14, autoAlpha: .15, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
+    mm.add("(min-width: 761px)", function () {
+      gsap.fromTo(".pl-hero-bg", { clipPath: "inset(14% 10% 14% 10% round 44px 6px 6px 6px)" }, { clipPath: "inset(0% 0% 0% 0% round 44px 6px 6px 6px)", duration: 1.6, ease: E, delay: .2 + D0, clearProps: "clipPath" });
+      gsap.to(".pl-hero-bg", { yPercent: 10, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
+    });
+    gsap.from(".pl-proof > *", { y: 30, autoAlpha: 0, stagger: .12, duration: 1.1, ease: E, delay: .7 + D0 });
+  }
+
+  // kartu Jelajahi: masuk berurutan dari bawah, foto bergeser di dalam bingkai
+  var pcs = $$(".pc");
+  if (pcs.length) {
+    gsap.from(pcs, { y: 90, autoAlpha: 0, rotate: 2, stagger: .09, duration: 1.3, ease: E, scrollTrigger: { trigger: "#pc", start: "top 85%", once: true } });
+    pcs.forEach(function (c) {
+      var im = c.querySelector("img"); if (!im) return;
+      gsap.fromTo(im, { yPercent: -6, scale: 1.12 }, { yPercent: 6, scale: 1.12, ease: "none", scrollTrigger: { trigger: c, start: "top bottom", end: "bottom top", scrub: true } });
+    });
+  }
+
+  // Nilai Organisasi: dipin di desktop, nilai menyala satu per satu (seperti stretch / move / recover)
+  var seq = d.querySelector(".pl-seq"), its = $$(".sq-it");
+  if (seq && its.length) {
+    var aktif = function (i) { its.forEach(function (x, k) { x.classList.toggle("act", k === i); }); };
+    mm.add("(min-width: 900px)", function () {
+      aktif(0);
+      ScrollTrigger.create({ trigger: seq, start: "top top", end: "+=" + (its.length * 70) + "%", pin: true, scrub: true,
+        onUpdate: function (st) { aktif(Math.min(its.length - 1, Math.floor(st.progress * its.length))); } });
+      its.forEach(function (it) { var bb = it.querySelector("b"); if (bb) gsap.from(bb, { x: -60, autoAlpha: 0, duration: 1.2, ease: E, scrollTrigger: { trigger: seq, start: "top 70%", once: true } }); });
+      return function () { its.forEach(function (x) { x.classList.remove("act"); }); };
+    });
+    mm.add("(max-width: 899px)", function () {
+      its.forEach(function (it, k) { ScrollTrigger.create({ trigger: it, start: "top 65%", end: "bottom 35%", onToggle: function (st) { if (st.isActive) aktif(k); } }); });
+    });
+  }
+
+  // Cara Mendaftar: di desktop bagian dipin, garis emas terisi dan langkah menyala bergantian
+  $$(".steps-v").forEach(function (ol) {
+    var lis = $$("li", ol), sec = ol.closest(".sec");
+    var nyala = function (p) { ol.style.setProperty("--p", p.toFixed(3)); lis.forEach(function (li, k) { li.classList.toggle("lit", p >= k / Math.max(1, lis.length - 1) - .02); }); };
+    if (sec && sec.id === "cara") {
+      mm.add("(min-width: 900px)", function () {
+        nyala(0);
+        ScrollTrigger.create({ trigger: sec, start: "top top", end: "+=110%", pin: true, scrub: .4, onUpdate: function (st) { nyala(st.progress); } });
+      });
+      mm.add("(max-width: 899px)", function () {
+        ScrollTrigger.create({ trigger: ol, start: "top 70%", end: "bottom 55%", scrub: .4, onUpdate: function (st) { nyala(st.progress); } });
+      });
+    } else {
+      nyala(1);
+    }
+  });
+
+  // aplikasi: dua layar bergerak berlawanan arah
+  $$(".shots .shot").forEach(function (s, i) {
+    s.classList.remove("rv", "in");
+    gsap.fromTo(s, { y: i ? 120 : 40 }, { y: i ? -40 : -20, ease: "none", scrollTrigger: { trigger: ".shots", start: "top bottom", end: "bottom top", scrub: true } });
+  });
+
+  // ajakan akhir: kotak membesar dari tengah saat didekati
+  var cta = d.querySelector(".pl-cta");
+  if (cta) gsap.fromTo(cta, { clipPath: "inset(8% 6% 8% 6% round 44px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "none", scrollTrigger: { trigger: cta, start: "top bottom", end: "top 30%", scrub: true } });
+
+  // daftar lain: muncul berurutan per kelompok
+  ScrollTrigger.batch(".dl, .mq", {
+    start: "top 90%", once: true,
+    onEnter: function (els) { gsap.from(els, { y: 40, autoAlpha: 0, stagger: .08, duration: 1.1, ease: E, overwrite: true }); }
+  });
+
+  // kaca pembesar: foto pengurus bisa diperbesar dengan kursor
+  mm.add("(hover: hover) and (pointer: fine)", function () {
+    $$(".wide-photo").forEach(function (box) {
+      var im = box.querySelector("img"); if (!im || box.classList.contains("zoomable")) return;
+      box.classList.add("zoomable");
+      var ln = d.createElement("span"); ln.className = "lens"; box.appendChild(ln);
+      var hint = d.createElement("span"); hint.className = "zoom-hint"; hint.textContent = "Arahkan kursor untuk memperbesar"; box.appendChild(hint);
+      var Z = 2.4, src = "/img/pengurus-2026.jpg"; gsap.set(ln, { scale: .6 });
+      var xTo = gsap.quickTo(ln, "x", { duration: .35, ease: "power3" }), yTo = gsap.quickTo(ln, "y", { duration: .35, ease: "power3" });
+      box.addEventListener("pointerenter", function () { ln.style.backgroundImage = "url(" + (im.currentSrc && im.currentSrc.indexOf("-900") < 0 ? im.currentSrc : src) + ")"; box.classList.add("on"); gsap.to(ln, { scale: 1, duration: .5, ease: "back.out(2)" }); });
+      box.addEventListener("pointerleave", function () { box.classList.remove("on"); gsap.to(ln, { scale: .6, duration: .3 }); });
+      box.addEventListener("pointermove", function (e) {
+        var r = im.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        xTo(x - 95); yTo(y - 95 + (im.offsetTop || 0));
+        ln.style.backgroundSize = (r.width * Z) + "px " + (r.height * Z) + "px";
+        ln.style.backgroundPosition = (-(x * Z - 95)) + "px " + (-(y * Z - 95)) + "px";
+      });
+    });
+  });
+
+  // 404: lambang miring mengikuti kursor, klik untuk mengecap
+  var em = d.querySelector(".emblem");
+  if (em) {
+    var inner = d.createElement("div"); inner.className = "emblem-in";
+    while (em.firstChild) inner.appendChild(em.firstChild); em.appendChild(inner);
+    var rx = gsap.quickTo(inner, "rotationX", { duration: .6, ease: "power3" }), ry = gsap.quickTo(inner, "rotationY", { duration: .6, ease: "power3" });
+    addEventListener("pointermove", function (e) { var r = em.getBoundingClientRect(); ry(((e.clientX - (r.left + r.width / 2)) / innerWidth) * 40); rx((-(e.clientY - (r.top + r.height / 2)) / innerHeight) * 40); });
+    em.addEventListener("click", function () {
+      gsap.fromTo(inner, { scale: .9 }, { scale: 1, duration: .6, ease: "elastic.out(1,.4)" });
+      var st = d.createElement("div"); st.className = "stamp"; st.innerHTML = "<span>Halaman<br>Tidak<br>Ditemukan</span>"; inner.appendChild(st);
+      gsap.fromTo(st, { xPercent: -50, yPercent: -50, scale: 2.4, rotation: gsap.utils.random(-28, 28), opacity: 0 }, { scale: 1, opacity: .85, duration: .35, ease: "power4.in",
+        onComplete: function () { gsap.to(st, { opacity: 0, duration: 1.2, delay: 1.4, onComplete: function () { st.remove(); } }); } });
+    });
+    var tip = d.createElement("p"); tip.className = "emblem-tip"; tip.textContent = "Klik lambang untuk mengecap"; em.appendChild(tip);
+  }
+
+
+  // pembatas belah ketupat di antara bagian
+  $$("main > section + section").forEach(function (sec) {
+    if (sec.previousElementSibling && sec.previousElementSibling.classList.contains("pl-hero")) return;
+    var dv = d.createElement("div"); dv.className = "dv"; dv.setAttribute("aria-hidden", "true"); sec.parentNode.insertBefore(dv, sec);
+    ScrollTrigger.create({ trigger: dv, start: "top 92%", once: true, onEnter: function () { dv.classList.add("in"); } });
+  });
+
+  // judul halaman dalam (Tentang, Pendaftaran, Agenda): kata naik dari balik garis
+  $$(".ph h1").forEach(function (h) {
+    h.classList.remove("rv", "in");
+    if (!window.SplitText) return;
+    d.fonts.ready.then(function () {
+      var sp = SplitText.create(h, { type: "words", wordsClass: "wd" });
+      sp.words.forEach(function (w) { var o = d.createElement("span"); o.className = "wd-o"; w.parentNode.insertBefore(o, w); o.appendChild(w); });
+      gsap.from(sp.words, { yPercent: 110, duration: 1.2, ease: E, stagger: .07, delay: .15 + D0 });
+    });
+  });
+  $$(".ph .photo").forEach(function (ph) {
+    ph.classList.remove("rv", "in", "rv-c");
+    gsap.fromTo(ph, { clipPath: "inset(10% 8% 10% 8% round 44px 6px 6px 6px)" }, { clipPath: "inset(0% 0% 0% 0% round 44px 6px 6px 6px)", duration: 1.5, ease: E, delay: .3 + D0, clearProps: "clipPath" });
+    var im = ph.querySelector("img"); if (im) gsap.fromTo(im, { scale: 1.15 }, { scale: 1, duration: 2, ease: E, delay: .3 + D0 });
+  });
+
+  // angka papan skor
+  $$(".pl-proof b").forEach(function (b, k) {
+    if (!/\d/.test(b.textContent)) return;
+    b.setAttribute("aria-label", b.textContent);
+    b.innerHTML = b.textContent.split("").map(function (c) {
+      if (!/\d/.test(c)) return '<span aria-hidden="true">' + c + "</span>";
+      var col = ""; for (var i = 0; i <= 9; i++) col += "<i>" + i + "</i>"; col += col;
+      return '<span class="od" aria-hidden="true" data-n="' + c + '"><span class="od-r">' + col + "</span></span>";
+    }).join("");
+    $$(".od", b).forEach(function (o, i) {
+      var n = +o.dataset.n; gsap.fromTo(o.firstChild, { yPercent: 0 }, { yPercent: -(10 + n) * 5, duration: 1.6 + i * .15, ease: "power4.out", delay: .9 + D0 + k * .15 });
+    });
+  });
+
+  // kartu Jelajahi: seret dengan mouse, meluncur dengan inersia
+  $$(".pc-track").forEach(function (tr) {
+    if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    var down = false, moved = 0, x0 = 0, s0 = 0, v = 0, lx = 0, lt = 0, raf2 = 0;
+    tr.addEventListener("pointerdown", function (e) { if (e.button) return; down = true; moved = 0; x0 = lx = e.clientX; lt = performance.now(); s0 = tr.scrollLeft; v = 0; cancelAnimationFrame(raf2); });
+    addEventListener("pointermove", function (e) {
+      if (!down) return; var dx = e.clientX - x0; moved = Math.max(moved, Math.abs(dx));
+      if (moved > 5) tr.classList.add("drag");
+      var now = performance.now(); v = (e.clientX - lx) / Math.max(1, now - lt); lx = e.clientX; lt = now;
+      tr.scrollLeft = s0 - dx;
+    });
+    addEventListener("pointerup", function () {
+      if (!down) return; down = false;
+      var vel = -v * 16;
+      var glide = function () { vel *= .94; tr.scrollLeft += vel; if (Math.abs(vel) > .4) raf2 = requestAnimationFrame(glide); else tr.classList.remove("drag"); };
+      if (moved > 5) glide(); else tr.classList.remove("drag");
+    });
+    tr.addEventListener("click", function (e) { if (moved > 5) { e.preventDefault(); e.stopPropagation(); } }, true);
+  });
+
+  // pita logo mitra: digerakkan GSAP, melambat saat disentuh
+  $$(".marquee").forEach(function (mq) {
+    var tr = mq.querySelector(".mq-track"); if (!tr) return;
+    var tw = gsap.to(tr, { xPercent: -50, duration: 34, ease: "none", repeat: -1 });
+    mq.addEventListener("pointerenter", function () { gsap.to(tw, { timeScale: .15, duration: .8 }); });
+    mq.addEventListener("pointerleave", function () { gsap.to(tw, { timeScale: 1, duration: .8 }); });
+  });
+
+  // footer: huruf PERKAPI raksasa bergeser mengikuti kursor, tiap huruf beda kedalaman
+  mm.add("(hover: hover) and (pointer: fine)", function () {
+    var fw = d.querySelector(".ft-word span"), ft = d.querySelector(".ft"); if (!fw || !ft || !window.SplitText) return;
+    d.fonts.ready.then(function () {
+      var chars = $$(".ft-word span > div, .ft-word span .ch", ft);
+      if (!chars.length) return;
+      var mv = chars.map(function (c) { return { x: gsap.quickTo(c, "x", { duration: 1, ease: "power3" }), y: gsap.quickTo(c, "y", { duration: 1, ease: "power3" }) }; });
+      ft.addEventListener("pointermove", function (e) {
+        var nx = e.clientX / innerWidth - .5, r = ft.getBoundingClientRect(), ny = (e.clientY - r.top) / r.height - .5;
+        mv.forEach(function (m, i) { var depth = 1 - Math.abs(i - (chars.length - 1) / 2) / chars.length; m.x(nx * 60 * (0.4 + depth)); m.y(ny * 24 * (0.4 + depth)); });
+      });
+      ft.addEventListener("pointerleave", function () { mv.forEach(function (m) { m.x(0); m.y(0); }); });
+    });
+  });
+  addEventListener("load", function () { ScrollTrigger.refresh(); });
+})();
+
+// tirai saat pindah halaman
+(function () {
+  var html = document.documentElement;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  setTimeout(function () { html.classList.remove("pt-in"); }, 1200);
+  addEventListener("pageshow", function (e) { if (e.persisted) html.classList.remove("pt-out", "pt-in", "pl-first"); });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    if (a.target && a.target !== "_self") return; if (a.hasAttribute("download")) return;
+    var u = new URL(a.href, location.href);
+    if (u.origin !== location.origin) return;
+    if (!/(\.html|\/)$/.test(u.pathname)) return;
+    if (u.pathname === location.pathname && u.search === location.search) return;
+    if (/^\/admin\//.test(u.pathname)) return;
+    e.preventDefault();
+    try { sessionStorage.setItem("pk_pt", "1"); } catch (x) {}
+    html.classList.add("pt-out");
+    setTimeout(function () { location.href = u.href; }, 520);
+  });
+})();
