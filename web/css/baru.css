@@ -1427,3 +1427,20 @@ html.pl-first .words .w-i{transition-delay:calc(1.95s + var(--k,0)*70ms)}
 .pl-proof b .od{display:inline-block;height:1.1em;overflow:hidden;vertical-align:top}
 .pl-proof b .od-r{display:flex;flex-direction:column}
 .pl-proof b .od{vertical-align:-.12em}
+
+/* ===== revisi 17: tanpa tirai, transisi halaman halus, lebih tenang ===== */
+.curtain{display:none!important}
+@view-transition{navigation:auto}
+.hd{view-transition-name:hd}
+::view-transition-group(hd){animation:none}
+::view-transition-old(root){animation:vt-fade-out .22s ease both}
+::view-transition-new(root){animation:vt-rise .55s cubic-bezier(.16,1,.3,1) both}
+@keyframes vt-fade-out{to{opacity:0}}
+@keyframes vt-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
+/* hilangkan dekorasi yang mengganggu */
+.edge-glow{display:none}
+.nav .btn::before,.pl-hero .btn.gold::before,.dock .btn::before{content:none}
+/* header pil: permukaan padat, bukan kaca abu-abu */
+@media (min-width:761px){.hd.scrolled:not(.open) .w{background:rgba(255,255,255,.96);-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media (min-width:761px) and (prefers-color-scheme:dark){.hd.scrolled:not(.open) .w{background:rgba(14,31,69,.97)}}

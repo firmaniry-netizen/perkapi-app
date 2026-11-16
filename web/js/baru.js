@@ -239,7 +239,6 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   if (reduce || !window.gsap || !window.ScrollTrigger) { [].forEach.call(d.querySelectorAll(".steps-v"), function (o) { o.style.setProperty("--p", 1); }); return; }
   gsap.registerPlugin(ScrollTrigger, window.SplitText || {});
   html.classList.add("gs");
-  var glow = d.createElement("div"); glow.className = "edge-glow"; glow.setAttribute("aria-hidden", "true"); d.body.appendChild(glow);
   var E = "expo.out", $$ = function (s, r) { return [].slice.call((r || d).querySelectorAll(s)); };
   var D0 = html.classList.contains("pl-first") ? 1.8 : html.classList.contains("pt-in") ? .45 : 0;
   var mm = gsap.matchMedia();
@@ -257,11 +256,6 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
       var sp = SplitText.create(p, { type: "words", wordsClass: "wd" });
       gsap.fromTo(sp.words, { opacity: .14 }, { opacity: 1, stagger: .1, ease: "none",
         scrollTrigger: { trigger: p, start: "top 82%", end: "bottom 45%", scrub: .6 } });
-    });
-    // kata raksasa di footer naik per huruf
-    $$(".ft-word span").forEach(function (w) {
-      var sp = SplitText.create(w, { type: "chars", charsClass: "ch" });
-      gsap.from(sp.chars, { yPercent: 110, opacity: 0, stagger: .045, duration: 1.4, ease: E, scrollTrigger: { trigger: w, start: "top 95%", once: true } });
     });
     ScrollTrigger.refresh();
   });
@@ -438,41 +432,8 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     mq.addEventListener("pointerleave", function () { gsap.to(tw, { timeScale: 1, duration: .8 }); });
   });
 
-  // footer: huruf PERKAPI raksasa bergeser mengikuti kursor, tiap huruf beda kedalaman
-  mm.add("(hover: hover) and (pointer: fine)", function () {
-    var fw = d.querySelector(".ft-word span"), ft = d.querySelector(".ft"); if (!fw || !ft || !window.SplitText) return;
-    d.fonts.ready.then(function () {
-      var chars = $$(".ft-word span > div, .ft-word span .ch", ft);
-      if (!chars.length) return;
-      var mv = chars.map(function (c) { return { x: gsap.quickTo(c, "x", { duration: 1, ease: "power3" }), y: gsap.quickTo(c, "y", { duration: 1, ease: "power3" }) }; });
-      ft.addEventListener("pointermove", function (e) {
-        var nx = e.clientX / innerWidth - .5, r = ft.getBoundingClientRect(), ny = (e.clientY - r.top) / r.height - .5;
-        mv.forEach(function (m, i) { var depth = 1 - Math.abs(i - (chars.length - 1) / 2) / chars.length; m.x(nx * 60 * (0.4 + depth)); m.y(ny * 24 * (0.4 + depth)); });
-      });
-      ft.addEventListener("pointerleave", function () { mv.forEach(function (m) { m.x(0); m.y(0); }); });
-    });
-  });
-  addEventListener("load", function () { ScrollTrigger.refresh(); });
-})();
+  // footer: kata PERKAPI naik pelan saat terlihat
+  $$(".ft-word span").forEach(function (w) { gsap.from(w, { yPercent: 35, autoAlpha: 0, duration: 1.6, ease: E, scrollTrigger: { trigger: w, start: "top 98%", once: true } }); });
 
-// tirai saat pindah halaman
-(function () {
-  var html = document.documentElement;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  setTimeout(function () { html.classList.remove("pt-in"); }, 1200);
-  addEventListener("pageshow", function (e) { if (e.persisted) html.classList.remove("pt-out", "pt-in", "pl-first"); });
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest && e.target.closest("a[href]");
-    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
-    if (a.target && a.target !== "_self") return; if (a.hasAttribute("download")) return;
-    var u = new URL(a.href, location.href);
-    if (u.origin !== location.origin) return;
-    if (!/(\.html|\/)$/.test(u.pathname)) return;
-    if (u.pathname === location.pathname && u.search === location.search) return;
-    if (/^\/admin\//.test(u.pathname)) return;
-    e.preventDefault();
-    try { sessionStorage.setItem("pk_pt", "1"); } catch (x) {}
-    html.classList.add("pt-out");
-    setTimeout(function () { location.href = u.href; }, 520);
-  });
+  addEventListener("load", function () { ScrollTrigger.refresh(); });
 })();
