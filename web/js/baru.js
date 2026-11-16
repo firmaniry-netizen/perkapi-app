@@ -19,6 +19,30 @@
     addEventListener("resize", function () { if (innerWidth > 860) setOpen(false); });
   }
 
+  // tandai elemen yang muncul saat digulir (tanpa mengubah HTML tiap halaman)
+  var tandai = function (sel, extra) { [].forEach.call(d.querySelectorAll(sel), function (el) { if (!el.closest(".hero3") && !el.classList.contains("rv")) { el.classList.add("rv"); if (extra) el.classList.add(extra); } }); };
+  if (!reduce) {
+    tandai(".head > *, .split-h > *, .join > div > *, .faq > div:first-child > *, .ph .crumb, .ph h1, .ph .lead, .reg-side > *, .exam-note, .cta, .quote");
+    tandai(".vals > div, .prows li, .go2-it", "rv-l");
+    tandai(".role, .steps-v li, .qa details, .feat li, .stores, .app-note, .shot", "");
+    tandai(".gallery .photo, .split-photo, .wide-photo, .ph .photo", "rv-c");
+    tandai(".app", "rv-s");
+  }
+  // judul hero dipecah per kata
+  [].forEach.call(d.querySelectorAll("h1.words"), function (h) {
+    var k = 0;
+    h.innerHTML = h.textContent.trim().split(/\s+/).map(function (w) { return '<span class="w-o"><span class="w-i" style="--k:' + (k++) + '">' + w + "</span></span>"; }).join(" ");
+  });
+  // foto hero bergerak pelan saat digulir
+  var hb = d.querySelector(".hero3-bg img");
+  if (hb && !reduce) {
+    var tick = false;
+    addEventListener("scroll", function () {
+      if (tick) return; tick = true;
+      requestAnimationFrame(function () { var y = Math.min(scrollY, innerHeight); hb.style.translate = "0 " + (y * 0.18).toFixed(1) + "px"; tick = false; });
+    }, { passive: true });
+  }
+
   // muncul saat digulir (sekali saja); elemen berurutan dalam satu kelompok diberi jeda bertahap
   var els = [].slice.call(d.querySelectorAll(".rv"));
   els.forEach(function (el) { var p = el.parentElement, sib = [].filter.call(p.children, function (c) { return c.classList.contains("rv"); }); el.style.setProperty("--i", Math.min(sib.indexOf(el), 5)); });
