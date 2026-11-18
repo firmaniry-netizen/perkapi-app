@@ -377,3 +377,11 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     ln.forEach(function (a) { var s = d.getElementById(a.getAttribute("href").slice(1)); if (s) io.observe(s); });
   }
 })();
+
+// kartu yang dibuat setelah halaman dimuat (kerja sama) ikut muncul saat digulir
+(function () {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+  var els = [].slice.call(document.querySelectorAll(".ks li, .mitra-g li")).filter(function (e) { return !e.classList.contains("rv"); });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+  els.forEach(function (e, i) { e.classList.add("rv"); e.style.transitionDelay = (i % 4) * 80 + "ms"; io.observe(e); });
+})();
