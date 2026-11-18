@@ -1620,3 +1620,26 @@ a:focus-visible,button:focus-visible,summary:focus-visible,.btn:focus-visible{ou
 /* 404 sederhana */
 .emblem{cursor:default}.emblem-tip,.stamp{display:none!important}
 @media (prefers-reduced-motion:reduce){.annc-dot,.btn[aria-busy="true"]::after{animation:none}}
+
+/* ===== revisi 21 ===== */
+/* garis bawah menu yang bergeser */
+.nav{position:relative}
+.nav.has-bar a[aria-current="page"]::after{display:none}
+.nav-bar{position:absolute;left:0;bottom:8px;height:1.5px;background:var(--gold);pointer-events:none;opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1),opacity .2s}
+@media (max-width:860px){.nav-bar{display:none}}
+/* menu HP: tautan muncul berurutan */
+@media (max-width:860px){
+  .nav a{opacity:0;transform:translateY(-8px);transition:opacity .25s ease,transform .35s cubic-bezier(.2,.8,.2,1)}
+  .hd.open .nav a{opacity:1;transform:none;transition-delay:calc(var(--k,0) * 45ms + 60ms)}
+}
+/* tanya jawab */
+.qa .a{overflow:hidden}
+.qa details[open] .a{animation:none}
+/* foto yang bisa diperbesar */
+.zoomable-img{cursor:zoom-in}
+.zoomable-img:focus-visible{outline:2px solid var(--gold);outline-offset:6px}
+.lb{position:fixed;inset:0;z-index:95;background:rgba(10,19,38,0);cursor:zoom-out}
+.lb-img{position:absolute;object-fit:cover;border-radius:12px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);transform-origin:0 0}
+.lb-x{position:absolute;top:16px;right:16px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#0F1C33;font-size:26px;line-height:1;cursor:pointer}
+.lb-cap{position:absolute;left:0;right:0;bottom:16px;margin:0;padding:0 24px;text-align:center;color:#E9EEF8;font-size:14px}
+@media (prefers-reduced-motion:reduce){.nav a{opacity:1!important;transform:none!important;transition:none!important}.nav-bar{transition:none}}

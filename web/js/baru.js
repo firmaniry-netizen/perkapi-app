@@ -250,3 +250,91 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     setTimeout(function () { b.removeAttribute("aria-busy"); }, 1600);
   });
 })();
+
+// revisi 21: gerak kecil yang menjelaskan
+(function () {
+  var d = document, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var EASE = "cubic-bezier(.2,.8,.2,1)";
+
+  // 9. garis bawah menu bergeser ke tautan yang ditunjuk
+  var nav = d.getElementById("nav");
+  if (nav && matchMedia("(hover: hover) and (min-width: 861px)").matches) {
+    var bar = d.createElement("span"); bar.className = "nav-bar"; bar.setAttribute("aria-hidden", "true"); nav.appendChild(bar);
+    var links = [].slice.call(nav.querySelectorAll("a:not(.btn)"));
+    var cur = nav.querySelector('a[aria-current="page"]:not(.btn)');
+    var ke = function (a, instan) {
+      if (!a) { bar.style.opacity = 0; return; }
+      var r = a.getBoundingClientRect(), n = nav.getBoundingClientRect();
+      if (instan) bar.style.transition = "none";
+      bar.style.opacity = 1; bar.style.width = (r.width - 28) + "px"; bar.style.transform = "translateX(" + (r.left - n.left + 14) + "px)";
+      if (instan) { void bar.offsetWidth; bar.style.transition = ""; }
+    };
+    nav.classList.add("has-bar");
+    links.forEach(function (a) { a.addEventListener("pointerenter", function () { ke(a); }); a.addEventListener("focus", function () { ke(a); }); });
+    nav.addEventListener("pointerleave", function () { ke(cur); });
+    addEventListener("resize", function () { ke(cur, true); });
+    (d.fonts ? d.fonts.ready : Promise.resolve()).then(function () { ke(cur, true); });
+  }
+
+  // 8. menu HP: tautan diberi urutan untuk muncul berurutan
+  if (nav) [].forEach.call(nav.querySelectorAll("a"), function (a, i) { a.style.setProperty("--k", i); });
+
+  // 7. tanya jawab: buka dan tutup dengan tinggi yang mengalir
+  [].forEach.call(d.querySelectorAll(".qa details"), function (dt) {
+    var sm = dt.querySelector("summary"), body = dt.querySelector(".a"); if (!sm || !body || reduce || !body.animate) return;
+    var anim = null;
+    sm.addEventListener("click", function (e) {
+      e.preventDefault();
+      var awal = body.getBoundingClientRect().height;
+      if (anim) anim.cancel();
+      if (!dt.open) {
+        dt.open = true; var akhir = body.getBoundingClientRect().height;
+        anim = body.animate([{ height: awal + "px", opacity: 0 }, { height: akhir + "px", opacity: 1 }], { duration: 320, easing: EASE });
+      } else {
+        dt.classList.add("closing");
+        anim = body.animate([{ height: awal + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 240, easing: EASE });
+        anim.onfinish = function () { dt.open = false; dt.classList.remove("closing"); };
+      }
+      anim.addEventListener("finish", function () { anim = null; });
+    });
+  });
+
+  // 6. foto membesar dari tempatnya saat diklik, kembali ke tempat yang sama saat ditutup
+  var pics = [].slice.call(d.querySelectorAll(".ph .photo img, .wide-photo img, .split-ph img"));
+  pics.forEach(function (im) {
+    var box = im.closest("figure, .photo, .wide-photo") || im.parentNode;
+    box.classList.add("zoomable-img"); box.setAttribute("role", "button"); box.setAttribute("tabindex", "0"); box.setAttribute("aria-label", "Perbesar foto" + (im.alt ? ": " + im.alt : ""));
+    var buka = function () {
+      var r = im.getBoundingClientRect(), src = im.currentSrc || im.src;
+      if (/-900\.jpg/.test(src)) src = src.replace("-900.jpg", ".jpg");
+      var ov = d.createElement("div"); ov.className = "lb"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", im.alt || "Foto");
+      ov.innerHTML = '<button class="lb-x" type="button" aria-label="Tutup foto">&times;</button>';
+      var big = d.createElement("img"); big.src = src; big.alt = im.alt || ""; big.className = "lb-img"; ov.appendChild(big);
+      if (im.alt) { var cap = d.createElement("p"); cap.className = "lb-cap"; cap.textContent = im.alt; ov.appendChild(cap); }
+      d.body.appendChild(ov); d.body.classList.add("nm-lock");
+      var rasio = (im.naturalWidth || r.width) / (im.naturalHeight || r.height);
+      var maxW = innerWidth * .92, maxH = innerHeight * .8, w = Math.min(maxW, maxH * rasio), h = w / rasio;
+      var tx = (innerWidth - w) / 2, ty = (innerHeight - h) / 2 - 16;
+      big.style.cssText = "left:" + tx + "px;top:" + ty + "px;width:" + w + "px;height:" + h + "px";
+      var dari = "translate(" + (r.left - tx) + "px," + (r.top - ty) + "px) scale(" + (r.width / w) + "," + (r.height / h) + ")";
+      if (!reduce) {
+        big.animate([{ transform: dari, borderRadius: "24px" }, { transform: "none", borderRadius: "12px" }], { duration: 420, easing: EASE });
+        ov.animate([{ backgroundColor: "rgba(10,19,38,0)" }, { backgroundColor: "rgba(10,19,38,.88)" }], { duration: 320, fill: "forwards" });
+      } else ov.style.backgroundColor = "rgba(10,19,38,.88)";
+      var tutup = function () {
+        if (ov.dataset.t) return; ov.dataset.t = 1; d.body.classList.remove("nm-lock");
+        var r2 = im.getBoundingClientRect(), ke = "translate(" + (r2.left - tx) + "px," + (r2.top - ty) + "px) scale(" + (r2.width / w) + "," + (r2.height / h) + ")";
+        if (reduce) { ov.remove(); box.focus(); return; }
+        big.animate([{ transform: "none" }, { transform: ke, borderRadius: "24px" }], { duration: 340, easing: EASE, fill: "forwards" });
+        var a = ov.animate([{ backgroundColor: "rgba(10,19,38,.88)" }, { backgroundColor: "rgba(10,19,38,0)" }], { duration: 340, fill: "forwards" });
+        a.onfinish = function () { ov.remove(); box.focus({ preventScroll: true }); };
+      };
+      ov.addEventListener("click", tutup);
+      var esc = function (e) { if (e.key === "Escape") { tutup(); removeEventListener("keydown", esc); } };
+      addEventListener("keydown", esc);
+      ov.querySelector(".lb-x").focus();
+    };
+    box.addEventListener("click", buka);
+    box.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); buka(); } });
+  });
+})();
