@@ -21,7 +21,7 @@
 
   // tandai elemen yang muncul saat digulir (tanpa mengubah HTML tiap halaman)
   var tandai = function (sel, extra) { [].forEach.call(d.querySelectorAll(sel), function (el) { if (!el.closest(".hero3") && !el.classList.contains("rv")) { el.classList.add("rv"); if (extra) el.classList.add(extra); } }); };
-  if (!reduce) {
+  if (false) {
     tandai(".head > *, .split-h > *, .join > div > *, .faq > div:first-child > *, .ph .crumb, .ph h1, .ph .lead, .reg-side > *, .exam-note, .cta, .quote");
     tandai(".vals > div, .prows li, .go2-it", "rv-l");
     tandai(".role, .steps-v li, .qa details, .feat li, .stores, .app-note, .shot", "");
@@ -144,20 +144,6 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   } else its.forEach(function (i) { i.classList.add("on"); });
 })();
 
-// hero: foto berganti pelan (pengganti video latar)
-(function () {
-  var imgs = [].slice.call(document.querySelectorAll(".pl-hero-bg img"));
-  if (imgs.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  var i = 0;
-  setInterval(function () {
-    if (document.hidden) return;
-    var cur = imgs[i]; i = (i + 1) % imgs.length; var nx = imgs[i];
-    if (nx.loading === "lazy") nx.loading = "eager";
-    nx.classList.remove("on"); void nx.offsetWidth; nx.classList.add("on");
-    setTimeout(function () { cur.classList.remove("on"); }, 50);
-  }, 7000);
-})();
-
 // berita terbuka di jendela, tanpa pindah halaman (tautan tetap berfungsi bila JS gagal)
 (function () {
   if (typeof rpc !== "function") return;
@@ -201,32 +187,10 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   var q = new URLSearchParams(location.search).get("berita"); if (q) buka(q);
 })();
 
-// tombol sedikit tertarik ke arah kursor (hanya mouse, tidak saat gerak dikurangi)
-(function () {
-  if (!matchMedia("(hover: hover) and (pointer: fine)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  document.addEventListener("pointermove", function (e) {
-    var b = e.target.closest && e.target.closest(".btn:not(.is-off), .car-b, .pc-go");
-    document.querySelectorAll(".mag").forEach(function (m) { if (m !== b) { m.classList.remove("mag"); m.style.transform = ""; } });
-    if (!b) return; var r = b.getBoundingClientRect(), x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
-    b.classList.add("mag"); b.style.transform = "translate(" + (x * .18).toFixed(1) + "px," + (y * .28).toFixed(1) + "px)";
-  });
-})();
-
 // revisi 13: gerak ala pliability, digerakkan GSAP + ScrollTrigger + SplitText
 (function () {
   var d = document, html = d.documentElement;
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // pil ajakan di bawah layar (tanpa GSAP, agar tetap jalan bila pustaka gagal dimuat)
-  var kind = (window.PAGE && PAGE.kind) || "";
-  if (["pendaftaran", "ujian", "404"].indexOf(kind) < 0) {
-    var dk = d.createElement("div"); dk.className = "dock"; dk.setAttribute("role", "region"); dk.setAttribute("aria-label", "Pendaftaran");
-    dk.innerHTML = '<span><b>Pendidikan Intensif Angkatan I</b><small>Pendaftaran tahun 2026 telah dibuka</small></span><a class="btn" href="pendaftaran.html">Cara Daftar</a>';
-    d.body.appendChild(dk); html.classList.add("has-dock");
-    var stop = d.querySelector(".pl-cta, .cta-sec, .ft"), raf = 0;
-    var cek = function () { raf = 0; var on = scrollY > innerHeight * .7 && !(stop && stop.getBoundingClientRect().top < innerHeight - 40); dk.classList.toggle("on", on); html.classList.toggle("dock-on", on); };
-    addEventListener("scroll", function () { if (!raf) raf = requestAnimationFrame(cek); }, { passive: true }); cek();
-  }
 
   if (reduce || !window.gsap || !window.ScrollTrigger) { [].forEach.call(d.querySelectorAll(".steps-v"), function (o) { o.style.setProperty("--p", 1); }); return; }
   gsap.registerPlugin(ScrollTrigger, window.SplitText || {});
@@ -235,35 +199,11 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   var D0 = html.classList.contains("pl-first") ? 1.8 : html.classList.contains("pt-in") ? .45 : 0;
   var mm = gsap.matchMedia();
 
-  // judul bagian: naik pelan saat terlihat
-  $$(".head > .h2, .split-h > .h2, .faq .h2, .pl-cards-head .h2, .ab-g > .h2, .pl-cta h2").forEach(function (h) {
-    h.classList.remove("rv", "in");
-    gsap.from(h, { autoAlpha: 0, y: 24, duration: .9, ease: E, scrollTrigger: { trigger: h, start: "top 90%", once: true } });
-  });
-
   // hero: teks terangkat dan memudar, bingkai foto melayang lebih lambat
   var hero = d.querySelector(".pl-hero");
   if (hero) {
-    gsap.from(".pl-proof > *", { y: 30, autoAlpha: 0, stagger: .12, duration: 1.1, ease: E, delay: .7 + D0 });
+    gsap.from(".pl-proof > *", { y: 12, autoAlpha: 0, stagger: .06, duration: .7, ease: "power2.out", delay: .5 });
   }
-
-  // kartu Jelajahi: masuk berurutan dari bawah, foto bergeser di dalam bingkai
-  var pcs = $$(".pc");
-  if (pcs.length) {
-    gsap.from(pcs, { y: 40, autoAlpha: 0, stagger: .08, duration: 1, ease: E, scrollTrigger: { trigger: "#pc", start: "top 85%", once: true } });
-  }
-
-  // aplikasi: dua layar sedikit bergerak saat digulir
-  $$(".shots .shot").forEach(function (s, i) {
-    s.classList.remove("rv", "in");
-    gsap.fromTo(s, { y: i ? 40 : 16 }, { y: i ? -16 : -8, ease: "none", scrollTrigger: { trigger: ".shots", start: "top bottom", end: "bottom top", scrub: true } });
-  });
-
-  // daftar lain: muncul berurutan per kelompok
-  ScrollTrigger.batch(".dl, .mq", {
-    start: "top 90%", once: true,
-    onEnter: function (els) { gsap.from(els, { y: 40, autoAlpha: 0, stagger: .08, duration: 1.1, ease: E, overwrite: true }); }
-  });
 
   // 404: lambang miring mengikuti kursor, klik untuk mengecap
   var em = d.querySelector(".emblem");
@@ -289,14 +229,31 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     d.fonts.ready.then(function () {
       var sp = SplitText.create(h, { type: "words", wordsClass: "wd" });
       sp.words.forEach(function (w) { var o = d.createElement("span"); o.className = "wd-o"; w.parentNode.insertBefore(o, w); o.appendChild(w); });
-      gsap.from(sp.words, { yPercent: 110, duration: 1.2, ease: E, stagger: .07, delay: .15 + D0 });
+      gsap.from(sp.words, { yPercent: 100, duration: .8, ease: "power3.out", stagger: .05, delay: .05 });
     });
   });
   $$(".ph .photo").forEach(function (ph) {
     ph.classList.remove("rv", "in", "rv-c");
-    gsap.fromTo(ph, { clipPath: "inset(10% 8% 10% 8% round 44px 6px 6px 6px)" }, { clipPath: "inset(0% 0% 0% 0% round 44px 6px 6px 6px)", duration: 1.5, ease: E, delay: .3 + D0, clearProps: "clipPath" });
-    var im = ph.querySelector("img"); if (im) gsap.fromTo(im, { scale: 1.15 }, { scale: 1, duration: 2, ease: E, delay: .3 + D0 });
+    gsap.from(ph, { autoAlpha: 0, y: 12, duration: .7, ease: "power2.out", delay: .2 });
   });
 
   addEventListener("load", function () { ScrollTrigger.refresh(); });
+})();
+
+// agenda kosong: tampilkan kalender bulan berjalan, bukan kotak polos
+(function () {
+  var ev = document.getElementById("ev"); if (!ev) return;
+  var BL = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  var gambar = function () {
+    var kosong = ev.querySelector(".rw") && !ev.querySelector(".ev, .ev-it, article, a");
+    if (!kosong || ev.querySelector(".cal")) return;
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth(), awal = (new Date(y, m, 1).getDay() + 6) % 7, jml = new Date(y, m + 1, 0).getDate();
+    var sel = ""; for (var i = 0; i < awal; i++) sel += "<span></span>";
+    for (var t = 1; t <= jml; t++) sel += '<span' + (t === now.getDate() ? ' class="today" aria-current="date"' : "") + ">" + t + "</span>";
+    var pesan = ev.querySelector(".rw p") ? ev.querySelector(".rw p").textContent : "Belum ada agenda mendatang.";
+    ev.innerHTML = '<div class="cal"><div class="cal-h"><b>' + BL[m] + " " + y + '</b><span>Kalender kegiatan PERKAPI</span></div>' +
+      '<div class="cal-d" aria-hidden="true"><i>Sen</i><i>Sel</i><i>Rab</i><i>Kam</i><i>Jum</i><i>Sab</i><i>Min</i></div><div class="cal-g" aria-hidden="true">' + sel + "</div>" +
+      '<p class="cal-e">' + pesan + " Jadwal baru diumumkan di halaman ini dan di Instagram @official.perkapi.</p></div>";
+  };
+  new MutationObserver(gambar).observe(ev, { childList: true }); gambar();
 })();
