@@ -1593,3 +1593,6 @@ em,i,blockquote,.ft-tag,.role blockquote,.pl-cta h2 em{font-style:normal}
 
 /* muncul saat digulir: kembali aktif, halus */
 .pc-grid .pc,.mitra-g li,.cal{transition:none}
+.priv>div{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+.priv dt{font-size:22px}
+.ft-b a{color:inherit;text-decoration:underline;text-underline-offset:3px}
