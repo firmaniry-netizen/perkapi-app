@@ -1643,3 +1643,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,.btn:focus-visible{ou
 .lb-x{position:absolute;top:16px;right:16px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#0F1C33;font-size:26px;line-height:1;cursor:pointer}
 .lb-cap{position:absolute;left:0;right:0;bottom:16px;margin:0;padding:0 24px;text-align:center;color:#E9EEF8;font-size:14px}
 @media (prefers-reduced-motion:reduce){.nav a{opacity:1!important;transform:none!important;transition:none!important}.nav-bar{transition:none}}
+/* foto bersama tampil utuh, tidak terpotong */
+@media (min-width:761px){.pl-hero-bg{aspect-ratio:3/2!important}}
+.pl-hero-bg img{object-fit:cover;object-position:50% 50%}
+@media (max-width:760px){.pl-hero-bg{height:auto!important;min-height:0!important;aspect-ratio:3/2}}
+@media (min-width:761px){.pl-hero{overflow:visible}.pl-hero-bg{margin-right:10px}}
