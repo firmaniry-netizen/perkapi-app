@@ -1444,3 +1444,89 @@ html.pl-first .words .w-i{transition-delay:calc(1.95s + var(--k,0)*70ms)}
 /* header pil: permukaan padat, bukan kaca abu-abu */
 @media (min-width:761px){.hd.scrolled:not(.open) .w{background:rgba(255,255,255,.96);-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media (min-width:761px) and (prefers-color-scheme:dark){.hd.scrolled:not(.open) .w{background:rgba(14,31,69,.97)}}
+
+/* ===== revisi 18: permintaan pengurus, lebih sederhana dan tegas ===== */
+/* huruf tegas, tanpa miring, tanpa judul dua nada */
+h1,h2,.h2,.h3,.pc b,.vals dt,.role h3{font-weight:500}
+em,i,blockquote,.ft-tag,.role blockquote,.pl-cta h2 em{font-style:normal}
+.mt{color:inherit!important}
+
+/* hero: dua kolom rapi, teks kiri dan foto kanan, tidak saling menumpuk */
+@media (min-width:761px){
+  .pl-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-rows:auto auto;column-gap:clamp(32px,4vw,64px);row-gap:clamp(36px,5vw,56px);align-items:center;width:min(100% - 2*var(--gut,24px),var(--wrap,1160px));max-width:1160px;margin:0 auto;padding:clamp(120px,14vh,160px) 0 clamp(40px,6vw,72px);min-height:0}
+  .pl-hero::before{display:none}
+  .pl-hero-bg{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:auto!important;grid-column:2;grid-row:1;aspect-ratio:5/4;transform:none!important}
+  .pl-hero-in{grid-column:1;grid-row:1;width:auto;max-width:none;padding:0;margin:0;opacity:1!important;transform:none!important}
+  .pl-hero .pl-hero-in h1,.pl-hero .pl-hero-in .lead{max-width:none}
+  .pl-hero h1{font-size:clamp(2.5rem,4.2vw,4.3rem);line-height:1.05}
+  .pl-hero .pl-hero-in .lead{max-width:46ch}
+  .pl-proof{grid-column:1/-1;grid-row:2;width:auto;margin:0;padding-left:0;padding-right:0}
+}
+.pl-proof b{white-space:nowrap}
+
+/* Jelajahi: kisi rapi, satu kartu besar dan sisanya kecil */
+.pc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(220px,1fr);gap:16px;width:min(100% - 2*var(--gut,24px),var(--wrap,1160px));margin:0 auto}
+.pc-grid .pc{flex:none;aspect-ratio:auto;min-height:220px;border-radius:18px;scroll-snap-align:none}
+.pc-grid .pc:first-child{grid-row:span 2;min-height:456px;border-radius:44px 18px 18px 18px}
+.pc-grid .pc:first-child b{font-size:clamp(1.8rem,2.6vw,2.4rem)}
+.pc-grid .pc b{font-size:clamp(1.25rem,1.6vw,1.5rem)}
+@media (max-width:900px){.pc-grid{grid-template-columns:1fr 1fr}.pc-grid .pc:first-child{grid-column:1/-1;grid-row:auto;min-height:300px}}
+@media (max-width:560px){.pc-grid{grid-template-columns:1fr}.pc-grid .pc{min-height:200px}}
+
+/* mitra beranda: daftar statis tanpa pita bergerak */
+.mitra{padding:clamp(48px,7vw,80px) 0}
+.mitra-t{margin:0 0 28px;font:500 clamp(1.5rem,2.4vw,2rem)/1.2 var(--f-serif);color:var(--navy)}
+.mitra-g{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.mitra-g li{display:flex;align-items:center;gap:14px;padding:18px;border-radius:14px;background:var(--paper);border:1px solid var(--line);font:600 15px/1.3 var(--f-sans);color:var(--ink)}
+.mitra-g img{width:48px;height:48px;object-fit:contain;flex:none}
+@media (max-width:900px){.mitra-g{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.mitra-g{grid-template-columns:1fr}}
+
+/* kerja sama di Tentang: daftar sederhana tanpa tautan dokumen */
+.ks .ks-row{display:flex;align-items:center;gap:20px;padding:20px 0}
+.ks .ks-k{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+
+/* Nilai Organisasi di Tentang: foto di bawah judul */
+.split-ph{margin:28px 0 0;border-radius:24px 6px 6px 6px;overflow:hidden;aspect-ratio:4/3}
+.split-ph img{width:100%;height:100%;object-fit:cover}
+@media (max-width:900px){.split-ph{max-width:520px}}
+
+/* Cara Mendaftar: semua langkah tampil penuh, tanpa dipin */
+.steps-v{--p:1}
+.gs #cara .steps-v li:not(.lit){opacity:1}
+.gs #cara .steps-v li:not(.lit)::before{background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important}
+@media (prefers-color-scheme:dark){.gs #cara .steps-v li:not(.lit)::before{background:#D2B272!important;color:#0A1326!important;border-color:#D2B272!important}}
+
+/* aplikasi: layar kedua menampilkan kartu anggota */
+.dev.kartu{display:flex;flex-direction:column;background:#F7F4EC;color:#0F1C33;text-align:center}
+.k-bar{padding:16px 14px 12px;font:600 14px/1 var(--f-sans);border-bottom:1px solid rgba(15,28,51,.08);background:#fff}
+.k-card{margin:16px 12px 0;padding:18px 14px 16px;border-radius:16px;background:#fff;box-shadow:0 10px 24px -14px rgba(13,31,69,.45);display:grid;justify-items:center;gap:3px;position:relative;overflow:hidden}
+.k-card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:linear-gradient(90deg,#B3262B,#B08D4A,#0D1F45)}
+.k-logo{width:46px;height:46px}
+.k-org{font:700 14px/1.1 var(--f-sans);letter-spacing:.08em;color:#0D1F45;margin-top:4px}
+.k-sub{font-size:8px;color:#5B6478}
+.k-name{margin-top:10px;font:600 13px/1.2 var(--f-sans)}
+.k-no{font-size:10px;color:#5B6478}
+.k-card .qr{width:84px;height:84px;margin:10px 0 6px;fill:#0D1F45}
+.k-ok{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:#E7F5EC;color:#1D7A43;font:600 10px/1 var(--f-sans)}
+.k-note{margin:12px 16px 0;font-size:10px;line-height:1.4;color:#5B6478}
+
+/* footer: kontak mendatar di bawah logo, ikon sosmed, peta sekretariat */
+.ft-kontak{display:flex!important;flex-wrap:wrap;gap:10px 22px!important;margin-top:22px!important}
+.ft-kontak li a{display:inline-flex;align-items:center;gap:8px;padding:0}
+.ft-kontak svg{width:18px;height:18px;flex:none}
+.ft-sos{display:flex;gap:10px;margin-top:20px}
+.sos-ic{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.2);color:#fff;transition:border-color .2s,background-color .2s}
+.sos-ic:hover{border-color:var(--gold-hi);background:rgba(255,255,255,.06)}
+.sos-ic .ic{width:19px;height:19px}
+.ft .addr{display:flex;gap:10px;align-items:flex-start;color:inherit;text-decoration:none;line-height:1.55}
+.ft .addr .ic{flex:none;margin-top:3px;color:var(--gold-hi)}
+.ft-map{margin-top:16px;border-radius:12px;overflow:hidden;aspect-ratio:16/10;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.ft-map iframe{display:block;width:100%;height:100%;border:0}
+.ft-word,.ft-tag,.ft-ig,.nav-ig{display:none!important}
+
+/* lebih tenang: tanpa kabur pada judul, tanpa kata menyala */
+.ab-p .wd{opacity:1!important}
+.pc-grid{width:auto;margin-left:auto;margin-right:auto}
+.dv{display:none!important}
+.sec.navy::after,.sec.navy::before{display:none}
