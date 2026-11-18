@@ -1596,3 +1596,27 @@ em,i,blockquote,.ft-tag,.role blockquote,.pl-cta h2 em{font-style:normal}
 .priv>div{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
 .priv dt{font-size:22px}
 .ft-b a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+
+/* ===== revisi 20 ===== */
+/* mode gelap: kotak bantuan dan permukaan pucat */
+@media (prefers-color-scheme:dark){
+  .help,.go2-it .badge,.dl-ic{background:#13254F;color:#E9EEF8}
+  .help b{color:#fff}.help p{color:#C3CDE1}.help .ic{color:#D2B272}
+  .help .link{color:#D2B272}
+  .crumb,.crumb a{color:#9AA6C2}
+  .reg-side .steps-v li::before{background:#13254F;color:#D2B272;border-color:#2A4580}
+  .btn.line{--fg-b:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+}
+/* fokus keyboard jelas di semua kontrol */
+a:focus-visible,button:focus-visible,summary:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:8px}
+/* status memuat pada tombol */
+.btn[aria-busy="true"]{pointer-events:none;opacity:.75}
+.btn[aria-busy="true"]::after{content:"";width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn.is-off,.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+/* titik pendaftaran berdenyut sangat pelan */
+.annc-dot{animation:napas 3.2s ease-in-out infinite;box-shadow:none}
+@keyframes napas{0%,100%{box-shadow:0 0 0 0 rgba(61,220,132,.45)}50%{box-shadow:0 0 0 6px rgba(61,220,132,0)}}
+/* 404 sederhana */
+.emblem{cursor:default}.emblem-tip,.stamp{display:none!important}
+@media (prefers-reduced-motion:reduce){.annc-dot,.btn[aria-busy="true"]::after{animation:none}}

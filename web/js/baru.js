@@ -205,23 +205,6 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     gsap.from(".pl-proof > *", { y: 12, autoAlpha: 0, stagger: .06, duration: .7, ease: "power2.out", delay: .5 });
   }
 
-  // 404: lambang miring mengikuti kursor, klik untuk mengecap
-  var em = d.querySelector(".emblem");
-  if (em) {
-    var inner = d.createElement("div"); inner.className = "emblem-in";
-    while (em.firstChild) inner.appendChild(em.firstChild); em.appendChild(inner);
-    var rx = gsap.quickTo(inner, "rotationX", { duration: .6, ease: "power3" }), ry = gsap.quickTo(inner, "rotationY", { duration: .6, ease: "power3" });
-    addEventListener("pointermove", function (e) { var r = em.getBoundingClientRect(); ry(((e.clientX - (r.left + r.width / 2)) / innerWidth) * 40); rx((-(e.clientY - (r.top + r.height / 2)) / innerHeight) * 40); });
-    em.addEventListener("click", function () {
-      gsap.fromTo(inner, { scale: .9 }, { scale: 1, duration: .6, ease: "elastic.out(1,.4)" });
-      var st = d.createElement("div"); st.className = "stamp"; st.innerHTML = "<span>Halaman<br>Tidak<br>Ditemukan</span>"; inner.appendChild(st);
-      gsap.fromTo(st, { xPercent: -50, yPercent: -50, scale: 2.4, rotation: gsap.utils.random(-28, 28), opacity: 0 }, { scale: 1, opacity: .85, duration: .35, ease: "power4.in",
-        onComplete: function () { gsap.to(st, { opacity: 0, duration: 1.2, delay: 1.4, onComplete: function () { st.remove(); } }); } });
-    });
-    var tip = d.createElement("p"); tip.className = "emblem-tip"; tip.textContent = "Klik lambang untuk mengecap"; em.appendChild(tip);
-  }
-
-
   // judul halaman dalam (Tentang, Pendaftaran, Agenda): kata naik dari balik garis
   $$(".ph h1").forEach(function (h) {
     h.classList.remove("rv", "in");
@@ -256,4 +239,14 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
       '<p class="cal-e">' + pesan + " Jadwal baru diumumkan di halaman ini dan di Instagram @official.perkapi.</p></div>";
   };
   new MutationObserver(gambar).observe(ev, { childList: true }); gambar();
+})();
+
+// status memuat pada tombol telepon dan tautan keluar, agar tekanan terasa ditanggapi
+(function () {
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest('a.btn[href^="tel:"], a.btn[target="_blank"]');
+    if (!b) return;
+    b.setAttribute("aria-busy", "true");
+    setTimeout(function () { b.removeAttribute("aria-busy"); }, 1600);
+  });
 })();
