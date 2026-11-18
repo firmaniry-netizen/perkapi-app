@@ -300,12 +300,12 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   });
 
   // 6. foto membesar dari tempatnya saat diklik, kembali ke tempat yang sama saat ditutup
-  var pics = [].slice.call(d.querySelectorAll(".ph .photo img, .wide-photo img, .split-ph img"));
+  var pics = [].slice.call(d.querySelectorAll(".ph .photo img, .wide-photo img, .split-ph img, .gal img"));
   pics.forEach(function (im) {
     var box = im.closest("figure, .photo, .wide-photo") || im.parentNode;
     box.classList.add("zoomable-img"); box.setAttribute("role", "button"); box.setAttribute("tabindex", "0"); box.setAttribute("aria-label", "Perbesar foto" + (im.alt ? ": " + im.alt : ""));
     var buka = function () {
-      var r = im.getBoundingClientRect(), src = im.currentSrc || im.src;
+      var r = im.getBoundingClientRect(), src = im.getAttribute("data-full") || im.currentSrc || im.src;
       if (/-900\.jpg/.test(src)) src = src.replace("-900.jpg", ".jpg");
       var ov = d.createElement("div"); ov.className = "lb"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", im.alt || "Foto");
       ov.innerHTML = '<button class="lb-x" type="button" aria-label="Tutup foto">&times;</button>';
@@ -337,4 +337,43 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     box.addEventListener("click", buka);
     box.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); buka(); } });
   });
+})();
+
+// revisi 22
+(function () {
+  var d = document, html = d.documentElement, hd = d.querySelector(".hd");
+  // tinggi kepala situs untuk menu HP dan penanda bagian
+  var ukur = function () { if (hd) html.style.setProperty("--hd-b", Math.round(hd.getBoundingClientRect().bottom) + "px"); };
+  ukur(); addEventListener("resize", ukur); addEventListener("scroll", function () { if (!hd || !hd.classList.contains("open")) ukur(); }, { passive: true });
+  var bg = d.querySelector(".burger");
+  if (bg) bg.addEventListener("click", function () { ukur(); setTimeout(function () { d.body.classList.toggle("menu-open", hd.classList.contains("open")); }, 0); });
+  var nav = d.getElementById("nav"); if (nav) nav.addEventListener("click", function (e) { if (e.target.closest("a")) d.body.classList.remove("menu-open"); });
+  addEventListener("keydown", function (e) { if (e.key === "Escape") d.body.classList.remove("menu-open"); });
+
+  // tombol kembali ke atas
+  var tt = d.createElement("button"); tt.type = "button"; tt.className = "totop"; tt.setAttribute("aria-label", "Kembali ke atas");
+  tt.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  d.body.appendChild(tt);
+  tt.addEventListener("click", function () { scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); var t = d.getElementById("main"); if (t) t.focus({ preventScroll: true }); });
+  var raf = 0; addEventListener("scroll", function () { if (raf) return; raf = requestAnimationFrame(function () { raf = 0; tt.classList.toggle("on", scrollY > innerHeight * 1.2); }); }, { passive: true });
+
+  // foto memudar halus setelah dimuat
+  [].forEach.call(d.querySelectorAll("main img"), function (im) {
+    if (im.complete && im.naturalWidth) return;
+    im.classList.add("fd");
+    var ok = function () { im.classList.add("ok"); };
+    im.addEventListener("load", ok); im.addEventListener("error", ok);
+  });
+
+  // penanda bagian yang sedang dibaca
+  var sn = d.querySelector(".secnav");
+  if (sn && "IntersectionObserver" in window) {
+    var ln = [].slice.call(sn.querySelectorAll("a")), aktif = null;
+    var pilih = function (id) {
+      if (aktif === id) return; aktif = id;
+      ln.forEach(function (a) { var on = a.getAttribute("href") === "#" + id; a.classList.toggle("on", on); if (on) { a.setAttribute("aria-current", "true"); var ul = sn.querySelector("ul"); ul.scrollTo({ left: a.offsetLeft - 24, behavior: "smooth" }); } else a.removeAttribute("aria-current"); });
+    };
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) pilih(e.target.id); }); }, { rootMargin: "-45% 0px -50% 0px" });
+    ln.forEach(function (a) { var s = d.getElementById(a.getAttribute("href").slice(1)); if (s) io.observe(s); });
+  }
 })();
