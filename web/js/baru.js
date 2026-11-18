@@ -21,10 +21,10 @@
 
   // tandai elemen yang muncul saat digulir (tanpa mengubah HTML tiap halaman)
   var tandai = function (sel, extra) { [].forEach.call(d.querySelectorAll(sel), function (el) { if (!el.closest(".hero3") && !el.classList.contains("rv")) { el.classList.add("rv"); if (extra) el.classList.add(extra); } }); };
-  if (false) {
+  if (!reduce) {
     tandai(".head > *, .split-h > *, .join > div > *, .faq > div:first-child > *, .ph .crumb, .ph h1, .ph .lead, .reg-side > *, .exam-note, .cta, .quote");
     tandai(".vals > div, .prows li, .go2-it", "rv-l");
-    tandai(".role, .steps-v li, .qa details, .feat li, .stores, .app-note, .shot", "");
+    tandai(".role, .steps-v li, .qa details, .feat li, .stores, .app-note, .shot, .pc-grid .pc, .mitra-g li, .ab-g > *, .pl-cards-head > *, .pl-cta-g > *, .pl-check li, .ag-side .help, .go2-it, .reg-side > *", "");
     tandai(".gallery .photo, .split-photo, .wide-photo, .ph .photo", "rv-c");
     tandai(".app", "rv-s");
     tandai(".stat");

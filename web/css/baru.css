@@ -1533,7 +1533,6 @@ em,i,blockquote,.ft-tag,.role blockquote,.pl-cta h2 em{font-style:normal}
 
 /* ===== revisi 19: unslop, poles tenang ===== */
 /* tanpa muncul saat digulir: isi langsung tampil */
-.js .rv,.js .rv.in{opacity:1!important;transform:none!important;clip-path:none!important;transition:none!important}
 /* hero: satu foto diam, tanpa zoom berulang */
 .pl-hero-bg img{animation:none!important;transition:none!important}
 .pl-hero-bg img:not(:first-child){display:none}
@@ -1591,3 +1590,6 @@ em,i,blockquote,.ft-tag,.role blockquote,.pl-cta h2 em{font-style:normal}
 @media (prefers-color-scheme:dark){.cal-h b{color:#fff}.cal-g .today{background:#D2B272!important;color:#0A1326}}
 .cal-g span{aspect-ratio:auto;height:44px}
 .ph + .sec:not(.sand){padding-top:clamp(8px,2vw,24px)!important}
+
+/* muncul saat digulir: kembali aktif, halus */
+.pc-grid .pc,.mitra-g li,.cal{transition:none}
