@@ -1,8 +1,8 @@
 // Pendaftaran, pengumuman koran, dan beranda (site_settings: pendaftaran, pengumuman, beranda)
-async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key=in.(pendaftaran,pengumuman,beranda,halaman)")).forEach(function(x){s[x.key]=x.value||{}});
-  var p=s.pendaftaran||{},g=s.pengumuman||{},br=s.beranda||{},hl=s.halaman||{},HL=[["berita","Berita (menu Berita, kolom berita di beranda, halaman berita)"],["agenda","Agenda"],["tentang","Tentang"]],h=function(t){return'<p style="font-size:13px;color:#59627a;margin:0 0 6px">'+t+"</p>"};
+async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key=in.(pendaftaran,pengumuman,beranda,halaman,faq)")).forEach(function(x){s[x.key]=x.value||{}});
+  var p=s.pendaftaran||{},g=s.pengumuman||{},br=s.beranda||{},hl=s.halaman||{},fq=s.faq||{},HL=[["berita","Berita (menu Berita, kolom berita di beranda, halaman berita)"],["agenda","Agenda"],["tentang","Tentang"],["kode-etik","Kode Etik (isi dari menu Kode etik)"],["peraturan","Peraturan (isi dari menu Peraturan)"],["adart","AD/ART (PDF dari Pengaturan > Profil organisasi)"],["anggota","Direktori Anggota (isi dari menu Direktori)"],["faq","FAQ (isi di bawah)"],["kontak","Kontak (isi dari Pengaturan > Kontak, pesan masuk ke menu Pesan)"]],h=function(t){return'<p style="font-size:13px;color:#59627a;margin:0 0 6px">'+t+"</p>"};
   V.innerHTML='<h2>Halaman, pendaftaran &amp; pengumuman</h2><div class="g2">'
-  +'<form id="phl" style="grid-column:1/-1"><h3>Halaman yang tampil di situs</h3>'+h("Halaman yang dimatikan hilang dari menu dan footer. Pengunjung yang membuka alamatnya melihat pemberitahuan halaman belum tersedia.")+HL.map(function(x){return'<label><input type="checkbox" id="h_'+x[0]+'"> '+x[1]+'</label>'}).join("")+'<p><button class="b">Simpan halaman</button></p></form>'
+  +'<form id="phl" style="grid-column:1/-1"><h3>Halaman yang tampil di situs</h3>'+h("Halaman yang dimatikan hilang dari menu dan footer. Halaman baru (Kode Etik sampai Kontak) tampil di footer bagian Halaman. Pengunjung yang membuka alamatnya melihat pemberitahuan halaman belum tersedia.")+HL.map(function(x){return'<label><input type="checkbox" id="h_'+x[0]+'"> '+x[1]+'</label>'}).join("")+'<p><button class="b">Simpan halaman</button></p></form>'
   +'<form id="pdf"><h3>Status pendaftaran</h3>'+h("Mode otomatis: sebelum waktu buka tampil teks \"segera dibuka\", di antara buka dan tutup tampil \"dibuka\", setelah waktu tutup tampil \"ditutup\". Waktu dalam WIB.")
   +'<label>Mode</label><select id="d_mode"><option value="otomatis">Otomatis mengikuti tanggal</option><option value="buka">Selalu dibuka</option><option value="tutup">Ditutup sekarang</option></select>'
   +'<label>Dibuka mulai (WIB)</label><input id="d_buka" type="datetime-local"><label>Ditutup pada (WIB)</label><input id="d_tutup" type="datetime-local">'
@@ -21,10 +21,12 @@ async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key
   +'<label>Kalimat informasi di akhir</label><textarea id="g_info"></textarea>'
   +'<label>Tempat dan tanggal</label><input id="g_tanggal" placeholder="Jakarta, 20 November 2026"><label>Nama organisasi</label><input id="g_organisasi">'
   +'<label>Tanda tangan (satu baris per orang: NAMA | Jabatan, urut kiri ke kanan)</label><textarea id="g_ttd" style="min-height:90px"></textarea>'
-  +'<p><button class="b">Simpan pengumuman</button></p></form></div>';
+  +'<p><button class="b">Simpan pengumuman</button></p></form>'
+  +'<form id="pfq" style="grid-column:1/-1"><h3>FAQ (halaman Pertanyaan yang Sering Diajukan)</h3>'+h("<b>## Kelompok</b> = judul kelompok<br><b>? Pertanyaan</b> = pertanyaan baru<br>Baris berikutnya = jawaban (boleh beberapa baris)")+'<textarea id="f_faq" style="min-height:360px;font-family:ui-monospace,Consolas,monospace;font-size:13.5px"></textarea><p><button class="b">Simpan FAQ</button> <a class="b l" href="/faq.html" target="_blank" rel="noopener">Lihat halaman FAQ</a></p></form></div>';
   ["mode","buka","tutup","telepon","pita_segera","pita_buka","pita_tutup","label_buka","label_tutup","ket_tutup"].forEach(function(n){$("d_"+n).value=p[n]||(n=="mode"?"otomatis":"")});
   ["judul","sumber","subjudul","kop","isi","info","tanggal","organisasi","ttd"].forEach(function(n){$("g_"+n).value=g[n]||""});$("g_tampil").checked=g.tampil!==false;
-  $("b_tagline").value=br.tagline||"";HL.forEach(function(x){$("h_"+x[0]).checked=hl[x[0]]!==false});
+  $("b_tagline").value=br.tagline||"";$("f_faq").value=fq.isi||"";
+  $("pfq").onsubmit=function(ev){ev.preventDefault();simpan("faq",{isi:$("f_faq").value.trim()})};HL.forEach(function(x){$("h_"+x[0]).checked=hl[x[0]]!==false});
   $("phl").onsubmit=function(ev){ev.preventDefault();var v={};HL.forEach(function(x){v[x[0]]=$("h_"+x[0]).checked});simpan("halaman",v)};
   $("pdf").onsubmit=function(ev){ev.preventDefault();var v={};["mode","buka","tutup","telepon","pita_segera","pita_buka","pita_tutup","label_buka","label_tutup","ket_tutup"].forEach(function(n){v[n]=$("d_"+n).value.trim()});
     if(v.buka&&v.tutup&&v.tutup<=v.buka)return note("Waktu tutup harus setelah waktu buka.","er");simpan("pendaftaran",v)};

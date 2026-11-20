@@ -509,3 +509,110 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     });
   });
 })();
+
+// Halaman tambahan (dinyalakan dari admin > Halaman & pendaftaran): kode etik, peraturan, AD/ART, direktori, FAQ, kontak.
+(function () {
+  var d = document, $ = function (i) { return d.getElementById(i); };
+  var esc = function (s) { var x = d.createElement("div"); x.textContent = s == null ? "" : s; return x.innerHTML; };
+  var kosong = function (t, p) { return '<div class="kosong"><h2>' + t + "</h2><p>" + p + "</p></div>"; };
+  var ada = typeof rpc === "function", st = typeof settings === "function" ? settings() : Promise.resolve({});
+  var https = function (u) { return /^https:\/\//.test(String(u || "")); };
+
+  // kode etik: bab dari public_ethics, PDF dan tanggal berlaku dari Pengaturan > Kode etik
+  if ($("ke")) {
+    st.then(function (s) { var k = (s || {}).kode_etik || {};
+      if (https(k.pdf)) { $("kpdf").href = k.pdf; $("kpdf").hidden = false; }
+      if (k.berlaku) { $("kber").textContent = "Berlaku sejak " + k.berlaku; $("kber").hidden = false; } });
+    (ada ? rpc("public_ethics") : Promise.resolve([])).then(function (r) {
+      if (!r || !r.length) { $("ke").innerHTML = kosong("Naskah kode etik sedang disiapkan", "Kode etik profesi akan diterbitkan di halaman ini setelah disahkan."); return; }
+      $("ke").innerHTML = r.map(function (x, i) { return '<section id="bab-' + (i + 1) + '"><h2>' + esc(x.title) + "</h2>" + String(x.body || "").split(/\n+/).filter(function (l) { return l.trim(); }).map(function (l) { return "<p>" + esc(l.trim()) + "</p>"; }).join("") + "</section>"; }).join("");
+      $("kt").innerHTML = r.map(function (x, i) { return '<li><a href="#bab-' + (i + 1) + '">' + esc(x.title) + "</a></li>"; }).join("");
+      $("kt-wrap").hidden = r.length < 2;
+    }).catch(function () { $("ke").innerHTML = kosong("Kode etik belum dapat dimuat", "Periksa koneksi Anda lalu muat ulang halaman."); });
+  }
+
+  // peraturan: public_regulations (Admin > Peraturan)
+  if ($("lawlist")) {
+    var semua = [], saring = "";
+    var tampil = function () {
+      var v = semua.filter(function (x) { return !saring || x.kind === saring; });
+      $("lawlist").innerHTML = v.length ? v.map(function (x) {
+        var a = (https(x.pdf_url) ? '<a class="link" href="' + esc(x.pdf_url) + '" target="_blank" rel="noopener">Unduh PDF</a>' : "") + (https(x.page_url) ? '<a class="link" href="' + esc(x.page_url) + '" target="_blank" rel="noopener">' + esc(x.page_label || "Lihat sumber") + "</a>" : "");
+        return '<article class="law"><span class="tg">' + esc(x.kind === "Rancangan" ? "Dalam pembahasan" : x.kind) + "</span><div><b>" + esc(x.number) + "</b>" + (x.summary ? "<p>" + esc(x.summary) + "</p>" : "") + '</div><span class="act">' + a + "</span></article>";
+      }).join("") : kosong("Belum ada peraturan", "Daftar peraturan sedang disiapkan.");
+    };
+    $("lawf").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; saring = b.dataset.f; $("lawf").querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); tampil(); });
+    (ada ? rpc("public_regulations") : Promise.resolve([])).then(function (r) { semua = r || []; tampil(); }).catch(function () { $("lawlist").innerHTML = kosong("Peraturan belum dapat dimuat", "Periksa koneksi Anda lalu muat ulang halaman."); });
+  }
+
+  // direktori anggota: public_directory (Admin > Direktori)
+  if ($("dir")) {
+    var off = 0, total = 0, seq = 0, PER = 18;
+    var kartu = function (m) {
+      var ini = String(m.name || "?").replace(/,.*$/, "").trim().split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join("").toUpperCase();
+      var aktif = !m.status || m.status === "Aktif";
+      return '<article class="mcard"><span class="mav" aria-hidden="true">' + esc(ini) + "</span><div><b>" + esc(m.name) + "</b>" + (m.profession ? "<span>" + esc(m.profession) + "</span>" : "") + (m.city ? "<span>" + esc(m.city) + "</span>" : "") + (m.member_number ? "<span>No. anggota " + esc(m.member_number) + "</span>" : "") + '<span class="mst' + (aktif ? "" : " off") + '">' + esc(m.status || "Aktif") + "</span></div></article>";
+    };
+    var muat = function (baru) {
+      var my = ++seq, q = $("dq").value.trim(); if (baru) off = 0;
+      if (!ada) return;
+      rpc("public_directory", { p_q: q, p_prof: "", p_limit: PER, p_offset: off }).then(function (r) {
+        if (my !== seq) return; r = r || {}; total = r.total || 0;
+        var h = (r.rows || []).map(kartu).join("");
+        if (baru) $("dir").innerHTML = h || (q ? kosong("Tidak ada yang cocok", "Periksa ejaan nama, atau cari dengan nama kota.") : kosong("Direktori belum berisi data", "Daftar anggota sedang disiapkan oleh sekretariat."));
+        else $("dir").insertAdjacentHTML("beforeend", h);
+        off += (r.rows || []).length; $("dm").hidden = off >= total;
+        $("dn").textContent = total ? total.toLocaleString("id-ID") + " anggota ditemukan" : "";
+      }).catch(function () { $("dir").innerHTML = kosong("Direktori belum dapat dimuat", "Periksa koneksi Anda lalu coba lagi."); });
+    };
+    var tm; $("dq").addEventListener("input", function () { clearTimeout(tm); tm = setTimeout(function () { muat(true); }, 300); });
+    $("df").addEventListener("submit", function (e) { e.preventDefault(); muat(true); });
+    $("dm").addEventListener("click", function () { muat(false); });
+    muat(true);
+  }
+
+  // AD/ART: Pengaturan > Profil organisasi (tautan PDF AD/ART)
+  if ($("adart")) st.then(function (s) { var te = (s || {}).tentang || {};
+    if (!https(te.adart_pdf)) return;
+    $("adart").innerHTML = '<span class="doc-ic"><svg class="ic" aria-hidden="true"><use href="#i-file-pdf"/></svg></span><div><h2 class="h3">Anggaran Dasar dan Anggaran Rumah Tangga PERKAPI</h2>' + (te.adart_berlaku ? '<p class="muted">' + esc(te.adart_berlaku) + "</p>" : "") + '<div class="actions"><a class="btn" href="' + esc(te.adart_pdf) + '" target="_blank" rel="noopener">Buka Dokumen</a><a class="btn line" href="' + esc(te.adart_pdf) + '" download>Unduh PDF</a></div></div>'; });
+
+  // kontak: Pengaturan > Kontak, formulir ke Admin > Pesan
+  if ($("fk")) {
+    st.then(function (s) { var k = (s || {}).kontak || {};
+      if (k.alamat) { $("k-al").textContent = k.alamat; $("k-map").href = https(k.maps) ? k.maps : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(k.alamat); }
+      if (k.telepon) { $("k-tel").textContent = k.telepon; $("k-tel").href = "tel:" + String(k.telepon).replace(/[^\d+]/g, ""); }
+      if (k.email) { $("k-em").textContent = k.email; $("k-em").href = "mailto:" + k.email; }
+      var wa = String(k.whatsapp || "").replace(/\D/g, ""); if (/^62\d{8,13}$/.test(wa)) { $("k-wa").href = "https://wa.me/" + wa; $("k-wa").textContent = "+" + wa; $("k-wa-w").hidden = false; } });
+    var say = function (t, c) { $("mk").className = "msg " + c; $("mk").textContent = t; $("mk").hidden = false; };
+    $("fk").addEventListener("submit", function (e) {
+      e.preventDefault(); $("mk").hidden = true;
+      var n = $("kn").value.trim(), em = $("ke").value.trim(), p = $("kp").value.trim();
+      if (!n || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em) || p.length < 5) return say("Isi nama, email yang benar, dan pesan minimal 5 huruf.", "er");
+      if (!$("kc").checked) return say("Centang persetujuan Kebijakan Privasi.", "er");
+      if ($("kh").value) { say("Pesan terkirim. Terima kasih.", "ok"); $("fk").reset(); return; }
+      if (!ada) return say("Pesan belum dapat dikirim. Coba lagi nanti.", "er");
+      $("kb").disabled = true;
+      rpc("kirim_pesan", { p_name: n, p_email: em, p_message: p, p_consent: true }).then(function () { say("Pesan terkirim. Sekretariat akan membalas lewat email Anda.", "ok"); $("fk").reset(); })
+        .catch(function (x) { say(x.message || "Pesan gagal dikirim.", "er"); }).then(function () { $("kb").disabled = false; });
+    });
+  }
+
+  // FAQ: Admin > Halaman & pendaftaran > FAQ. Format: "## Kelompok", "? Pertanyaan", lalu baris jawaban.
+  if ($("fqlist")) st.then(function (s) {
+    var src = String(((s || {}).faq || {}).isi || ""), gr = [], g = null, q = null;
+    src.split(/\r?\n/).forEach(function (l) { var t = l.trim(), m; if (!t) return;
+      if ((m = t.match(/^##\s*(.+)/))) { g = { j: m[1], q: [] }; gr.push(g); q = null; return; }
+      if (!g) { g = { j: "", q: [] }; gr.push(g); }
+      if ((m = t.match(/^\?\s*(.+)/))) { q = { t: m[1], a: [] }; g.q.push(q); return; }
+      if (q) q.a.push(t); });
+    var ikon = '<svg class="ic" aria-hidden="true"><use href="#i-caret-down"/></svg>';
+    $("fqlist").innerHTML = gr.length ? gr.map(function (x) { return '<div class="faq-g">' + (x.j ? "<h2>" + esc(x.j) + "</h2>" : "") + '<div class="qa">' + x.q.map(function (y) { return "<details><summary>" + esc(y.t) + ikon + '</summary><div class="a">' + y.a.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + "</div></details>"; }).join("") + "</div></div>"; }).join("") : kosong("Belum ada pertanyaan", "Daftar pertanyaan sedang disiapkan.");
+    var norm = function (s) { return String(s).toLowerCase(); };
+    $("fqq").addEventListener("input", function () {
+      var w = norm(this.value).split(/\s+/).filter(Boolean), n = 0;
+      $("fqlist").querySelectorAll("details").forEach(function (dt) { var ok = w.every(function (k) { return norm(dt.textContent).indexOf(k) > -1; }); dt.hidden = !ok; if (ok) n++; dt.open = !!(w.length && ok); });
+      $("fqlist").querySelectorAll(".faq-g").forEach(function (fg) { fg.hidden = !fg.querySelector("details:not([hidden])"); });
+      $("fqempty").hidden = n > 0;
+    });
+  });
+})();
