@@ -1763,3 +1763,12 @@ span.sos-ic{cursor:default}
   .ik-h .ik-peng{grid-area:b;justify-self:end;width:54px}
   .ik-t{grid-area:t}
 }
+
+/* status pendaftaran: kelas .tutup dipasang di <html> setelah 27 Nov 2026 16.00 WIB */
+.tutup .saat-buka{display:none!important}
+html:not(.tutup) .saat-tutup{display:none!important}
+.tutup-box{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;margin-bottom:22px;border:1px solid #e3b7b9;border-left:4px solid #b3262d;border-radius:10px;background:#fdf3f3;color:#3a1416;text-align:left;max-width:720px}
+.tutup-box .ic{width:24px;height:24px;flex:none;color:#b3262d;margin-top:2px}
+.tutup-box b{display:block;font-size:1.05rem;margin-bottom:2px}
+.tutup-box p{margin:0}
+.ik-act .tutup-box{margin:0 auto}
