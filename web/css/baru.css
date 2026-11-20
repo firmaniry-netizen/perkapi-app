@@ -1712,10 +1712,10 @@ span.sos-ic{cursor:default}
 
 /* ===== pengumuman resmi (tata letak seperti iklan cetak) ===== */
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.iklan{max-width:900px;margin:0 auto;padding:clamp(16px,3vw,28px);background:#fff;color:#111;border:3px solid #111;outline:1px solid #111;outline-offset:-8px;font:400 15.5px/1.5 var(--f-sans);box-shadow:0 24px 50px -32px rgba(13,31,69,.45)}
+.iklan{max-width:900px;margin:0 auto;position:relative;padding:clamp(16px,3vw,28px);background:#fff;color:#111;border:3px solid #111;outline:1px solid #111;outline-offset:-8px;font:400 15.5px/1.5 var(--f-sans);box-shadow:0 24px 50px -32px rgba(13,31,69,.45)}
 .ik-h{display:grid;grid-template-columns:96px 1fr 96px;align-items:center;gap:12px;padding:8px 6px 14px}
 .ik-logo{width:86px;height:auto;justify-self:center}
-.ik-peng{filter:grayscale(1) contrast(1.1)}
+.ik-peng{border-radius:3px}
 .ik-t{text-align:center}
 .ik-t p{margin:0;font:800 clamp(13px,1.6vw,17px)/1.25 var(--f-sans);text-transform:uppercase;letter-spacing:.01em}
 .ik-bar{margin:14px 0 8px;padding:5px 10px;background:#111;color:#fff;text-align:center;font:800 clamp(13px,1.6vw,17px)/1.25 var(--f-sans);text-transform:uppercase;letter-spacing:.01em}
@@ -1737,6 +1737,21 @@ span.sos-ic{cursor:default}
 .ik-ttd{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
 .ik-ttd div{display:grid;gap:2px}
 .ik-ttd b{font-weight:500;margin-top:14px}
+.ik-poster{position:relative;max-width:980px;margin:0 auto;padding:clamp(18px,3vw,32px) clamp(12px,3vw,40px) clamp(16px,2.5vw,26px);background:linear-gradient(180deg,#f7f8fa,#eceff3);overflow:hidden;isolation:isolate}
+.ik-poster::before{content:"";position:absolute;left:-30px;top:-30px;width:clamp(150px,22vw,250px);aspect-ratio:1;z-index:-1;opacity:.9;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23d7262e' stroke-width='3'%3E%3Cpath d='M30 6 54 30 30 54 6 30z'/%3E%3Cpath d='M30 18 42 30 30 42 18 30z' fill='%23d7262e'/%3E%3C/g%3E%3C/svg%3E") 0 0/60px 60px;-webkit-mask:linear-gradient(135deg,#000 30%,transparent 72%);mask:linear-gradient(135deg,#000 30%,transparent 72%)}
+.ik-top{text-align:center;color:#1b2a6b;margin-bottom:14px}
+.ik-top p{margin:0}
+.ik-k{font:800 clamp(20px,3.2vw,30px)/1.15 var(--f-sans);text-transform:uppercase;letter-spacing:.03em}
+.ik-src{font:400 clamp(14px,1.8vw,18px)/1.4 var(--f-sans);color:#2a3570;margin-top:2px!important}
+.ik-st{font:800 clamp(14px,2.1vw,20px)/1.3 var(--f-sans);text-transform:uppercase;letter-spacing:.03em;margin-top:8px!important}
+.ik-poster .iklan{border:2px solid #111;outline:none;box-shadow:0 18px 40px -30px rgba(13,31,69,.5)}
+.ik-bot{display:flex;flex-wrap:wrap;justify-content:center;gap:10px clamp(24px,8vw,90px);margin-top:16px}
+.ik-bot a{display:inline-flex;align-items:center;gap:10px;color:#111;text-decoration:none;font:500 clamp(15px,2vw,20px)/1.3 var(--f-sans)}
+.ik-bot a:hover{text-decoration:underline;text-underline-offset:3px}
+.ik-bot .ic{width:1.4em;height:1.4em}
+@media (prefers-color-scheme:dark){.ik-poster{background:linear-gradient(180deg,#f7f8fa,#eceff3)}}
+@media (max-width:640px){.ik-poster{padding-top:clamp(64px,18vw,84px)}.ik-poster::before{width:120px;left:-20px;top:-20px;opacity:.75}}
+@media print{.ik-poster{background:none}.ik-poster::before{display:none}}
 .ik-act{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:28px}
 @media (max-width:640px){.ik-h{grid-template-columns:56px 1fr 56px;gap:6px}.ik-logo{width:52px}.iklan{font-size:14px}.ik-ttd{grid-template-columns:1fr;gap:16px}.ik-num{text-align:left}}
 @media (prefers-color-scheme:dark){.iklan{box-shadow:none}}
