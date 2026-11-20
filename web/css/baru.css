@@ -1786,3 +1786,4 @@ html:not(.tutup) .saat-tutup{display:none!important}
 .ev4-m .ic{width:20px;height:20px;flex:none}
 .ev4-d{margin:10px 0 0;color:var(--muted);font-size:15px;line-height:1.55}
 @media (max-width:560px){.evlist .ev4{grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start}.ev4-f{width:96px;height:96px}.ev4-b h2{font-size:18px}.ev4-m{font-size:14.5px;gap:4px 16px;margin-top:8px}.ev4-m .ic{width:17px;height:17px}}
+.ev4-d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}

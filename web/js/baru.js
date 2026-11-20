@@ -423,3 +423,74 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   if (typeof rpc !== "function") return;
   rpc("public_agenda", { p_limit: 20 }).then(function (v) { if (v && v.length) ev.innerHTML = html(v); }).catch(function () {});
 })();
+
+// Pengaturan dari panel admin (site_settings): status pendaftaran, teks, telepon, pengumuman, beranda, kontak, media sosial.
+(function () {
+  if (typeof settings !== "function") return;
+  var d = document, de = d.documentElement, $ = function (i) { return d.getElementById(i); };
+  var esc = function (s) { var x = d.createElement("div"); x.textContent = s == null ? "" : s; return x.innerHTML; };
+  var teks = function (id, v) { var e = $(id); if (e && v) e.textContent = v; };
+  var waktu = function (s) { return Date.parse(String(s).slice(0, 16) + ":00+07:00"); };
+  var telHref = function (n) { var x = String(n).replace(/[^\d+]/g, ""); if (/^0/.test(x)) x = "+62" + x.slice(1); return "tel:" + x; };
+  // nomor dalam teks jadi tautan: (021) ... ke telepon, 08... ke WhatsApp
+  var tautNomor = function (h) {
+    return h.replace(/\(0\d{2,3}\)\s?\d[\d\s-]{5,}\d|\b08\d[\d\s-]{6,}\d/g, function (m) {
+      var x = m.replace(/\D/g, "");
+      return /^08/.test(x) ? '<a href="https://wa.me/62' + x.slice(1) + '" target="_blank" rel="noopener">' + m + "</a>" : '<a href="' + telHref(m) + '">' + m + "</a>";
+    });
+  };
+  var baris = function (s) { return tautNomor(esc(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
+  // format isi pengumuman: "## Judul", "**tebal**", "- butir", "1. nomor", "1) sub-nomor"
+  var isiPengumuman = function (src) {
+    var out = "", blok = false, list = null, sub = false;
+    var tutupList = function () { if (sub) { out += "</ol>"; sub = false; } if (list) { out += "</li></" + list + ">"; list = null; } };
+    var bukaBlok = function () { if (!blok) { out += '<div class="ik-b">'; blok = true; } };
+    String(src || "").split(/\r?\n/).forEach(function (l) {
+      var t = l.trim(), m;
+      if (!t) return;
+      if ((m = t.match(/^##\s*(.+)$/))) { tutupList(); if (blok) { out += "</div>"; blok = false; } out += '<h2 class="ik-bar">' + esc(m[1]) + "</h2>"; return; }
+      bukaBlok();
+      if ((m = t.match(/^(\d+)\)\s*(.+)$/)) && list === "ol") { if (!sub) { out += '<ol class="ik-sub">'; sub = true; } out += "<li>" + baris(m[2]) + "</li>"; return; }
+      if ((m = t.match(/^(\d+)\.\s+(.+)$/))) { if (sub) { out += "</ol>"; sub = false; } if (list !== "ol") { tutupList(); out += '<ol class="ik-num">'; list = "ol"; } else out += "</li>"; out += '<li value="' + m[1] + '">' + baris(m[2]); return; }
+      if ((m = t.match(/^[-•]\s*(.+)$/))) { if (list !== "ul") { tutupList(); out += '<ul class="ik-dot">'; list = "ul"; } else out += "</li>"; out += "<li>" + baris(m[1]); return; }
+      tutupList(); out += "<p>" + baris(t) + "</p>";
+    });
+    tutupList(); if (blok) out += "</div>";
+    return out;
+  };
+  settings().then(function (st) {
+    st = st || {};
+    var p = st.pendaftaran || {};
+    if (p.buka || p.tutup || p.mode) {
+      try { localStorage.setItem("pk_daftar", JSON.stringify({ mode: p.mode || "otomatis", buka: p.buka, tutup: p.tutup })); } catch (e) {}
+      var n = Date.now(), s = p.mode === "buka" ? "buka" : p.mode === "tutup" ? "tutup" : (p.tutup && n >= waktu(p.tutup)) ? "tutup" : (p.buka && n < waktu(p.buka)) ? "segera" : "buka";
+      de.classList.toggle("tutup", s === "tutup"); de.classList.toggle("segera", s === "segera");
+    }
+    teks("pita-buka", de.classList.contains("segera") ? (p.pita_segera || p.pita_buka) : p.pita_buka);
+    teks("pita-tutup", p.pita_tutup); teks("lbl-buka", p.label_buka); teks("lbl-tutup", p.label_tutup); teks("ket-tutup", p.ket_tutup);
+    if (p.telepon) d.querySelectorAll("a.tel-daftar").forEach(function (a) { a.href = telHref(p.telepon); var t = a.querySelector(".tel-n"); if (t) t.textContent = p.telepon; });
+    var b = st.beranda || {}; teks("tagline", b.tagline);
+    var g = st.pengumuman || {};
+    if ($("iklan") && g.tampil !== false && g.isi) {
+      teks("ik-judul", g.judul); teks("ik-sumber", g.sumber); teks("ik-sub", g.subjudul);
+      if (g.kop) $("ik-kop").innerHTML = String(g.kop).split(/\r?\n/).filter(Boolean).map(function (x) { return "<p>" + esc(x) + "</p>"; }).join("");
+      $("ik-isi").innerHTML = isiPengumuman(g.isi) + (g.info ? '<p class="ik-info">' + tautNomor(esc(g.info)) + "</p>" : "");
+      teks("ik-tgl", g.tanggal); teks("ik-org", g.organisasi);
+      if (g.ttd) $("ik-ttd").innerHTML = String(g.ttd).split(/\r?\n/).filter(function (x) { return x.trim(); }).map(function (x) { var q = x.split("|"); return "<div><span>Ttd.</span><b>" + esc(q[0].trim()) + "</b><span>" + esc((q[1] || "").trim()) + "</span></div>"; }).join("");
+    }
+    var k = st.kontak || {};
+    if (k.email && $("f-em")) { $("f-em").href = "mailto:" + k.email; $("f-em").querySelector("span").textContent = k.email; }
+    if (k.alamat && $("f-addr")) {
+      $("f-addr").querySelector("span").innerHTML = esc(k.alamat).replace(/\n/g, "<br>");
+      $("f-addr").href = /^https?:\/\//.test(k.maps || "") ? k.maps : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(k.alamat.replace(/\n/g, " "));
+      if ($("f-map")) $("f-map").src = "https://www.google.com/maps?q=" + encodeURIComponent(k.alamat.replace(/\n/g, " ")) + "&z=16&output=embed";
+    }
+    var so = st.sosial || {};
+    d.querySelectorAll("[data-sos]").forEach(function (e) {
+      var u = so[e.dataset.sos]; if (!/^https?:\/\//.test(u || "")) return;
+      var a = e;
+      if (e.tagName !== "A") { a = d.createElement("a"); a.className = e.className; a.dataset.sos = e.dataset.sos; a.innerHTML = e.innerHTML; a.target = "_blank"; a.rel = "noopener"; a.setAttribute("aria-label", (e.getAttribute("aria-label") || "").replace(", segera tersedia", "")); e.replaceWith(a); }
+      a.href = u;
+    });
+  });
+})();
