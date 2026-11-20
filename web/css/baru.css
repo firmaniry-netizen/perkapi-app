@@ -1772,3 +1772,17 @@ html:not(.tutup) .saat-tutup{display:none!important}
 .tutup-box b{display:block;font-size:1.05rem;margin-bottom:2px}
 .tutup-box p{margin:0}
 .ik-act .tutup-box{margin:0 auto}
+
+/* agenda bergambar */
+.evlist .ev4{display:grid;grid-template-columns:150px minmax(0,1fr);gap:28px;align-items:center;padding:0 0 26px;border-bottom:1px solid var(--line)}
+.evlist .ev4:last-child{border-bottom:0}
+.ev4-f{width:150px;height:150px;object-fit:cover;border-radius:6px;background:var(--sand)}
+.ev4-kosong{display:grid;place-items:center}
+.ev4-kosong img{width:64px;height:auto;opacity:.7}
+.ev4-b h2{margin:0;font:400 clamp(20px,2vw,24px)/1.3 var(--f-sans);color:var(--ink)}
+.ev4-m{display:flex;flex-wrap:wrap;gap:6px 26px;margin:12px 0 0;color:var(--muted);font-size:16px}
+.ev4-m span{display:inline-flex;align-items:flex-start;gap:8px}
+.ev4-m .ic{margin-top:1px}
+.ev4-m .ic{width:20px;height:20px;flex:none}
+.ev4-d{margin:10px 0 0;color:var(--muted);font-size:15px;line-height:1.55}
+@media (max-width:560px){.evlist .ev4{grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start}.ev4-f{width:96px;height:96px}.ev4-b h2{font-size:18px}.ev4-m{font-size:14.5px;gap:4px 16px;margin-top:8px}.ev4-m .ic{width:17px;height:17px}}

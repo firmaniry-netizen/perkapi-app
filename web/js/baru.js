@@ -385,3 +385,41 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
   els.forEach(function (e, i) { e.classList.add("rv"); e.style.transitionDelay = (i % 4) * 80 + "ms"; io.observe(e); });
 })();
+
+// Agenda bergambar: foto, judul, tanggal, lokasi. Data dari public_agenda (foto diatur di panel admin > Agenda).
+(function () {
+  var ev = document.getElementById("ev"); if (!ev) return;
+  var C = window.PERKAPI || {}, U = (C.SUPABASE_URL || "").replace(/\/+$/, "");
+  var BL = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  var esc = function (s) { var d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; };
+  var ic = function (n) { return '<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-' + n + '"/></svg>'; };
+  var wib = function (d) { var x = new Date(new Date(d).getTime() + 7 * 36e5); return { y: x.getUTCFullYear(), m: x.getUTCMonth(), d: x.getUTCDate(), h: x.getUTCHours(), i: x.getUTCMinutes() }; };
+  var foto = function (p) { if (!p) return ""; if (/^(https?:)?\/\//.test(p) || p.charAt(0) === "/") return p; return U + "/storage/v1/object/public/news-photos/" + encodeURI(p); };
+  var tanggal = function (a, b) {
+    var s = wib(a), e = b ? wib(b) : null;
+    if (!e || (e.y === s.y && e.m === s.m && e.d === s.d)) return s.d + " " + BL[s.m] + " " + s.y;
+    if (e.y === s.y && e.m === s.m) return s.d + "–" + e.d + " " + BL[s.m] + " " + s.y;
+    if (e.y === s.y) return s.d + " " + BL[s.m] + " – " + e.d + " " + BL[e.m] + " " + s.y;
+    return s.d + " " + BL[s.m] + " " + s.y + " – " + e.d + " " + BL[e.m] + " " + e.y;
+  };
+  var jam = function (a, b) {
+    var s = wib(a), e = b ? wib(b) : null, f = function (x) { return String(x.h).padStart(2, "0") + "." + String(x.i).padStart(2, "0"); };
+    if (!s.h && !s.i) return "";
+    return e && (e.h || e.i) ? f(s) + "–" + f(e) + " WIB" : f(s) + " WIB";
+  };
+  var html = function (v) {
+    return v.map(function (x) {
+      var src = foto(x.photo_path), j = jam(x.starts_at, x.ends_at);
+      return '<article class="rw ev4">' +
+        (src ? '<img class="ev4-f" src="' + esc(src) + '" alt="" loading="lazy" width="300" height="300">' : '<span class="ev4-f ev4-kosong" aria-hidden="true"><img src="/img/logo.png" alt="" width="64" height="64"></span>') +
+        '<div class="ev4-b"><h2>' + esc(x.title) + '</h2><p class="ev4-m">' +
+        '<span>' + ic("calendar-blank") + '<time datetime="' + esc(new Date(x.starts_at).toISOString()) + '">' + tanggal(x.starts_at, x.ends_at) + '</time></span>' +
+        (j ? '<span>' + ic("clock") + j + '</span>' : "") +
+        (x.location ? '<span>' + ic("map-pin") + esc(x.location) + '</span>' : "") +
+        '</p>' + (x.description ? '<p class="ev4-d">' + esc(x.description) + '</p>' : "") + '</div></article>';
+    }).join("");
+  };
+  window.evHtml = html;
+  if (typeof rpc !== "function") return;
+  rpc("public_agenda", { p_limit: 20 }).then(function (v) { if (v && v.length) ev.innerHTML = html(v); }).catch(function () {});
+})();
