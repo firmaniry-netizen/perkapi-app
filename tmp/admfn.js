@@ -1,7 +1,8 @@
 // Pendaftaran, pengumuman koran, dan beranda (site_settings: pendaftaran, pengumuman, beranda)
-async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key=in.(pendaftaran,pengumuman,beranda)")).forEach(function(x){s[x.key]=x.value||{}});
-  var p=s.pendaftaran||{},g=s.pengumuman||{},br=s.beranda||{},h=function(t){return'<p style="font-size:13px;color:#59627a;margin:0 0 6px">'+t+"</p>"};
-  V.innerHTML='<h2>Pendaftaran &amp; pengumuman</h2><div class="g2">'
+async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key=in.(pendaftaran,pengumuman,beranda,halaman)")).forEach(function(x){s[x.key]=x.value||{}});
+  var p=s.pendaftaran||{},g=s.pengumuman||{},br=s.beranda||{},hl=s.halaman||{},HL=[["berita","Berita (menu Berita, kolom berita di beranda, halaman berita)"],["agenda","Agenda"],["tentang","Tentang"]],h=function(t){return'<p style="font-size:13px;color:#59627a;margin:0 0 6px">'+t+"</p>"};
+  V.innerHTML='<h2>Halaman, pendaftaran &amp; pengumuman</h2><div class="g2">'
+  +'<form id="phl" style="grid-column:1/-1"><h3>Halaman yang tampil di situs</h3>'+h("Halaman yang dimatikan hilang dari menu dan footer. Pengunjung yang membuka alamatnya melihat pemberitahuan halaman belum tersedia.")+HL.map(function(x){return'<label><input type="checkbox" id="h_'+x[0]+'"> '+x[1]+'</label>'}).join("")+'<p><button class="b">Simpan halaman</button></p></form>'
   +'<form id="pdf"><h3>Status pendaftaran</h3>'+h("Mode otomatis: sebelum waktu buka tampil teks \"segera dibuka\", di antara buka dan tutup tampil \"dibuka\", setelah waktu tutup tampil \"ditutup\". Waktu dalam WIB.")
   +'<label>Mode</label><select id="d_mode"><option value="otomatis">Otomatis mengikuti tanggal</option><option value="buka">Selalu dibuka</option><option value="tutup">Ditutup sekarang</option></select>'
   +'<label>Dibuka mulai (WIB)</label><input id="d_buka" type="datetime-local"><label>Ditutup pada (WIB)</label><input id="d_tutup" type="datetime-local">'
@@ -23,7 +24,8 @@ async function daftarSet(){var s={};(await api("GET","site_settings?select=*&key
   +'<p><button class="b">Simpan pengumuman</button></p></form></div>';
   ["mode","buka","tutup","telepon","pita_segera","pita_buka","pita_tutup","label_buka","label_tutup","ket_tutup"].forEach(function(n){$("d_"+n).value=p[n]||(n=="mode"?"otomatis":"")});
   ["judul","sumber","subjudul","kop","isi","info","tanggal","organisasi","ttd"].forEach(function(n){$("g_"+n).value=g[n]||""});$("g_tampil").checked=g.tampil!==false;
-  $("b_tagline").value=br.tagline||"";
+  $("b_tagline").value=br.tagline||"";HL.forEach(function(x){$("h_"+x[0]).checked=hl[x[0]]!==false});
+  $("phl").onsubmit=function(ev){ev.preventDefault();var v={};HL.forEach(function(x){v[x[0]]=$("h_"+x[0]).checked});simpan("halaman",v)};
   $("pdf").onsubmit=function(ev){ev.preventDefault();var v={};["mode","buka","tutup","telepon","pita_segera","pita_buka","pita_tutup","label_buka","label_tutup","ket_tutup"].forEach(function(n){v[n]=$("d_"+n).value.trim()});
     if(v.buka&&v.tutup&&v.tutup<=v.buka)return note("Waktu tutup harus setelah waktu buka.","er");simpan("pendaftaran",v)};
   $("pbr").onsubmit=function(ev){ev.preventDefault();simpan("beranda",{tagline:$("b_tagline").value.trim()})};

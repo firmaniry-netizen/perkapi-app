@@ -1787,3 +1787,11 @@ html:not(.tutup) .saat-tutup{display:none!important}
 .ev4-d{margin:10px 0 0;color:var(--muted);font-size:15px;line-height:1.55}
 @media (max-width:560px){.evlist .ev4{grid-template-columns:96px minmax(0,1fr);gap:16px;align-items:start}.ev4-f{width:96px;height:96px}.ev4-b h2{font-size:18px}.ev4-m{font-size:14.5px;gap:4px 16px;margin-top:8px}.ev4-m .ic{width:17px;height:17px}}
 .ev4-d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* halaman yang dimatikan dari panel admin (site_settings.halaman) */
+html.off-berita [data-hal="berita"],html.off-berita .nav a[href="berita.html"],html.off-berita .ft li:has(>a[href="berita.html"]),html.off-berita a.pc[href="berita.html"],html.off-berita .help:has(a[href="berita.html"]){display:none!important}
+html.off-agenda [data-hal="agenda"],html.off-agenda .nav a[href="agenda.html"],html.off-agenda .ft li:has(>a[href="agenda.html"]),html.off-agenda a.pc[href="agenda.html"],html.off-agenda .help:has(a[href="agenda.html"]){display:none!important}
+html.off-tentang [data-hal="tentang"],html.off-tentang .nav a[href="tentang.html"],html.off-tentang .ft li:has(>a[href="tentang.html"]),html.off-tentang a.pc[href="tentang.html"],html.off-tentang .help:has(a[href="tentang.html"]){display:none!important}
+html:not(.off-berita) [data-nohal="berita"]{display:none!important}
+.hal-off{max-width:640px;margin:0 auto;padding:clamp(60px,10vw,120px) 0;text-align:center}
+.hal-off h1{font:400 clamp(2rem,4vw,2.8rem)/1.15 var(--f-serif);margin:0 0 12px}
+.hal-off p{color:var(--muted);margin:0 0 24px}

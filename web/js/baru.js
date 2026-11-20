@@ -458,6 +458,15 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     tutupList(); if (blok) out += "</div>";
     return out;
   };
+  // halaman yang sedang dibuka dimatikan dari admin: tampilkan pemberitahuan, bukan isi lama
+  var halamanTutup = function () {
+    var k = (window.PAGE || {}).kind; if (k === "baca") k = "berita";
+    var m = d.getElementById("main"); if (!m || !k) return;
+    if (!de.classList.contains("off-" + k)) { if (m.dataset.off) location.reload(); return; }
+    if (m.dataset.off) return; m.dataset.off = "1";
+    m.innerHTML = '<section class="sec"><div class="w hal-off"><h1>Halaman belum tersedia</h1><p>Halaman ini sedang disiapkan oleh sekretariat PERKAPI.</p><a class="btn" href="./">Kembali ke Beranda</a></div></section>';
+  };
+  halamanTutup();
   settings().then(function (st) {
     st = st || {};
     var p = st.pendaftaran || {};
@@ -470,6 +479,12 @@ setTimeout(function () { ["s1", "s2"].forEach(function (id) { var el = document.
     teks("pita-tutup", p.pita_tutup); teks("lbl-buka", p.label_buka); teks("lbl-tutup", p.label_tutup); teks("ket-tutup", p.ket_tutup);
     if (p.telepon) d.querySelectorAll("a.tel-daftar").forEach(function (a) { a.href = telHref(p.telepon); var t = a.querySelector(".tel-n"); if (t) t.textContent = p.telepon; });
     var b = st.beranda || {}; teks("tagline", b.tagline);
+    var hal = st.halaman;
+    if (hal) {
+      try { localStorage.setItem("pk_hal", JSON.stringify(hal)); } catch (e) {}
+      Object.keys(hal).forEach(function (k) { de.classList.toggle("off-" + k, hal[k] === false); });
+    }
+    halamanTutup();
     var g = st.pengumuman || {};
     if ($("iklan") && g.tampil !== false && g.isi) {
       teks("ik-judul", g.judul); teks("ik-sumber", g.sumber); teks("ik-sub", g.subjudul);
